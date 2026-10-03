@@ -4,7 +4,7 @@
 
 #define CYRILLIC 1
 
-//#include "flag_rs.xpm"
+//#include "resources/flag_rs.xpm"
 
 //#include "../MyWizzard.h"
 ///run for i=1,GetAchievementNumCriteria(7298)do local a,b,c,d,e=GetAchievementCriteriaInfo(7298,i) print(format("%s %d/%d",a,d,e)) end

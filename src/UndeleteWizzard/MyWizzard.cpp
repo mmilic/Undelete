@@ -13,8 +13,8 @@
 #include "MyThreadClass.h"
 
 //icon image
-#include "flag_rs.xpm"
-#include "SidePictureZ_0.xpm"
+#include "resources/flag_rs.xpm"
+#include "resources/SidePictureZ_0.xpm"
 
 //wizard pages header files
 #include "Page_GreetingPage.h"

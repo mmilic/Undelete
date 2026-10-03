@@ -24,7 +24,7 @@
 #include "FAT/phmain.h"
 
 //Various pictures
-#include "SidePicture2.xpm"
+#include "resources/SidePicture2.xpm"
 
 DEFINE_EVENT_TYPE(wxEVT_SELECT_DESTINATION_DRIVE_PAGE_PULSE_DIALOG)
 DEFINE_EVENT_TYPE(wxEVT_SELECT_DESTINATION_DRIVE_PAGE_STOP_DIALOG)

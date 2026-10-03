@@ -12,7 +12,7 @@
 #include "Page_SelectFilesPage.h"
 #include "languages/LanguageEnums.h"
 
-#include "SidePicture3.xpm"
+#include "resources/SidePicture3.xpm"
 
 DEFINE_EVENT_TYPE(wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG)
 DEFINE_EVENT_TYPE(wxEVT_SELECT_FILES_PAGE_STOP_DIALOG)

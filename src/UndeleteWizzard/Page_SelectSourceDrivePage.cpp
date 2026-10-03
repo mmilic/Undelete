@@ -11,13 +11,13 @@
 #include "languages/LanguageEnums.h"
 
 //Various pictures
-#include "drive-harddisk-5.xpm"
-#include "drive-optical-3.xpm"
-#include "drive-removable-media-3.xpm"
-#include "media-flash-2.xpm"
-#include "SidePicture1.xpm"
+#include "resources/drive-harddisk-5.xpm"
+#include "resources/drive-optical-3.xpm"
+#include "resources/drive-removable-media-3.xpm"
+#include "resources/media-flash-2.xpm"
+#include "resources/SidePicture1.xpm"
 //#include "desktopIcon256x256.xpm"
-#include "desktopIcon64x64.xpm"
+#include "resources/desktopIcon64x64.xpm"
 
 #include <shlobj.h>
 

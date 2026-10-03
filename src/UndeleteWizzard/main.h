@@ -40,10 +40,10 @@
 #include "wx/textctrl.h"
 #include "wx/wizard.h"
 
-#include "wiztest.xpm"
-#include "wiztest2.xpm"
+#include "resources/wiztest.xpm"
+#include "resources/wiztest2.xpm"
 
-#include "sample.xpm"
+#include "resources/sample.xpm"
 
 // ----------------------------------------------------------------------------
 // constants
