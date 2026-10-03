@@ -1,0 +1,284 @@
+V1.0
+- Multi language support ima bug. 
+  Neke poruke nisu tipa wxString nego nesto trece. Treba da se doda jos jedna funkcija u interfejs i u svaki languagePack objekat
+  koja ce da vraca std::string.
+
+V2.0
+- Multi language support ima bug. 
+  Neke poruke nisu tipa wxString nego nesto trece. Treba da se doda jos jedna funkcija u interfejs i u svaki languagePack objekat
+  koja ce da vraca std::string.
+- Biranje jezika treba da se pojednostavi ali da se i zadrzi trenutni graficki interfejs u kodu
+- FAT: napraviti ekran na kome se bira koji sve fajlovi treba da se vrate
+- FAT: pretraga treba da se ugura u poseban thread kako bi moglo da se reaguje na dugmice
+- FAT: progress bar
+- FAT: izdvoji FAT klasu u poseban file
+
+
+Post GA - Bitni, ali manje bitniji od GA
+=======
+- program treba da kaze da ne podrzava fat?! Ili kad selektujes FAT file, da kaze not supported.
+- Zoran da nacrta slike kako treba. - valjda je gotovo, mozda treba jos ono step 1, step 2
+- promeniti ime fajlu tokom odbrisavanja samo ako u destination diru vec postoji fajl sa takvim imenom - a ne uvek
+- (ctrl + a) ne radi
+- selektovanje bez control dugmeta ii izbaciti komentar da treba control za vise fajlova (ko jos spasava samo jedan file)
+- Prodji kroz sve wxLogFatalError koje si napisao i vidi dali treba to tu da stoji. FatalError prekida tok programa
+- razmisli da li da kopiras i druge data streamove - mislim da se ne koriste u redovnoj upotrebi fajlova. Ovde imamo bag koji treba da se ispravi (ispravljen), pitanje je da li nam treba funkcionalnost uopste.
+- kad stisnes dugme select all - boja selekcije da bude plava\
+- defect tracking software :)
+- preview polje za slike
+- kada snima na C:\ da ne snima na desktop. Sta ako nema D:\?
+- namestiti boje da lice na nesto - progress baru ne moze da se menja boja - treba samo izabrati boju za dugmice (Milan) - ovo moze i ovako? Videti da li svi dugmici da budu kao i toggle dugmici? Ovo moze i post GA
+- ne secam se kako ide sa sajtom sa koga prodajes program? Na tom sajtu treba da neko izvrsi placanje, i vidi jos nesto o proizvodu?!
+- progress barovi - da li imaju cancel i skip - treba da se dogovorimo (u verziji 2.0)
+- FAT: lista treba da sadrzi podatke o disku i tipu fajl sistema
+
+
+Pre pocetka prodaje V1.0 - To bi trebalo da je to. Jos 7 tacaka pre GA
+==================== 
+- da prepoznaje ime fajla iz recycle bina i na windows xp-u i visti... uff - to treba da se odradi!!!!!!
+- napraviti ona dve strane - vladimir i stefan su to sami napravili - time nam troskovi padaju na ~15$ mesecno (jbmli ga) http://www.clickbank.com/help/vendor-help/vendor-basics/vendor-checklist/
+- mozes sajt da pravis sa ovim:
+ http://www.wix.com/create/website?utm_campaign=em_welcome_en&experiment_id=em_welcome_en
+ili ovim: 
+http://foundation.zurb.com/
+ovde mozes da nadjes template:
+http://foundation.zurb.com/prototyping.php
+ja predlazem ovaj:
+http://zurb.net/zurbwired2011/projects/zurbwired2011/frame/prototype/public/
+samo popunimo slicice
+- hosting i domen za sajtove?!
+- http://www.clickbank.com/help/vendor-help/vendor-basics/vendor-checklist/
+- implementirati licenciranje - ovo ide skroz na kraju. Izgleda jednostavno i placa se na vreme.
+- disclaimer - da li ide i u program, u file pored programa ili samo na sajtu?
+- kad moze da trazi pare nazad?!
+
+Sta treba sajt da sadrzi:
+==================
+- disclaimer - to moze da se uzme i sa password resetter strane?!
+- ime proizvoda - undelete-wizard (ima crticu :) ), quick recovery, easy undelete, ligh file recover/undelete, 3-step file undelete/recovery, File recover in 3 
+- slika neka proizvoda - nisam video da ovi imaju slike, osim onih ‘kutija’
+- slike sva tri koraka
+- objasnjenje cemu sluzi program 
+- objasnjenje da ne sme da snimi na isti drive sa koga je brisano
+- cena -  29.95€? Treba videti sa Vladimirom i Stefanom, mislim da cena zavisi od metoda navlacenja affiliatesa. 
+- testimonials - Bice interesantno napraviti :)
+- logo projekta, treba da je isti kao i ikonica. Ako smislimo nesto drugo, lako se menja 
+- 
+
+
+
+Done
+====
+- staticko kompajliranje/linkovanje (uradjeno)
+- sortiranje liste kad uradi (double? - single) click na zaglavlje  (Milan) (uradio)
+- na kraju wizarda se vise ne pojavljuje poruka da se wizard dobro zavrsio (gotovo)
+- da li nama treba prva kolona kad prikazujemo spisak fajlova koje mozemo da undelete-ujemo? ovde ima da se radi malo - tipa 10-15 minuta. (izbacio prvu kolonu, i promenio popunjavanje druge kolone)
+- ne dozvoliti da source i destination budu isti (uradio).
+- ceprkanje po recycle bin-u (uradio)
+- uradi log i error handling (uradio, nije 100% ali kako se naidje na to treba popraviti)
+- proci kroz tekstove - treba Zoran da radi (uradio).
+- zavrsi jos ove filter dugmice - (uradio, ima jos po neku bubicu, ali za sada je dovoljno)
+i u prodaju pa ko ziv
+- poslednje dugme treba da je Undelete ili Recover a ne next. (uradio, sad se zove &Retrieve>)
+- Skroz poslednjoj stranici ne treba cancel (uradio)
+- Kad na poslednjoj strani stisne Finish, otvorice mu dir gde su snimljeni fajlovi (uradio)
+- Povecati prozor programa (uradio)
+-  treba videti da li je nova verzija ujedno i nov ‘product’. (nije)
+- nova ikonica, i za ugao aplikacije, i za desktop! - pogledaj: http://stackoverflow.com/questions/3236115/which-icon-sizes-should-my-windows-applications-icon-include (Menjanje ikonice je prilicno jednostavno)
+- suvise je skroman tekst, ne daje detaljna uputstva za idiote
+
+V.0.95
+- introduced simple versioning, and version number in the window name  (mozda je rano, ali bolje sad da pocnemo)
+- dodao naslov prozora i verziju
+
+
+
+
+Posle pocetka prodaje V1.1 - Manje bitni od Post GA
+===================
+*** NTFS ***
+- n64AllocSize n64RealSize n64StreamSize - da izabere najmanji pozitivan broj i njega da koristi? tako ce valjda da radi?
+- debug
+- idiot proof
+- carving
+
+
+*** FAT ***
+- fat32, fat16
+- scan
+- copy
+- log
+- debug
+- idiot proof
+- carving
+
+*** MISC ***
+- logovanje
+- sta sa 'run as admin'? treba mu ‘manifest’ za to.
+- staviti da snima fajlove na desktop, ili na D:\ disk ukoliko je source C:\
+- ne radi na XP virtualnoj masini. Nedostaje mu wxbase294u_gcc_custom.dll (compile with static)
+
+*** TESTIRANJE ***
+- sta i kako testirati? Black box, white box?
+- win xp, vista, win 7, win8? 
+- neke windows specific komande su podrzane u win 8. Treba proveriti za sve ostale i/ili naci win8 :)
+
+
+Ideje za nove proizvode
+=================
+- safe delete [ wxWidgets ili java? :) ]
+
+
+
+Teme koje treba da se obrade i da se presloze tokom preslaganja cemo videti na koju stranu ide koja (Pitch Page and Thank You Page):
+http://www.clickbank.com/help/vendor-help/vendor-basics/get-started-as-a-vendor/
+
+Ideje za BLABLA:
+- ThreeStepsUndelete? - meni je ova OK
+- GetThemBack
+- Light Undelete
+- Easy Recovery
+- Light Recovery
+- GetMyFilesBack
+- GetMyPicturesBack
+- GetMyVideosBack
+- 
+
+Punchlines (mozda da se one vrte na onom slajdu na pocetku?) (m)
+- Get your pictures and video clips back.
+- Get your deleted files back.
+- Get everything back.
+- Accidentally deleted your files and now what?
+- Emptied Recycle Bin and now you need those files - no problem!
+
+Opis proizvoda (z)
+What is BLA BLA.
+BLA BLA is our very simple file recovery utility. Da se definise sta radi
+Ja bi ovo stavio malo vece nego sto jeste - da bude udarna vest - a ne ovako malecko - moguce da ide i kao one slike slajdovi. 
+If you’ve accidentally deleted your pictures, video clips, documents or any other file on you computer, BLABLA will get it back for you.
+BLABLA is one of the simplest, safest and fastest file recovery tools on the market today. 
+BLABLA will find the files you’ve deleted, undelete them and put them where ever you want them.
+
+
+Main Features (m)
+Is it complicated?.
+The most user friendly recovery tool on the market today. It works on windows XP, windows 7 and NO INSTALL is needed. Just click and start recovering!!
+Stavio bi tri koraka koji definisu nas proizvod u ova tri stupca - kao u help stranici.
+Na help strani bi vise stavio ekonomske strane. tj. ne bi ga ni zvao help nego Contact? ili izbacio skroz
+You don’t have to be a computer expert to get your files back.
+Design with simplicity in mind.
+It automatically recognises Hard Disk Drives or Removable Storage devices that support the undelete process performed by BLABLA.
+Multithreaded - it will utilise your CPU in the most optimum way :)
+Even though Windows mangles filenames when he deletes them, BLABLA will retrieve the original file names as well.
+Works on Windows 7, Windows Vista, Windows XP
+Unlimited File size.
+You need admin rights in order to perform undelete.
+Safety was one of the main concern while making this software.
+Simplicity was one of the main concern while making this software.
+
+Supports multiple file data streams.
+
+
+Tell me some more how good you are! (z)
+We are sooo good and fine :). It recovers files from NTFS partition. - ili Hard Disk Drives - tako ih i windows zove. Jos bolje Hard Disk Drives/Removable Storage. Da navedemo oba.
+
+
+
+Objasniti ukratko tri koraka koja se obavljaju u programu (M)
+Choose the source drive.
+So - some files got deleted - Select the Hard Disk Drive or a Removable Storage Device where the files were located before they got deleted. If they were on the Desktop - just choose the Desktop icon. Simply select and click “Next”
+
+
+Choose the destination.
+Once BLABLA gets the files back - where should it put them? If you have a special place in mind, put it there, if not - just click “Next”.
+
+
+Select the files.
+BLABLA shows you a list of all files that were deleted from the Hard Disk Drive or a Removable Storage Device you told it to look on. Just pick the files you want to get back and click “Next”
+
+Ogranicenja - moze samo NTFS a i to onda kad treba, ali ce pokazati sve drajvove sa kojima moze da
+ radi. Ako je disk formatizovan - nema mu pomoci (z)
+
+Pogodnosti - zna i da iskopa ako je fajl bacen u Recycle Bin (ili je ovo suvise komplikovano) (m)
+Works from a usb stick if needed.
+
+
+Use Cases: (m)
+ostalo koje treba da se negde ugura:
+My children have deleted my files, what should I do?
+Riba provalila tipa da je imao neke slike na hardu?
+Slucajno startovao i nasao davno izgubljene slike?
+Eksterni hard disk od 1TB - isto podrzava sve to! Ako ga podrzava - pokazace ga - Nije bitna velicina eksternog uredjaja.
+Neogranicena velicina fajla.
+
+
+
+DOWNLOAD - da li nam ovo treba? Nema downloadovanja nego samo kupovina. -> Purchase!
+
+zoran parne milan neparne
+
+Affiliates page i info:
+
+Cena - pricing rules i info:
+A detailed description of the product.
+BLABLA is a File Recovery utility that insists on simplicity of use. It is able to recover files from NTFS Hard Disk Drives and Removable Storage Devices. 
+
+BLABLA does not require any installation at all - just download and use it. It is perfect for running from a USB flash drive.
+
+BLABLA is concepted as a three step wizard. The user has to perform three actions in order to retrieve his files.
+
+BLABLA has no limitations when it comes to the size of the file being recovered or the size of the device from which the file is being recovered. 
+
+When Windows deletes a file, it mangles its file name so that it can store it properly in the Recycle Bin. BLABLA performs de-mangling of such filenames.
+
+Initially BLABLA scans the MFT of the NTFS partition and using that information it locates all the files that were deleted on that partition. 
+The user is then shown a list of the deleted files that were found and he is offered a choice to select which files he wants to attempt to retrieve.
+The retrieved files are copied to the location specified by the user in the second step of the BLABLA wizard.
+Definisati korake tacno hronoloski? negde? tipa prvi korak - tu se desava to i to - drugi korak - to i to?
+Known Limitations:
+It won’t work on a formatted hard drive.
+As will all file retrieval programs that exists, this one is also not able to retrieve a file
+Works only with NTFS.
+
+
+The cost of the product.
+For recurring billing products, be sure to clearly state all the details of the rebill schedule, including the number of times a customer is billed, and how frequently they will be billed. For example, you should say, “Your initial charge will be $19.95. You will then be charged $9.95 per month for the next 11 months.”
+There are no recurring charges for this product.
+
+The file format of your product, as well as any particular software or operating system required to use it (e.g., Microsoft Word, Adobe Acrobat, etc.).
+If your product is only useful to customers in a particular geographic region or country, be sure to say so.
+There are no geographic limitation associated to this product.
+
+How the product will be delivered (e.g., direct download, via email, etc.).
+How long delivery will take (e.g., immediate, 5 minutes, etc.).
+Delivery will be immediate, that is, how long does it take to download the product.
+
+For recurring billing products, explain how the product will be delivered, and how often. For example, if you sold a monthly newsletter, you could say that it will be delivered by email on the 1st of each month.
+Customers must be able to reach you if they have a question about your product prior to purchase. Please include an email address, a link to your email address, or a contact us link on your Pitch Page.
+Our support center can be reached at all times via e-mail: support@BLABLA.com
+
+To ensure your use of a ClickBank trademark does not mislead consumers as to any sponsorship, affiliation or endorsement by ClickBank of your company, products or services, the following disclaimer needs to be at the bottom of any page with a ClickBank reference:
+ClickBank is the retailer of this product. CLICKBANK® is a registered trademark of Click Sales, Inc., a Delaware corporation located at 917 S. Lusk Street, Suite 200, Boise Idaho, 83706, USA and used by permission.  ClickBank’s role as retailer does not constitute an endorsement, approval or review of this product or any claim, statement or opinion used in promotion of this product.
+
+
+The Thank You Page
+The Thank You Page is the page customers will see after they purchase your product. Customers will only see this page if their purchase has been approved and the payment processed. In addition to thanking the customer for their purchase, your Thank You Page must include the following information:
+
+Customers must be able to reach you if they have a question about your product need technical assistance after the purchase. Please include an email address, a link to your email address, or a contact us link on your Thank You Page.
+Our support center can be reached at all times via e-mail: support@BLABLA.com
+
+A reminder to the customer that his or her credit card or bank statement will show a charge by ClickBank or CLKBANK*COM, rather than a reference to your specific product. This reminder should be prominent, as customers sometimes request refunds because they forget that ClickBank is handling the purchase.
+Clear instructions on how to download or access the product, or information on how and when it will be delivered to them.
+To ensure your use of a ClickBank trademark does not mislead consumers as to any sponsorship, affiliation or endorsement by ClickBank of your company, products or services, the following disclaimer needs to be at the bottom of any page with a ClickBank reference:
+ClickBank is the retailer of this product. CLICKBANK® is a registered trademark of Click Sales, Inc., a Delaware corporation located at 917 S. Lusk Street, Suite 200, Boise Idaho, 83706, USA and used by permission.  ClickBank’s role as retailer does not constitute an endorsement, approval or review of this product or any claim, statement or opinion used in promotion of this product.
+
+Google analytics - da pratimo posecenost sajta ;) nije za v1.0 ali je za v1.0001
+
+
+
+######
+otvori grane za:
+- dodavanje slika na biranju jezika
+- ubaci funkciju koja vraca tekst a ne wxT u language pack
+- promeniti jezik logovanja? (ko treba da cita logove?)
+- kako da mi vraca formatiran preveden tekst? Tj da ubaci vrednosti u tekst.

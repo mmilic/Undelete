@@ -1,0 +1,4146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>CustomButton.h</itemPath>
+      <itemPath>languages/ILanguage.h</itemPath>
+      <itemPath>IsValidFileName.h</itemPath>
+      <itemPath>languages/LanguageDialog.h</itemPath>
+      <itemPath>languages/LanguageEnums.h</itemPath>
+      <itemPath>languages/LanguageFactory.h</itemPath>
+      <itemPath>MFTRecord.h</itemPath>
+      <itemPath>MyThreadClass.h</itemPath>
+      <itemPath>MyWizzard.h</itemPath>
+      <itemPath>NTFSDrive.h</itemPath>
+      <itemPath>Page_EndPage.h</itemPath>
+      <itemPath>Page_GreetingPage.h</itemPath>
+      <itemPath>Page_SelectDestinationDirPage.h</itemPath>
+      <itemPath>Page_SelectFilesPage.h</itemPath>
+      <itemPath>Page_SelectSourceDrivePage.h</itemPath>
+      <itemPath>FAT/addpart.h</itemPath>
+      <itemPath>FAT/alignio.h</itemPath>
+      <itemPath>FAT/analyse.h</itemPath>
+      <itemPath>FAT/askloc.h</itemPath>
+      <itemPath>FAT/autoset.h</itemPath>
+      <itemPath>FAT/bfs.h</itemPath>
+      <itemPath>FAT/bsd.h</itemPath>
+      <itemPath>FAT/chgtype.h</itemPath>
+      <itemPath>FAT/chgtypen.h</itemPath>
+      <itemPath>FAT/common.h</itemPath>
+      <itemPath>FAT/config.h</itemPath>
+      <itemPath>FAT/crc.h</itemPath>
+      <itemPath>FAT/dfxml.h</itemPath>
+      <itemPath>FAT/dir.h</itemPath>
+      <itemPath>FAT/ewf.h</itemPath>
+      <itemPath>FAT/exfatp.h</itemPath>
+      <itemPath>FAT/ext2.h</itemPath>
+      <itemPath>FAT/ext2_dir.h</itemPath>
+      <itemPath>FAT/ext2_inc.h</itemPath>
+      <itemPath>FAT/ext2grp.h</itemPath>
+      <itemPath>FAT/ext2p.h</itemPath>
+      <itemPath>FAT/fat.h</itemPath>
+      <itemPath>FAT/fat_cluster.h</itemPath>
+      <itemPath>FAT/fat_dir.h</itemPath>
+      <itemPath>FAT/fat_unformat.h</itemPath>
+      <itemPath>FAT/fatp.h</itemPath>
+      <itemPath>FAT/file_found.h</itemPath>
+      <itemPath>FAT/file_sp3.h</itemPath>
+      <itemPath>FAT/file_tar.h</itemPath>
+      <itemPath>FAT/file_tiff.h</itemPath>
+      <itemPath>FAT/file_txt.h</itemPath>
+      <itemPath>FAT/filegen.h</itemPath>
+      <itemPath>FAT/fnctdsk.h</itemPath>
+      <itemPath>FAT/geometry.h</itemPath>
+      <itemPath>FAT/guid_cpy.h</itemPath>
+      <itemPath>FAT/hdaccess.h</itemPath>
+      <itemPath>FAT/hdcache.h</itemPath>
+      <itemPath>FAT/hdwin32.h</itemPath>
+      <itemPath>FAT/hfsp.h</itemPath>
+      <itemPath>FAT/hidden.h</itemPath>
+      <itemPath>FAT/hiddenn.h</itemPath>
+      <itemPath>FAT/hpa_dco.h</itemPath>
+      <itemPath>FAT/intrf.h</itemPath>
+      <itemPath>FAT/intrfn.h</itemPath>
+      <itemPath>FAT/iso.h</itemPath>
+      <itemPath>FAT/iso9660.h</itemPath>
+      <itemPath>FAT/lang.h</itemPath>
+      <itemPath>FAT/list.h</itemPath>
+      <itemPath>FAT/list_sort.h</itemPath>
+      <itemPath>FAT/log.h</itemPath>
+      <itemPath>FAT/log_part.h</itemPath>
+      <itemPath>main.h</itemPath>
+      <itemPath>FAT/memmem.h</itemPath>
+      <itemPath>FAT/misc.h</itemPath>
+      <itemPath>FAT/nodisk.h</itemPath>
+      <itemPath>FAT/ntfs.h</itemPath>
+      <itemPath>FAT/ntfs_dir.h</itemPath>
+      <itemPath>FAT/ntfs_inc.h</itemPath>
+      <itemPath>FAT/ntfs_utl.h</itemPath>
+      <itemPath>FAT/ntfsp.h</itemPath>
+      <itemPath>FAT/ole.h</itemPath>
+      <itemPath>FAT/partauto.h</itemPath>
+      <itemPath>FAT/partgpt.h</itemPath>
+      <itemPath>FAT/partgptn.h</itemPath>
+      <itemPath>FAT/parthumax.h</itemPath>
+      <itemPath>FAT/parti386.h</itemPath>
+      <itemPath>FAT/parti386n.h</itemPath>
+      <itemPath>FAT/partmac.h</itemPath>
+      <itemPath>FAT/partmacn.h</itemPath>
+      <itemPath>FAT/partsun.h</itemPath>
+      <itemPath>FAT/partsunn.h</itemPath>
+      <itemPath>FAT/partxbox.h</itemPath>
+      <itemPath>FAT/partxboxn.h</itemPath>
+      <itemPath>FAT/pblocksize.h</itemPath>
+      <itemPath>FAT/pdisksel.h</itemPath>
+      <itemPath>FAT/pe.h</itemPath>
+      <itemPath>FAT/pfree_whole.h</itemPath>
+      <itemPath>FAT/phbf.h</itemPath>
+      <itemPath>FAT/phbs.h</itemPath>
+      <itemPath>FAT/phcfg.h</itemPath>
+      <itemPath>FAT/phmain.h</itemPath>
+      <itemPath>FAT/phnc.h</itemPath>
+      <itemPath>FAT/photorec.h</itemPath>
+      <itemPath>FAT/phrecn.h</itemPath>
+      <itemPath>FAT/pnext.h</itemPath>
+      <itemPath>FAT/ppartsel.h</itemPath>
+      <itemPath>FAT/savehdr.h</itemPath>
+      <itemPath>FAT/sessionp.h</itemPath>
+      <itemPath>FAT/setdate.h</itemPath>
+      <itemPath>FAT/sudo.h</itemPath>
+      <itemPath>FAT/types.h</itemPath>
+      <itemPath>FAT/win32.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>languages/Germany_128_85.xpm</itemPath>
+      <itemPath>languages/Serbia_128_85.xpm</itemPath>
+      <itemPath>SidePicture0.xpm</itemPath>
+      <itemPath>SidePicture1.xpm</itemPath>
+      <itemPath>SidePicture2.xpm</itemPath>
+      <itemPath>SidePicture3.xpm</itemPath>
+      <itemPath>SidePictureZ_0.xpm</itemPath>
+      <itemPath>StaticLinkStepByStep.conf</itemPath>
+      <itemPath>Static_wxWidgetsSetENVandCompileFrom_cmd_console.conf</itemPath>
+      <itemPath>languages/UnitedKingsom_128.xpm</itemPath>
+      <itemPath>drive-harddisk-5.xpm</itemPath>
+      <itemPath>drive-optical-3.xpm</itemPath>
+      <itemPath>drive-removable-media-3.xpm</itemPath>
+      <itemPath>flag_rs.xpm</itemPath>
+      <itemPath>media-flash-2.xpm</itemPath>
+      <itemPath>sample.xpm</itemPath>
+      <itemPath>todo.txt</itemPath>
+      <itemPath>wiztest.xpm</itemPath>
+      <itemPath>wiztest2.xpm</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>CustomButton.cpp</itemPath>
+      <itemPath>IsValidFileName.cpp</itemPath>
+      <itemPath>languages/LanguageDialog.cpp</itemPath>
+      <itemPath>languages/LanguageFactory.cpp</itemPath>
+      <itemPath>languages/LanguagesImpl.cpp</itemPath>
+      <itemPath>MFTRecord.cpp</itemPath>
+      <itemPath>MyThreadClass.cpp</itemPath>
+      <itemPath>MyWizzard.cpp</itemPath>
+      <itemPath>NTFSDrive.cpp</itemPath>
+      <itemPath>Page_EndPage.cpp</itemPath>
+      <itemPath>Page_GreetingPage.cpp</itemPath>
+      <itemPath>Page_SelectDestinationDirPage.cpp</itemPath>
+      <itemPath>Page_SelectFilesPage.cpp</itemPath>
+      <itemPath>Page_SelectSourceDrivePage.cpp</itemPath>
+      <itemPath>FAT/addpart.c</itemPath>
+      <itemPath>FAT/analyse.c</itemPath>
+      <itemPath>FAT/askloc.c</itemPath>
+      <itemPath>FAT/autoset.c</itemPath>
+      <itemPath>FAT/bfs.c</itemPath>
+      <itemPath>FAT/bsd.c</itemPath>
+      <itemPath>FAT/btrfs.c</itemPath>
+      <itemPath>FAT/chgtype.c</itemPath>
+      <itemPath>FAT/chgtypen.c</itemPath>
+      <itemPath>FAT/common.c</itemPath>
+      <itemPath>FAT/cramfs.c</itemPath>
+      <itemPath>FAT/crc.c</itemPath>
+      <itemPath>desktopIcon64x64.xpm</itemPath>
+      <itemPath>FAT/dfxml.c</itemPath>
+      <itemPath>FAT/dir.c</itemPath>
+      <itemPath>FAT/ewf.c</itemPath>
+      <itemPath>FAT/exfat.c</itemPath>
+      <itemPath>FAT/exfatp.c</itemPath>
+      <itemPath>FAT/ext2.c</itemPath>
+      <itemPath>FAT/ext2_dir.c</itemPath>
+      <itemPath>FAT/ext2grp.c</itemPath>
+      <itemPath>FAT/ext2p.c</itemPath>
+      <itemPath>FAT/fat.c</itemPath>
+      <itemPath>FAT/fat_cluster.c</itemPath>
+      <itemPath>FAT/fat_dir.c</itemPath>
+      <itemPath>FAT/fat_unformat.c</itemPath>
+      <itemPath>FAT/fatp.c</itemPath>
+      <itemPath>FAT/fatx.c</itemPath>
+      <itemPath>FAT/file_1cd.c</itemPath>
+      <itemPath>FAT/file_7z.c</itemPath>
+      <itemPath>FAT/file_DB.c</itemPath>
+      <itemPath>FAT/file_a.c</itemPath>
+      <itemPath>FAT/file_ab.c</itemPath>
+      <itemPath>FAT/file_abcdp.c</itemPath>
+      <itemPath>FAT/file_abr.c</itemPath>
+      <itemPath>FAT/file_acb.c</itemPath>
+      <itemPath>FAT/file_ace.c</itemPath>
+      <itemPath>FAT/file_ado.c</itemPath>
+      <itemPath>FAT/file_ahn.c</itemPath>
+      <itemPath>FAT/file_aif.c</itemPath>
+      <itemPath>FAT/file_all.c</itemPath>
+      <itemPath>FAT/file_als.c</itemPath>
+      <itemPath>FAT/file_amd.c</itemPath>
+      <itemPath>FAT/file_amr.c</itemPath>
+      <itemPath>FAT/file_apa.c</itemPath>
+      <itemPath>FAT/file_ape.c</itemPath>
+      <itemPath>FAT/file_apple.c</itemPath>
+      <itemPath>FAT/file_arj.c</itemPath>
+      <itemPath>FAT/file_asf.c</itemPath>
+      <itemPath>FAT/file_asl.c</itemPath>
+      <itemPath>FAT/file_asm.c</itemPath>
+      <itemPath>FAT/file_atd.c</itemPath>
+      <itemPath>FAT/file_au.c</itemPath>
+      <itemPath>FAT/file_axx.c</itemPath>
+      <itemPath>FAT/file_bac.c</itemPath>
+      <itemPath>FAT/file_bim.c</itemPath>
+      <itemPath>FAT/file_binvox.c</itemPath>
+      <itemPath>FAT/file_bkf.c</itemPath>
+      <itemPath>FAT/file_bld.c</itemPath>
+      <itemPath>FAT/file_bmp.c</itemPath>
+      <itemPath>FAT/file_bz2.c</itemPath>
+      <itemPath>FAT/file_cab.c</itemPath>
+      <itemPath>FAT/file_caf.c</itemPath>
+      <itemPath>FAT/file_cam.c</itemPath>
+      <itemPath>FAT/file_catdrawing.c</itemPath>
+      <itemPath>FAT/file_cdt.c</itemPath>
+      <itemPath>FAT/file_chm.c</itemPath>
+      <itemPath>FAT/file_class.c</itemPath>
+      <itemPath>FAT/file_cm.c</itemPath>
+      <itemPath>FAT/file_compress.c</itemPath>
+      <itemPath>FAT/file_cow.c</itemPath>
+      <itemPath>FAT/file_crw.c</itemPath>
+      <itemPath>FAT/file_csh.c</itemPath>
+      <itemPath>FAT/file_ctg.c</itemPath>
+      <itemPath>FAT/file_cwk.c</itemPath>
+      <itemPath>FAT/file_d2s.c</itemPath>
+      <itemPath>FAT/file_dar.c</itemPath>
+      <itemPath>FAT/file_dat.c</itemPath>
+      <itemPath>FAT/file_dbf.c</itemPath>
+      <itemPath>FAT/file_dbn.c</itemPath>
+      <itemPath>FAT/file_ddf.c</itemPath>
+      <itemPath>FAT/file_dex.c</itemPath>
+      <itemPath>FAT/file_dim.c</itemPath>
+      <itemPath>FAT/file_dir.c</itemPath>
+      <itemPath>FAT/file_djv.c</itemPath>
+      <itemPath>FAT/file_dmp.c</itemPath>
+      <itemPath>FAT/file_doc.c</itemPath>
+      <itemPath>FAT/file_dpx.c</itemPath>
+      <itemPath>FAT/file_drw.c</itemPath>
+      <itemPath>FAT/file_ds2.c</itemPath>
+      <itemPath>FAT/file_dsc.c</itemPath>
+      <itemPath>FAT/file_dss.c</itemPath>
+      <itemPath>FAT/file_dta.c</itemPath>
+      <itemPath>FAT/file_dump.c</itemPath>
+      <itemPath>FAT/file_dv.c</itemPath>
+      <itemPath>FAT/file_dwg.c</itemPath>
+      <itemPath>FAT/file_dxf.c</itemPath>
+      <itemPath>FAT/file_e01.c</itemPath>
+      <itemPath>FAT/file_ecryptfs.c</itemPath>
+      <itemPath>FAT/file_edb.c</itemPath>
+      <itemPath>FAT/file_elf.c</itemPath>
+      <itemPath>FAT/file_emf.c</itemPath>
+      <itemPath>FAT/file_evt.c</itemPath>
+      <itemPath>FAT/file_exe.c</itemPath>
+      <itemPath>FAT/file_exs.c</itemPath>
+      <itemPath>FAT/file_ext.c</itemPath>
+      <itemPath>FAT/file_ext2.c</itemPath>
+      <itemPath>FAT/file_fat.c</itemPath>
+      <itemPath>FAT/file_fbf.c</itemPath>
+      <itemPath>FAT/file_fbk.c</itemPath>
+      <itemPath>FAT/file_fcp.c</itemPath>
+      <itemPath>FAT/file_fcs.c</itemPath>
+      <itemPath>FAT/file_fdb.c</itemPath>
+      <itemPath>FAT/file_fh10.c</itemPath>
+      <itemPath>FAT/file_fh5.c</itemPath>
+      <itemPath>FAT/file_filevault.c</itemPath>
+      <itemPath>FAT/file_fits.c</itemPath>
+      <itemPath>FAT/file_flac.c</itemPath>
+      <itemPath>FAT/file_flp.c</itemPath>
+      <itemPath>FAT/file_flv.c</itemPath>
+      <itemPath>FAT/file_fob.c</itemPath>
+      <itemPath>FAT/file_found.c</itemPath>
+      <itemPath>FAT/file_fp5.c</itemPath>
+      <itemPath>FAT/file_fp7.c</itemPath>
+      <itemPath>FAT/file_freeway.c</itemPath>
+      <itemPath>FAT/file_frm.c</itemPath>
+      <itemPath>FAT/file_fs.c</itemPath>
+      <itemPath>FAT/file_fwd.c</itemPath>
+      <itemPath>FAT/file_gam.c</itemPath>
+      <itemPath>FAT/file_gct.c</itemPath>
+      <itemPath>FAT/file_gho.c</itemPath>
+      <itemPath>FAT/file_gif.c</itemPath>
+      <itemPath>FAT/file_gm6.c</itemPath>
+      <itemPath>FAT/file_gp5.c</itemPath>
+      <itemPath>FAT/file_gpg.c</itemPath>
+      <itemPath>FAT/file_gz.c</itemPath>
+      <itemPath>FAT/file_hdf.c</itemPath>
+      <itemPath>FAT/file_hds.c</itemPath>
+      <itemPath>FAT/file_hfsp.c</itemPath>
+      <itemPath>FAT/file_hr9.c</itemPath>
+      <itemPath>FAT/file_http.c</itemPath>
+      <itemPath>FAT/file_icc.c</itemPath>
+      <itemPath>FAT/file_ico.c</itemPath>
+      <itemPath>FAT/file_ifo.c</itemPath>
+      <itemPath>FAT/file_imb.c</itemPath>
+      <itemPath>FAT/file_indd.c</itemPath>
+      <itemPath>FAT/file_info.c</itemPath>
+      <itemPath>FAT/file_iso.c</itemPath>
+      <itemPath>FAT/file_it.c</itemPath>
+      <itemPath>FAT/file_itu.c</itemPath>
+      <itemPath>FAT/file_jpg.c</itemPath>
+      <itemPath>FAT/file_kdb.c</itemPath>
+      <itemPath>FAT/file_kdbx.c</itemPath>
+      <itemPath>FAT/file_ldf.c</itemPath>
+      <itemPath>FAT/file_list.c</itemPath>
+      <itemPath>FAT/file_lit.c</itemPath>
+      <itemPath>FAT/file_lnk.c</itemPath>
+      <itemPath>FAT/file_logic.c</itemPath>
+      <itemPath>FAT/file_lso.c</itemPath>
+      <itemPath>FAT/file_lxo.c</itemPath>
+      <itemPath>FAT/file_lzo.c</itemPath>
+      <itemPath>FAT/file_m2ts.c</itemPath>
+      <itemPath>FAT/file_mat.c</itemPath>
+      <itemPath>FAT/file_max.c</itemPath>
+      <itemPath>FAT/file_mb.c</itemPath>
+      <itemPath>FAT/file_mcd.c</itemPath>
+      <itemPath>FAT/file_mdb.c</itemPath>
+      <itemPath>FAT/file_mdf.c</itemPath>
+      <itemPath>FAT/file_mfa.c</itemPath>
+      <itemPath>FAT/file_mfg.c</itemPath>
+      <itemPath>FAT/file_mft.c</itemPath>
+      <itemPath>FAT/file_mid.c</itemPath>
+      <itemPath>FAT/file_mig.c</itemPath>
+      <itemPath>FAT/file_mk5.c</itemPath>
+      <itemPath>FAT/file_mkv.c</itemPath>
+      <itemPath>FAT/file_mobi.c</itemPath>
+      <itemPath>FAT/file_mov.c</itemPath>
+      <itemPath>FAT/file_mp3.c</itemPath>
+      <itemPath>FAT/file_mpg.c</itemPath>
+      <itemPath>FAT/file_mrw.c</itemPath>
+      <itemPath>FAT/file_mus.c</itemPath>
+      <itemPath>FAT/file_mxf.c</itemPath>
+      <itemPath>FAT/file_myo.c</itemPath>
+      <itemPath>FAT/file_mysql.c</itemPath>
+      <itemPath>FAT/file_nds.c</itemPath>
+      <itemPath>FAT/file_njx.c</itemPath>
+      <itemPath>FAT/file_nk2.c</itemPath>
+      <itemPath>FAT/file_nsf.c</itemPath>
+      <itemPath>FAT/file_oci.c</itemPath>
+      <itemPath>FAT/file_ogg.c</itemPath>
+      <itemPath>FAT/file_one.c</itemPath>
+      <itemPath>FAT/file_orf.c</itemPath>
+      <itemPath>FAT/file_paf.c</itemPath>
+      <itemPath>FAT/file_pap.c</itemPath>
+      <itemPath>FAT/file_par2.c</itemPath>
+      <itemPath>FAT/file_pcap.c</itemPath>
+      <itemPath>FAT/file_pct.c</itemPath>
+      <itemPath>FAT/file_pcx.c</itemPath>
+      <itemPath>FAT/file_pdf.c</itemPath>
+      <itemPath>FAT/file_pds.c</itemPath>
+      <itemPath>FAT/file_pfx.c</itemPath>
+      <itemPath>FAT/file_plt.c</itemPath>
+      <itemPath>FAT/file_png.c</itemPath>
+      <itemPath>FAT/file_pnm.c</itemPath>
+      <itemPath>FAT/file_prc.c</itemPath>
+      <itemPath>FAT/file_prt.c</itemPath>
+      <itemPath>FAT/file_ps.c</itemPath>
+      <itemPath>FAT/file_psd.c</itemPath>
+      <itemPath>FAT/file_psf.c</itemPath>
+      <itemPath>FAT/file_psp.c</itemPath>
+      <itemPath>FAT/file_pst.c</itemPath>
+      <itemPath>FAT/file_ptb.c</itemPath>
+      <itemPath>FAT/file_ptf.c</itemPath>
+      <itemPath>FAT/file_pyc.c</itemPath>
+      <itemPath>FAT/file_pzf.c</itemPath>
+      <itemPath>FAT/file_pzh.c</itemPath>
+      <itemPath>FAT/file_qbb.c</itemPath>
+      <itemPath>FAT/file_qdf.c</itemPath>
+      <itemPath>FAT/file_qkt.c</itemPath>
+      <itemPath>FAT/file_qxd.c</itemPath>
+      <itemPath>FAT/file_r3d.c</itemPath>
+      <itemPath>FAT/file_ra.c</itemPath>
+      <itemPath>FAT/file_raf.c</itemPath>
+      <itemPath>FAT/file_rar.c</itemPath>
+      <itemPath>FAT/file_raw.c</itemPath>
+      <itemPath>FAT/file_rdc.c</itemPath>
+      <itemPath>FAT/file_reg.c</itemPath>
+      <itemPath>FAT/file_res.c</itemPath>
+      <itemPath>FAT/file_rfp.c</itemPath>
+      <itemPath>FAT/file_riff.c</itemPath>
+      <itemPath>FAT/file_rm.c</itemPath>
+      <itemPath>FAT/file_rns.c</itemPath>
+      <itemPath>FAT/file_rpm.c</itemPath>
+      <itemPath>FAT/file_rw2.c</itemPath>
+      <itemPath>FAT/file_rx2.c</itemPath>
+      <itemPath>FAT/file_save.c</itemPath>
+      <itemPath>FAT/file_ses.c</itemPath>
+      <itemPath>FAT/file_sib.c</itemPath>
+      <itemPath>FAT/file_sig.c</itemPath>
+      <itemPath>FAT/file_sit.c</itemPath>
+      <itemPath>FAT/file_skd.c</itemPath>
+      <itemPath>FAT/file_skp.c</itemPath>
+      <itemPath>FAT/file_sp3.c</itemPath>
+      <itemPath>FAT/file_spe.c</itemPath>
+      <itemPath>FAT/file_spf.c</itemPath>
+      <itemPath>FAT/file_spss.c</itemPath>
+      <itemPath>FAT/file_sql.c</itemPath>
+      <itemPath>FAT/file_sqm.c</itemPath>
+      <itemPath>FAT/file_stl.c</itemPath>
+      <itemPath>FAT/file_stu.c</itemPath>
+      <itemPath>FAT/file_swf.c</itemPath>
+      <itemPath>FAT/file_tar.c</itemPath>
+      <itemPath>FAT/file_tax.c</itemPath>
+      <itemPath>FAT/file_tib.c</itemPath>
+      <itemPath>FAT/file_tiff.c</itemPath>
+      <itemPath>FAT/file_tivo.c</itemPath>
+      <itemPath>FAT/file_torrent.c</itemPath>
+      <itemPath>FAT/file_tph.c</itemPath>
+      <itemPath>FAT/file_tpl.c</itemPath>
+      <itemPath>FAT/file_ttf.c</itemPath>
+      <itemPath>FAT/file_txt.c</itemPath>
+      <itemPath>FAT/file_tz.c</itemPath>
+      <itemPath>FAT/file_v2i.c</itemPath>
+      <itemPath>FAT/file_vault.c</itemPath>
+      <itemPath>FAT/file_vdi.c</itemPath>
+      <itemPath>FAT/file_veg.c</itemPath>
+      <itemPath>FAT/file_vfb.c</itemPath>
+      <itemPath>FAT/file_vmdk.c</itemPath>
+      <itemPath>FAT/file_vmg.c</itemPath>
+      <itemPath>FAT/file_wdp.c</itemPath>
+      <itemPath>FAT/file_win.c</itemPath>
+      <itemPath>FAT/file_wks.c</itemPath>
+      <itemPath>FAT/file_wmf.c</itemPath>
+      <itemPath>FAT/file_wnk.c</itemPath>
+      <itemPath>FAT/file_wpb.c</itemPath>
+      <itemPath>FAT/file_wpd.c</itemPath>
+      <itemPath>FAT/file_wtv.c</itemPath>
+      <itemPath>FAT/file_wv.c</itemPath>
+      <itemPath>FAT/file_x3f.c</itemPath>
+      <itemPath>FAT/file_xcf.c</itemPath>
+      <itemPath>FAT/file_xfi.c</itemPath>
+      <itemPath>FAT/file_xm.c</itemPath>
+      <itemPath>FAT/file_xpt.c</itemPath>
+      <itemPath>FAT/file_xsv.c</itemPath>
+      <itemPath>FAT/file_xv.c</itemPath>
+      <itemPath>FAT/file_xz.c</itemPath>
+      <itemPath>FAT/file_zip.c</itemPath>
+      <itemPath>FAT/filegen.c</itemPath>
+      <itemPath>FAT/fnctdsk.c</itemPath>
+      <itemPath>FAT/geometry.c</itemPath>
+      <itemPath>FAT/gfs2.c</itemPath>
+      <itemPath>FAT/hdaccess.c</itemPath>
+      <itemPath>FAT/hdcache.c</itemPath>
+      <itemPath>FAT/hdwin32.c</itemPath>
+      <itemPath>FAT/hfs.c</itemPath>
+      <itemPath>FAT/hfsp.c</itemPath>
+      <itemPath>FAT/hidden.c</itemPath>
+      <itemPath>FAT/hiddenn.c</itemPath>
+      <itemPath>FAT/hpa_dco.c</itemPath>
+      <itemPath>FAT/hpfs.c</itemPath>
+      <itemPath>FAT/intrf.c</itemPath>
+      <itemPath>FAT/intrfn.c</itemPath>
+      <itemPath>FAT/iso.c</itemPath>
+      <itemPath>FAT/jfs.c</itemPath>
+      <itemPath>FAT/list.c</itemPath>
+      <itemPath>FAT/list_sort.c</itemPath>
+      <itemPath>FAT/log.c</itemPath>
+      <itemPath>FAT/log_part.c</itemPath>
+      <itemPath>FAT/luks.c</itemPath>
+      <itemPath>FAT/lvm.c</itemPath>
+      <itemPath>main.cpp</itemPath>
+      <itemPath>FAT/md.c</itemPath>
+      <itemPath>FAT/misc.c</itemPath>
+      <itemPath>FAT/netware.c</itemPath>
+      <itemPath>FAT/nodisk.c</itemPath>
+      <itemPath>FAT/ntfs.c</itemPath>
+      <itemPath>FAT/ntfs_dir.c</itemPath>
+      <itemPath>FAT/ntfs_utl.c</itemPath>
+      <itemPath>FAT/ntfsp.c</itemPath>
+      <itemPath>FAT/partauto.c</itemPath>
+      <itemPath>FAT/partgpt.c</itemPath>
+      <itemPath>FAT/partgptn.c</itemPath>
+      <itemPath>FAT/partgptro.c</itemPath>
+      <itemPath>FAT/parthumax.c</itemPath>
+      <itemPath>FAT/parti386.c</itemPath>
+      <itemPath>FAT/parti386n.c</itemPath>
+      <itemPath>FAT/partmac.c</itemPath>
+      <itemPath>FAT/partmacn.c</itemPath>
+      <itemPath>FAT/partnone.c</itemPath>
+      <itemPath>FAT/partsun.c</itemPath>
+      <itemPath>FAT/partsunn.c</itemPath>
+      <itemPath>FAT/partxbox.c</itemPath>
+      <itemPath>FAT/partxboxn.c</itemPath>
+      <itemPath>FAT/pblocksize.c</itemPath>
+      <itemPath>FAT/pdisksel.c</itemPath>
+      <itemPath>FAT/pfree_whole.c</itemPath>
+      <itemPath>FAT/phbf.c</itemPath>
+      <itemPath>FAT/phbs.c</itemPath>
+      <itemPath>FAT/phcfg.c</itemPath>
+      <itemPath>FAT/phmain.c</itemPath>
+      <itemPath>FAT/phnc.c</itemPath>
+      <itemPath>FAT/photorec.c</itemPath>
+      <itemPath>FAT/phrecn.c</itemPath>
+      <itemPath>FAT/ppartsel.c</itemPath>
+      <itemPath>FAT/rfs.c</itemPath>
+      <itemPath>FAT/savehdr.c</itemPath>
+      <itemPath>FAT/sessionp.c</itemPath>
+      <itemPath>FAT/setdate.c</itemPath>
+      <itemPath>FAT/sudo.c</itemPath>
+      <itemPath>FAT/sun.c</itemPath>
+      <itemPath>FAT/swap.c</itemPath>
+      <itemPath>FAT/sysv.c</itemPath>
+      <itemPath>FAT/ufs.c</itemPath>
+      <itemPath>FAT/unicode.c</itemPath>
+      <itemPath>FAT/vmfs.c</itemPath>
+      <itemPath>FAT/wbfs.c</itemPath>
+      <itemPath>FAT/win32.c</itemPath>
+      <itemPath>FAT/xfs.c</itemPath>
+      <itemPath>FAT/zfs.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>FAT</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>MinGW|MinGW</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <commandLine>-D HAVE_STRING_H -D HAVE_STDLIB_H -D HAVE_TIME_H -D HAVE_SYS_STAT_H -D HAVE_WINDEF_H -D HAVE_WINDEF_H -D HAVE_WINBASE_H -D HAVE_WINDOWS_H -D IOCTL_STORAGE_QUERY_PROPERTY -D HAVE_DDK_NTDDSTOR_H -D TESTDISK_LSB</commandLine>
+        </cTool>
+        <ccTool>
+          <architecture>1</architecture>
+          <incDir>
+            <pElem>../../wxWidgets-3.0.1/lib/wx/include/msw-unicode-3.0</pElem>
+            <pElem>../../wxWidgets-3.0.1/include</pElem>
+          </incDir>
+          <commandLine>-mwindows -Wall -O0 -D UNICODE</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/GetMyFilesBack</output>
+          <linkerAddLib>
+            <pElem>../../wxWidgets-3.0.1/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>undelete.res</linkerOptionItem>
+            <linkerLibLibItem>wx_baseu-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_net-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_xml-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_adv-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_aui-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_core-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_gl-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_html-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_media-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_propgrid-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_qa-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_ribbon-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_richtext-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_stc-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_webview-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_xrc-3.0.dll</linkerLibLibItem>
+            <linkerLibLibItem>wxexpat-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxjpeg-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxpng-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxregexu-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxscintilla-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxtiff-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxzlib-3.0</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="CustomButton.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CustomButton.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/addpart.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/addpart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/alignio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/analyse.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/analyse.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/askloc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/askloc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/autoset.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/autoset.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bsd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bsd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/btrfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/common.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/cramfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ewf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ewf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/exfat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_1cd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_7z.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_DB.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_a.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abcdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_acb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ado.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ahn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_aif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_all.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_als.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ape.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apple.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_arj.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_atd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_au.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_axx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_binvox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bkf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bld.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bz2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_caf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_catdrawing.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cdt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_chm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_class.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_compress.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cow.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_crw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_csh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ctg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cwk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_d2s.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ddf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_djv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_doc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dpx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_drw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ds2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dsc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dta.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dwg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_e01.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ecryptfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_edb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_elf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_emf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_evt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh10.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_filevault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fits.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fob.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_fp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fp7.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_freeway.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_frm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fwd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gho.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gm6.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hr9.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_http.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_icc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ico.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ifo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_imb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_indd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_info.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_it.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_itu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_jpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdbx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ldf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_logic.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lxo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lzo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_m2ts.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_max.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mcd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mft.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mid.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mk5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mkv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mobi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mov.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mrw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mus.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_myo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mysql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_njx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nk2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nsf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_oci.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ogg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_one.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_orf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_paf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_par2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pfx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_plt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_png.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pnm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ps.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pst.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pyc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qbb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qkt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qxd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_r3d.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ra.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rdc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_reg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_res.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rfp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_riff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rns.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rpm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rw2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rx2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_save.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ses.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_spe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sqm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_swf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tivo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_torrent.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tph.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tpl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ttf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_v2i.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vdi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_veg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vfb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmdk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_win.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wmf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wtv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_x3f.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xcf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xfi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xsv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_zip.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/geometry.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/geometry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/gfs2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/guid_cpy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hidden.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hidden.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/iso.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso9660.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/jfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lang.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log_part.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log_part.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/luks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/md.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/memmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/misc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/misc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/netware.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partauto.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partauto.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptro.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmac.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partnone.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pe.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phmain.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phmain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phnc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phnc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/photorec.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/photorec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pnext.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/rfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/setdate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/setdate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sudo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sudo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/swap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sysv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ufs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/unicode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/vmfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/wbfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/xfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/zfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="IsValidFileName.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IsValidFileName.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MFTRecord.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MFTRecord.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyThreadClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyThreadClass.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyWizzard.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyWizzard.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NTFSDrive.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NTFSDrive.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_EndPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_EndPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture1.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePictureZ_0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StaticLinkStepByStep.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Static_wxWidgetsSetENVandCompileFrom_cmd_console.conf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="desktopIcon64x64.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-harddisk-5.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-optical-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-removable-media-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="flag_rs.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/Germany_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/ILanguage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageEnums.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguagesImpl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/Serbia_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/UnitedKingsom_128.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="media-flash-2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sample.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="todo.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <architecture>1</architecture>
+          <incDir>
+            <pElem>../../wxWidgets-3.0.1_static/lib/wx/include/msw-unicode-static-3.0</pElem>
+            <pElem>../../wxWidgets-3.0.1_static/include</pElem>
+          </incDir>
+          <commandLine>-D_LARGEFILE_SOURCE=unknown -DwxDEBUG_LEVEL=0 -D__WXMSW__ -mthreads -D UNICODE</commandLine>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/GetMyFilesBack</output>
+          <linkerAddLib>
+            <pElem>../../wxWidgets-3.0.1_static/lib</pElem>
+          </linkerAddLib>
+          <stripSymbols>true</stripSymbols>
+          <linkerLibItems>
+            <linkerOptionItem>-static</linkerOptionItem>
+            <linkerOptionItem>undelete.res</linkerOptionItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu_net-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu_xml-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_adv-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_aui-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_core-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_gl-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_html-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_media-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_propgrid-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_qa-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_ribbon-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_richtext-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_stc-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_webview-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_xrc-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxexpat-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxjpeg-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxpng-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxregexu-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxscintilla-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxtiff-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxzlib-3.0.a</linkerLibFileItem>
+            <linkerLibLibItem>wx_baseu-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_net-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_xml-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_adv-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_aui-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_core-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_gl-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_html-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_media-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_propgrid-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_qa-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_ribbon-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_richtext-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_stc-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_webview-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_xrc-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxexpat-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxjpeg-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxpng-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxregexu-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxscintilla-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxtiff-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxzlib-3.0</linkerLibLibItem>
+            <linkerLibLibItem>aclui</linkerLibLibItem>
+            <linkerLibLibItem>advapi32</linkerLibLibItem>
+            <linkerLibLibItem>apcups</linkerLibLibItem>
+            <linkerLibLibItem>asprintf</linkerLibLibItem>
+            <linkerLibLibItem>asprintf.dll</linkerLibLibItem>
+            <linkerLibLibItem>avicap32</linkerLibLibItem>
+            <linkerLibLibItem>avifil32</linkerLibLibItem>
+            <linkerLibLibItem>bfd</linkerLibLibItem>
+            <linkerLibLibItem>bthprops</linkerLibLibItem>
+            <linkerLibLibItem>cap</linkerLibLibItem>
+            <linkerLibLibItem>cfgmgr32</linkerLibLibItem>
+            <linkerLibLibItem>charset</linkerLibLibItem>
+            <linkerLibLibItem>charset.dll</linkerLibLibItem>
+            <linkerLibLibItem>coldname</linkerLibLibItem>
+            <linkerLibLibItem>comctl32</linkerLibLibItem>
+            <linkerLibLibItem>comdlg32</linkerLibLibItem>
+            <linkerLibLibItem>crtdll</linkerLibLibItem>
+            <linkerLibLibItem>crypt32</linkerLibLibItem>
+            <linkerLibLibItem>ctl3d32</linkerLibLibItem>
+            <linkerLibLibItem>d3d8</linkerLibLibItem>
+            <linkerLibLibItem>d3d9</linkerLibLibItem>
+            <linkerLibLibItem>d3dim</linkerLibLibItem>
+            <linkerLibLibItem>d3drm</linkerLibLibItem>
+            <linkerLibLibItem>d3dx8d</linkerLibLibItem>
+            <linkerLibLibItem>d3dx9d</linkerLibLibItem>
+            <linkerLibLibItem>d3dxof</linkerLibLibItem>
+            <linkerLibLibItem>ddraw</linkerLibLibItem>
+            <linkerLibLibItem>dhcpcsvc</linkerLibLibItem>
+            <linkerLibLibItem>dinput</linkerLibLibItem>
+            <linkerLibLibItem>dinput8</linkerLibLibItem>
+            <linkerLibLibItem>dlcapi</linkerLibLibItem>
+            <linkerLibLibItem>dmoguids</linkerLibLibItem>
+            <linkerLibLibItem>dnsapi</linkerLibLibItem>
+            <linkerLibLibItem>dplayx</linkerLibLibItem>
+            <linkerLibLibItem>dpnaddr</linkerLibLibItem>
+            <linkerLibLibItem>dpnet</linkerLibLibItem>
+            <linkerLibLibItem>dpnlobby</linkerLibLibItem>
+            <linkerLibLibItem>dpvoice</linkerLibLibItem>
+            <linkerLibLibItem>dsetup</linkerLibLibItem>
+            <linkerLibLibItem>dsound</linkerLibLibItem>
+            <linkerLibLibItem>dxapi</linkerLibLibItem>
+            <linkerLibLibItem>dxerr8</linkerLibLibItem>
+            <linkerLibLibItem>dxerr9</linkerLibLibItem>
+            <linkerLibLibItem>dxguid</linkerLibLibItem>
+            <linkerLibLibItem>faultrep</linkerLibLibItem>
+            <linkerLibLibItem>gdi32</linkerLibLibItem>
+            <linkerLibLibItem>gdiplus</linkerLibLibItem>
+            <linkerLibLibItem>gettextlib.dll</linkerLibLibItem>
+            <linkerLibLibItem>gettextpo</linkerLibLibItem>
+            <linkerLibLibItem>gettextpo.dll</linkerLibLibItem>
+            <linkerLibLibItem>gettextsrc.dll</linkerLibLibItem>
+            <linkerLibLibItem>glaux</linkerLibLibItem>
+            <linkerLibLibItem>glu32</linkerLibLibItem>
+            <linkerLibLibItem>gmon</linkerLibLibItem>
+            <linkerLibLibItem>hal</linkerLibLibItem>
+            <linkerLibLibItem>hid</linkerLibLibItem>
+            <linkerLibLibItem>hidparse</linkerLibLibItem>
+            <linkerLibLibItem>iberty</linkerLibLibItem>
+            <linkerLibLibItem>icmui</linkerLibLibItem>
+            <linkerLibLibItem>iconv</linkerLibLibItem>
+            <linkerLibLibItem>iconv.dll</linkerLibLibItem>
+            <linkerLibLibItem>igmpagnt</linkerLibLibItem>
+            <linkerLibLibItem>imagehlp</linkerLibLibItem>
+            <linkerLibLibItem>imm32</linkerLibLibItem>
+            <linkerLibLibItem>intl</linkerLibLibItem>
+            <linkerLibLibItem>intl.dll</linkerLibLibItem>
+            <linkerLibLibItem>iphlpapi</linkerLibLibItem>
+            <linkerLibLibItem>kernel32</linkerLibLibItem>
+            <linkerLibLibItem>ksproxy</linkerLibLibItem>
+            <linkerLibLibItem>ksuser</linkerLibLibItem>
+            <linkerLibLibItem>largeint</linkerLibLibItem>
+            <linkerLibLibItem>ltdl</linkerLibLibItem>
+            <linkerLibLibItem>ltdl.dll</linkerLibLibItem>
+            <linkerLibLibItem>lz32</linkerLibLibItem>
+            <linkerLibLibItem>m</linkerLibLibItem>
+            <linkerLibLibItem>mapi32</linkerLibLibItem>
+            <linkerLibLibItem>mcd</linkerLibLibItem>
+            <linkerLibLibItem>mfcuia32</linkerLibLibItem>
+            <linkerLibLibItem>mgmtapi</linkerLibLibItem>
+            <linkerLibLibItem>mingw32</linkerLibLibItem>
+            <linkerLibLibItem>mingwex</linkerLibLibItem>
+            <linkerLibLibItem>mingwthrd</linkerLibLibItem>
+            <linkerLibLibItem>mingwthrd_old</linkerLibLibItem>
+            <linkerLibLibItem>moldname</linkerLibLibItem>
+            <linkerLibLibItem>moldname100</linkerLibLibItem>
+            <linkerLibLibItem>moldname100d</linkerLibLibItem>
+            <linkerLibLibItem>moldname70</linkerLibLibItem>
+            <linkerLibLibItem>moldname70d</linkerLibLibItem>
+            <linkerLibLibItem>moldname71</linkerLibLibItem>
+            <linkerLibLibItem>moldname71d</linkerLibLibItem>
+            <linkerLibLibItem>moldname80</linkerLibLibItem>
+            <linkerLibLibItem>moldname80d</linkerLibLibItem>
+            <linkerLibLibItem>moldname90</linkerLibLibItem>
+            <linkerLibLibItem>moldname90d</linkerLibLibItem>
+            <linkerLibLibItem>moldnamed</linkerLibLibItem>
+            <linkerLibLibItem>mpr</linkerLibLibItem>
+            <linkerLibLibItem>mprapi</linkerLibLibItem>
+            <linkerLibLibItem>mqrt</linkerLibLibItem>
+            <linkerLibLibItem>msacm32</linkerLibLibItem>
+            <linkerLibLibItem>mscms</linkerLibLibItem>
+            <linkerLibLibItem>msdmo</linkerLibLibItem>
+            <linkerLibLibItem>msimg32</linkerLibLibItem>
+            <linkerLibLibItem>msvcp60</linkerLibLibItem>
+            <linkerLibLibItem>msvcr100</linkerLibLibItem>
+            <linkerLibLibItem>msvcr100d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr70</linkerLibLibItem>
+            <linkerLibLibItem>msvcr70d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr71</linkerLibLibItem>
+            <linkerLibLibItem>msvcr71d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr80</linkerLibLibItem>
+            <linkerLibLibItem>msvcr80d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr90</linkerLibLibItem>
+            <linkerLibLibItem>msvcr90d</linkerLibLibItem>
+            <linkerLibLibItem>msvcrt</linkerLibLibItem>
+            <linkerLibLibItem>msvcrtd</linkerLibLibItem>
+            <linkerLibLibItem>msvfw32</linkerLibLibItem>
+            <linkerLibLibItem>mswsock</linkerLibLibItem>
+            <linkerLibLibItem>nddeapi</linkerLibLibItem>
+            <linkerLibLibItem>ndis</linkerLibLibItem>
+            <linkerLibLibItem>netapi32</linkerLibLibItem>
+            <linkerLibLibItem>newdev</linkerLibLibItem>
+            <linkerLibLibItem>ntdll</linkerLibLibItem>
+            <linkerLibLibItem>ntoskrnl</linkerLibLibItem>
+            <linkerLibLibItem>odbc32</linkerLibLibItem>
+            <linkerLibLibItem>odbccp32</linkerLibLibItem>
+            <linkerLibLibItem>ole32</linkerLibLibItem>
+            <linkerLibLibItem>oleacc</linkerLibLibItem>
+            <linkerLibLibItem>oleaut32</linkerLibLibItem>
+            <linkerLibLibItem>olecli32</linkerLibLibItem>
+            <linkerLibLibItem>oledlg</linkerLibLibItem>
+            <linkerLibLibItem>olepro32</linkerLibLibItem>
+            <linkerLibLibItem>olesvr32</linkerLibLibItem>
+            <linkerLibLibItem>opcodes</linkerLibLibItem>
+            <linkerLibLibItem>opengl32</linkerLibLibItem>
+            <linkerLibLibItem>penwin32</linkerLibLibItem>
+            <linkerLibLibItem>pkpd32</linkerLibLibItem>
+            <linkerLibLibItem>powrprof</linkerLibLibItem>
+            <linkerLibLibItem>psapi</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>pthread.dll</linkerLibLibItem>
+            <linkerLibLibItem>pthreadGC2.dll</linkerLibLibItem>
+            <linkerLibLibItem>pthreadGCE2.dll</linkerLibLibItem>
+            <linkerLibLibItem>quartz</linkerLibLibItem>
+            <linkerLibLibItem>quserex.dll</linkerLibLibItem>
+            <linkerLibLibItem>rapi</linkerLibLibItem>
+            <linkerLibLibItem>rasapi32</linkerLibLibItem>
+            <linkerLibLibItem>rasdlg</linkerLibLibItem>
+            <linkerLibLibItem>rpcdce4</linkerLibLibItem>
+            <linkerLibLibItem>rpcns4</linkerLibLibItem>
+            <linkerLibLibItem>rpcrt4</linkerLibLibItem>
+            <linkerLibLibItem>rtm</linkerLibLibItem>
+            <linkerLibLibItem>rtutils</linkerLibLibItem>
+            <linkerLibLibItem>scrnsave</linkerLibLibItem>
+            <linkerLibLibItem>scrnsavw</linkerLibLibItem>
+            <linkerLibLibItem>scsiport</linkerLibLibItem>
+            <linkerLibLibItem>secur32</linkerLibLibItem>
+            <linkerLibLibItem>setupapi</linkerLibLibItem>
+            <linkerLibLibItem>shell32</linkerLibLibItem>
+            <linkerLibLibItem>shfolder</linkerLibLibItem>
+            <linkerLibLibItem>shlwapi</linkerLibLibItem>
+            <linkerLibLibItem>snmpapi</linkerLibLibItem>
+            <linkerLibLibItem>strmiids</linkerLibLibItem>
+            <linkerLibLibItem>svrapi</linkerLibLibItem>
+            <linkerLibLibItem>tapi32</linkerLibLibItem>
+            <linkerLibLibItem>tdi</linkerLibLibItem>
+            <linkerLibLibItem>thunk32</linkerLibLibItem>
+            <linkerLibLibItem>url</linkerLibLibItem>
+            <linkerLibLibItem>usbcamd</linkerLibLibItem>
+            <linkerLibLibItem>usbcamd2</linkerLibLibItem>
+            <linkerLibLibItem>user32</linkerLibLibItem>
+            <linkerLibLibItem>userenv</linkerLibLibItem>
+            <linkerLibLibItem>usp10</linkerLibLibItem>
+            <linkerLibLibItem>uuid</linkerLibLibItem>
+            <linkerLibLibItem>uxtheme</linkerLibLibItem>
+            <linkerLibLibItem>vdmdbg</linkerLibLibItem>
+            <linkerLibLibItem>version</linkerLibLibItem>
+            <linkerLibLibItem>vfw32</linkerLibLibItem>
+            <linkerLibLibItem>videoprt</linkerLibLibItem>
+            <linkerLibLibItem>win32k</linkerLibLibItem>
+            <linkerLibLibItem>win32spl</linkerLibLibItem>
+            <linkerLibLibItem>wininet</linkerLibLibItem>
+            <linkerLibLibItem>winmm</linkerLibLibItem>
+            <linkerLibLibItem>winspool</linkerLibLibItem>
+            <linkerLibLibItem>winstrm</linkerLibLibItem>
+            <linkerLibLibItem>wldap32</linkerLibLibItem>
+            <linkerLibLibItem>wow32</linkerLibLibItem>
+            <linkerLibLibItem>ws2_32</linkerLibLibItem>
+            <linkerLibLibItem>wsnmp32</linkerLibLibItem>
+            <linkerLibLibItem>wsock32</linkerLibLibItem>
+            <linkerLibLibItem>wst</linkerLibLibItem>
+            <linkerLibLibItem>wtsapi32</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--subsystem,windows -mwindows</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="CustomButton.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CustomButton.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/addpart.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/addpart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/alignio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/analyse.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/analyse.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/askloc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/askloc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/autoset.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/autoset.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bsd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bsd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/btrfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/common.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/cramfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ewf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ewf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/exfat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_1cd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_7z.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_DB.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_a.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abcdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_acb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ado.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ahn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_aif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_all.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_als.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ape.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apple.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_arj.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_atd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_au.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_axx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_binvox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bkf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bld.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bz2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_caf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_catdrawing.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cdt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_chm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_class.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_compress.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cow.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_crw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_csh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ctg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cwk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_d2s.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ddf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_djv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_doc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dpx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_drw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ds2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dsc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dta.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dwg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_e01.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ecryptfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_edb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_elf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_emf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_evt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh10.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_filevault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fits.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fob.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_fp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fp7.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_freeway.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_frm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fwd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gho.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gm6.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hr9.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_http.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_icc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ico.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ifo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_imb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_indd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_info.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_it.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_itu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_jpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdbx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ldf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_logic.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lxo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lzo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_m2ts.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_max.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mcd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mft.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mid.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mk5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mkv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mobi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mov.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mrw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mus.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_myo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mysql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_njx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nk2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nsf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_oci.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ogg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_one.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_orf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_paf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_par2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pfx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_plt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_png.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pnm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ps.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pst.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pyc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qbb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qkt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qxd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_r3d.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ra.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rdc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_reg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_res.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rfp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_riff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rns.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rpm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rw2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rx2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_save.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ses.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_spe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sqm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_swf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tivo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_torrent.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tph.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tpl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ttf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_v2i.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vdi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_veg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vfb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmdk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_win.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wmf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wtv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_x3f.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xcf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xfi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xsv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_zip.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/geometry.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/geometry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/gfs2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/guid_cpy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hidden.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hidden.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/iso.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso9660.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/jfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lang.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log_part.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log_part.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/luks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/md.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/memmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/misc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/misc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/netware.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partauto.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partauto.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptro.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmac.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partnone.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pe.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phmain.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phmain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phnc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phnc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/photorec.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/photorec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pnext.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/rfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/setdate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/setdate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sudo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sudo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/swap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sysv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ufs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/unicode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/vmfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/wbfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/xfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/zfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="IsValidFileName.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IsValidFileName.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MFTRecord.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MFTRecord.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyThreadClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyThreadClass.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyWizzard.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyWizzard.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NTFSDrive.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NTFSDrive.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_EndPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_EndPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture1.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePictureZ_0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StaticLinkStepByStep.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Static_wxWidgetsSetENVandCompileFrom_cmd_console.conf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="desktopIcon64x64.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-harddisk-5.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-optical-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-removable-media-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="flag_rs.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/Germany_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/ILanguage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageEnums.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguagesImpl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/Serbia_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/UnitedKingsom_128.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="media-flash-2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sample.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="todo.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Demo" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <architecture>1</architecture>
+          <incDir>
+            <pElem>../../wxWidgets-3.0.1_static/lib/wx/include/msw-unicode-static-3.0</pElem>
+            <pElem>../../wxWidgets-3.0.1_static/include</pElem>
+          </incDir>
+          <commandLine>-D_LARGEFILE_SOURCE=unknown -DwxDEBUG_LEVEL=0 -D__WXMSW__ -mthreads -D UNICODE -D DEMO_BUILD</commandLine>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/GetMyFilesBackDEMO</output>
+          <linkerAddLib>
+            <pElem>../../wxWidgets-3.0.1_static/lib</pElem>
+          </linkerAddLib>
+          <stripSymbols>true</stripSymbols>
+          <linkerLibItems>
+            <linkerOptionItem>-static</linkerOptionItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu_net-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_baseu_xml-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_adv-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_aui-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_core-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_gl-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_html-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_media-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_propgrid-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_qa-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_ribbon-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_richtext-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_stc-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_webview-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwx_mswu_xrc-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxexpat-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxjpeg-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxpng-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxregexu-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxscintilla-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxtiff-3.0.a</linkerLibFileItem>
+            <linkerLibFileItem>../../wxWidgets-3.0.1_static/lib/libwxzlib-3.0.a</linkerLibFileItem>
+            <linkerLibLibItem>wx_baseu-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_net-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_baseu_xml-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_adv-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_aui-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_core-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_gl-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_html-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_media-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_propgrid-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_qa-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_ribbon-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_richtext-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_stc-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_webview-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wx_mswu_xrc-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxexpat-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxjpeg-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxpng-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxregexu-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxscintilla-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxtiff-3.0</linkerLibLibItem>
+            <linkerLibLibItem>wxzlib-3.0</linkerLibLibItem>
+            <linkerLibLibItem>aclui</linkerLibLibItem>
+            <linkerLibLibItem>advapi32</linkerLibLibItem>
+            <linkerLibLibItem>apcups</linkerLibLibItem>
+            <linkerLibLibItem>avicap32</linkerLibLibItem>
+            <linkerLibLibItem>avifil32</linkerLibLibItem>
+            <linkerLibLibItem>bfd</linkerLibLibItem>
+            <linkerLibLibItem>bthprops</linkerLibLibItem>
+            <linkerLibLibItem>cap</linkerLibLibItem>
+            <linkerLibLibItem>cfgmgr32</linkerLibLibItem>
+            <linkerLibLibItem>charset</linkerLibLibItem>
+            <linkerLibLibItem>charset.dll</linkerLibLibItem>
+            <linkerLibLibItem>comctl32</linkerLibLibItem>
+            <linkerLibLibItem>comdlg32</linkerLibLibItem>
+            <linkerLibLibItem>crypt32</linkerLibLibItem>
+            <linkerLibLibItem>ctl3d32</linkerLibLibItem>
+            <linkerLibLibItem>d3d8</linkerLibLibItem>
+            <linkerLibLibItem>d3d9</linkerLibLibItem>
+            <linkerLibLibItem>d3dim</linkerLibLibItem>
+            <linkerLibLibItem>d3drm</linkerLibLibItem>
+            <linkerLibLibItem>d3dx8d</linkerLibLibItem>
+            <linkerLibLibItem>d3dx9d</linkerLibLibItem>
+            <linkerLibLibItem>d3dxof</linkerLibLibItem>
+            <linkerLibLibItem>ddraw</linkerLibLibItem>
+            <linkerLibLibItem>dhcpcsvc</linkerLibLibItem>
+            <linkerLibLibItem>dinput</linkerLibLibItem>
+            <linkerLibLibItem>dinput8</linkerLibLibItem>
+            <linkerLibLibItem>dl</linkerLibLibItem>
+            <linkerLibLibItem>dlcapi</linkerLibLibItem>
+            <linkerLibLibItem>dmoguids</linkerLibLibItem>
+            <linkerLibLibItem>dnsapi</linkerLibLibItem>
+            <linkerLibLibItem>dplayx</linkerLibLibItem>
+            <linkerLibLibItem>dpnaddr</linkerLibLibItem>
+            <linkerLibLibItem>dpnet</linkerLibLibItem>
+            <linkerLibLibItem>dpnlobby</linkerLibLibItem>
+            <linkerLibLibItem>dpvoice</linkerLibLibItem>
+            <linkerLibLibItem>dsetup</linkerLibLibItem>
+            <linkerLibLibItem>dsound</linkerLibLibItem>
+            <linkerLibLibItem>dxapi</linkerLibLibItem>
+            <linkerLibLibItem>dxerr8</linkerLibLibItem>
+            <linkerLibLibItem>dxerr9</linkerLibLibItem>
+            <linkerLibLibItem>dxguid</linkerLibLibItem>
+            <linkerLibLibItem>faultrep</linkerLibLibItem>
+            <linkerLibLibItem>gdi32</linkerLibLibItem>
+            <linkerLibLibItem>gdiplus</linkerLibLibItem>
+            <linkerLibLibItem>gettextlib.dll</linkerLibLibItem>
+            <linkerLibLibItem>gettextpo</linkerLibLibItem>
+            <linkerLibLibItem>gettextpo.dll</linkerLibLibItem>
+            <linkerLibLibItem>gettextsrc.dll</linkerLibLibItem>
+            <linkerLibLibItem>glaux</linkerLibLibItem>
+            <linkerLibLibItem>glu32</linkerLibLibItem>
+            <linkerLibLibItem>gmon</linkerLibLibItem>
+            <linkerLibLibItem>hal</linkerLibLibItem>
+            <linkerLibLibItem>hid</linkerLibLibItem>
+            <linkerLibLibItem>hidparse</linkerLibLibItem>
+            <linkerLibLibItem>iberty</linkerLibLibItem>
+            <linkerLibLibItem>icmui</linkerLibLibItem>
+            <linkerLibLibItem>iconv</linkerLibLibItem>
+            <linkerLibLibItem>iconv.dll</linkerLibLibItem>
+            <linkerLibLibItem>igmpagnt</linkerLibLibItem>
+            <linkerLibLibItem>imagehlp</linkerLibLibItem>
+            <linkerLibLibItem>imm32</linkerLibLibItem>
+            <linkerLibLibItem>intl</linkerLibLibItem>
+            <linkerLibLibItem>intl.dll</linkerLibLibItem>
+            <linkerLibLibItem>iphlpapi</linkerLibLibItem>
+            <linkerLibLibItem>kernel32</linkerLibLibItem>
+            <linkerLibLibItem>ksproxy</linkerLibLibItem>
+            <linkerLibLibItem>ksuser</linkerLibLibItem>
+            <linkerLibLibItem>largeint</linkerLibLibItem>
+            <linkerLibLibItem>ltdl</linkerLibLibItem>
+            <linkerLibLibItem>ltdl.dll</linkerLibLibItem>
+            <linkerLibLibItem>lz32</linkerLibLibItem>
+            <linkerLibLibItem>m</linkerLibLibItem>
+            <linkerLibLibItem>mapi32</linkerLibLibItem>
+            <linkerLibLibItem>mcd</linkerLibLibItem>
+            <linkerLibLibItem>mfcuia32</linkerLibLibItem>
+            <linkerLibLibItem>mgmtapi</linkerLibLibItem>
+            <linkerLibLibItem>mingw32</linkerLibLibItem>
+            <linkerLibLibItem>mingwex</linkerLibLibItem>
+            <linkerLibLibItem>mingwthrd</linkerLibLibItem>
+            <linkerLibLibItem>mingwthrd_old</linkerLibLibItem>
+            <linkerLibLibItem>moldname</linkerLibLibItem>
+            <linkerLibLibItem>moldname100</linkerLibLibItem>
+            <linkerLibLibItem>moldname100d</linkerLibLibItem>
+            <linkerLibLibItem>moldname70</linkerLibLibItem>
+            <linkerLibLibItem>moldname70d</linkerLibLibItem>
+            <linkerLibLibItem>moldname71</linkerLibLibItem>
+            <linkerLibLibItem>moldname71d</linkerLibLibItem>
+            <linkerLibLibItem>moldname80</linkerLibLibItem>
+            <linkerLibLibItem>moldname80d</linkerLibLibItem>
+            <linkerLibLibItem>moldname90</linkerLibLibItem>
+            <linkerLibLibItem>moldname90d</linkerLibLibItem>
+            <linkerLibLibItem>moldnamed</linkerLibLibItem>
+            <linkerLibLibItem>mpr</linkerLibLibItem>
+            <linkerLibLibItem>mprapi</linkerLibLibItem>
+            <linkerLibLibItem>mqrt</linkerLibLibItem>
+            <linkerLibLibItem>msacm32</linkerLibLibItem>
+            <linkerLibLibItem>mscms</linkerLibLibItem>
+            <linkerLibLibItem>msdmo</linkerLibLibItem>
+            <linkerLibLibItem>msimg32</linkerLibLibItem>
+            <linkerLibLibItem>msvcp60</linkerLibLibItem>
+            <linkerLibLibItem>msvcr100</linkerLibLibItem>
+            <linkerLibLibItem>msvcr100d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr70</linkerLibLibItem>
+            <linkerLibLibItem>msvcr70d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr71</linkerLibLibItem>
+            <linkerLibLibItem>msvcr71d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr80</linkerLibLibItem>
+            <linkerLibLibItem>msvcr80d</linkerLibLibItem>
+            <linkerLibLibItem>msvcr90</linkerLibLibItem>
+            <linkerLibLibItem>msvcr90d</linkerLibLibItem>
+            <linkerLibLibItem>msvcrt</linkerLibLibItem>
+            <linkerLibLibItem>msvcrtd</linkerLibLibItem>
+            <linkerLibLibItem>msvfw32</linkerLibLibItem>
+            <linkerLibLibItem>mswsock</linkerLibLibItem>
+            <linkerLibLibItem>nddeapi</linkerLibLibItem>
+            <linkerLibLibItem>ndis</linkerLibLibItem>
+            <linkerLibLibItem>netapi32</linkerLibLibItem>
+            <linkerLibLibItem>newdev</linkerLibLibItem>
+            <linkerLibLibItem>ntdll</linkerLibLibItem>
+            <linkerLibLibItem>ntoskrnl</linkerLibLibItem>
+            <linkerLibLibItem>odbc32</linkerLibLibItem>
+            <linkerLibLibItem>odbccp32</linkerLibLibItem>
+            <linkerLibLibItem>ole32</linkerLibLibItem>
+            <linkerLibLibItem>oleacc</linkerLibLibItem>
+            <linkerLibLibItem>oleaut32</linkerLibLibItem>
+            <linkerLibLibItem>olecli32</linkerLibLibItem>
+            <linkerLibLibItem>oledlg</linkerLibLibItem>
+            <linkerLibLibItem>olepro32</linkerLibLibItem>
+            <linkerLibLibItem>olesvr32</linkerLibLibItem>
+            <linkerLibLibItem>opcodes</linkerLibLibItem>
+            <linkerLibLibItem>opengl32</linkerLibLibItem>
+            <linkerLibLibItem>penwin32</linkerLibLibItem>
+            <linkerLibLibItem>pkpd32</linkerLibLibItem>
+            <linkerLibLibItem>powrprof</linkerLibLibItem>
+            <linkerLibLibItem>psapi</linkerLibLibItem>
+            <linkerLibLibItem>quartz</linkerLibLibItem>
+            <linkerLibLibItem>rapi</linkerLibLibItem>
+            <linkerLibLibItem>rasapi32</linkerLibLibItem>
+            <linkerLibLibItem>rasdlg</linkerLibLibItem>
+            <linkerLibLibItem>rpcdce4</linkerLibLibItem>
+            <linkerLibLibItem>rpcns4</linkerLibLibItem>
+            <linkerLibLibItem>rpcrt4</linkerLibLibItem>
+            <linkerLibLibItem>rtm</linkerLibLibItem>
+            <linkerLibLibItem>rtutils</linkerLibLibItem>
+            <linkerLibLibItem>scrnsave</linkerLibLibItem>
+            <linkerLibLibItem>scrnsavw</linkerLibLibItem>
+            <linkerLibLibItem>scsiport</linkerLibLibItem>
+            <linkerLibLibItem>secur32</linkerLibLibItem>
+            <linkerLibLibItem>setupapi</linkerLibLibItem>
+            <linkerLibLibItem>shell32</linkerLibLibItem>
+            <linkerLibLibItem>shfolder</linkerLibLibItem>
+            <linkerLibLibItem>shlwapi</linkerLibLibItem>
+            <linkerLibLibItem>snmpapi</linkerLibLibItem>
+            <linkerLibLibItem>strmiids</linkerLibLibItem>
+            <linkerLibLibItem>svrapi</linkerLibLibItem>
+            <linkerLibLibItem>tapi32</linkerLibLibItem>
+            <linkerLibLibItem>tdi</linkerLibLibItem>
+            <linkerLibLibItem>thunk32</linkerLibLibItem>
+            <linkerLibLibItem>url</linkerLibLibItem>
+            <linkerLibLibItem>usbcamd</linkerLibLibItem>
+            <linkerLibLibItem>usbcamd2</linkerLibLibItem>
+            <linkerLibLibItem>user32</linkerLibLibItem>
+            <linkerLibLibItem>userenv</linkerLibLibItem>
+            <linkerLibLibItem>usp10</linkerLibLibItem>
+            <linkerLibLibItem>uuid</linkerLibLibItem>
+            <linkerLibLibItem>uxtheme</linkerLibLibItem>
+            <linkerLibLibItem>vdmdbg</linkerLibLibItem>
+            <linkerLibLibItem>version</linkerLibLibItem>
+            <linkerLibLibItem>vfw32</linkerLibLibItem>
+            <linkerLibLibItem>videoprt</linkerLibLibItem>
+            <linkerLibLibItem>win32k</linkerLibLibItem>
+            <linkerLibLibItem>win32spl</linkerLibLibItem>
+            <linkerLibLibItem>wininet</linkerLibLibItem>
+            <linkerLibLibItem>winmm</linkerLibLibItem>
+            <linkerLibLibItem>winspool</linkerLibLibItem>
+            <linkerLibLibItem>winstrm</linkerLibLibItem>
+            <linkerLibLibItem>wldap32</linkerLibLibItem>
+            <linkerLibLibItem>wow32</linkerLibLibItem>
+            <linkerLibLibItem>ws2_32</linkerLibLibItem>
+            <linkerLibLibItem>wsnmp32</linkerLibLibItem>
+            <linkerLibLibItem>wsock32</linkerLibLibItem>
+            <linkerLibLibItem>wst</linkerLibLibItem>
+            <linkerLibLibItem>wtsapi32</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-Wl,--subsystem,windows -mwindows</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="CustomButton.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CustomButton.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/addpart.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/addpart.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/alignio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/analyse.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/analyse.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/askloc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/askloc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/autoset.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/autoset.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/bsd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/bsd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/btrfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtype.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/chgtypen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/common.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/config.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/cramfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/crc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dfxml.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ewf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ewf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/exfat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/exfatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2grp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ext2p.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_cluster.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fat_unformat.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fatp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fatx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_1cd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_7z.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_DB.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_a.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abcdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_abr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_acb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ado.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ahn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_aif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_all.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_als.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_amr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ape.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_apple.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_arj.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_asm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_atd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_au.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_axx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_binvox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bkf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bld.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_bz2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cab.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_caf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_catdrawing.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cdt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_chm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_class.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_compress.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cow.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_crw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_csh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ctg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_cwk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_d2s.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dbn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ddf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dim.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_djv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dmp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_doc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dpx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_drw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ds2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dsc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dta.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dwg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_dxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_e01.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ecryptfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_edb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_elf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_emf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_evt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_exs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ext2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fbk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fcs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh10.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fh5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_filevault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fits.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_flv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fob.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_found.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_fp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fp7.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_freeway.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_frm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_fwd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gam.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gho.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gif.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gm6.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gp5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_gz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_hr9.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_http.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_icc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ico.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ifo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_imb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_indd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_info.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_it.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_itu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_jpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_kdbx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ldf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_logic.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lxo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_lzo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_m2ts.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mat.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_max.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mcd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfa.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mft.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mid.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mk5.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mkv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mobi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mov.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mpg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mrw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mus.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mxf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_myo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_mysql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_njx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nk2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_nsf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_oci.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ogg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_one.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_orf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_paf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_par2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pct.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pcx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pds.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pfx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_plt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_png.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pnm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_prt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ps.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_psp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pst.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ptf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pyc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_pzh.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qbb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qdf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qkt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_qxd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_r3d.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ra.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_raw.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rdc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_reg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_res.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rfp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_riff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rns.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rpm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rw2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_rx2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_save.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ses.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sig.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_skp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sp3.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_spe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_spss.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sql.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_sqm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_stu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_swf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tar.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tiff.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tivo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_torrent.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tph.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_tpl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_ttf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_txt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/file_tz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_v2i.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vault.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vdi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_veg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vfb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmdk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_vmg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wdp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_win.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wmf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wnk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpb.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wpd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wtv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_wv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_x3f.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xcf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xfi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xsv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_xz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/file_zip.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/filegen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/fnctdsk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/geometry.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/geometry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/gfs2.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/guid_cpy.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdaccess.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdcache.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hdwin32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hidden.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hidden.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hiddenn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/hpa_dco.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/hpfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/intrfn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/iso.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/iso9660.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/jfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lang.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/list_sort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/log_part.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/log_part.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/luks.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/md.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/memmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/misc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/misc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/netware.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/nodisk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_dir.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_inc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfs_utl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ntfsp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partauto.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partauto.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgpt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partgptn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partgptro.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parthumax.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/parti386n.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmac.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmac.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partmacn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partnone.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsun.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partsunn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxbox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/partxboxn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pblocksize.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pdisksel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pe.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/pfree_whole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbf.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phbs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phbs.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phcfg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phmain.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phmain.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phnc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phnc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/photorec.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/photorec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/phrecn.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/pnext.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/ppartsel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/rfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/savehdr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sessionp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/setdate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/setdate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sudo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sudo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/sun.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/swap.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/sysv.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/ufs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/unicode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/vmfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/wbfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/win32.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FAT/xfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FAT/zfs.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="IsValidFileName.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="IsValidFileName.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MFTRecord.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MFTRecord.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyThreadClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyThreadClass.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MyWizzard.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MyWizzard.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NTFSDrive.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NTFSDrive.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_EndPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_EndPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_GreetingPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectDestinationDirPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectFilesPage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Page_SelectSourceDrivePage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture1.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePicture3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SidePictureZ_0.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="StaticLinkStepByStep.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Static_wxWidgetsSetENVandCompileFrom_cmd_console.conf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="desktopIcon64x64.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-harddisk-5.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-optical-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drive-removable-media-3.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="flag_rs.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/Germany_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/ILanguage.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageDialog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageEnums.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/LanguageFactory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/LanguagesImpl.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="languages/Serbia_128_85.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="languages/UnitedKingsom_128.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="media-flash-2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sample.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="todo.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wiztest2.xpm" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
