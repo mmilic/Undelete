@@ -11,11 +11,16 @@ a recommended long-term layout.
 ## Build
 
 ```powershell
-powershell -File build.ps1
+cd Undelete
+powershell -ExecutionPolicy Bypass -File build.ps1
 ```
 
-Produces `src\UndeleteWizzard\GetMyFilesBack.exe`. No MinGW/wxWidgets installation needed — the
-script uses the compiler and static libraries vendored in `tools/`.
+`-ExecutionPolicy Bypass` is needed because Windows' default policy blocks running unsigned local
+`.ps1` scripts; this only applies to this one invocation and doesn't change any system setting.
+
+The build is out-of-source: it produces `out\GetMyFilesBack.exe` (plus intermediate `.o`/`.res`
+files in `out\`), leaving `src\` untouched. No MinGW/wxWidgets installation needed — the script
+uses the compiler and static libraries vendored in `tools/`.
 
 ### Running it
 
