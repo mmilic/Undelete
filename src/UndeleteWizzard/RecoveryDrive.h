@@ -12,6 +12,7 @@
 #include <windows.h>
 #include <wx/string.h>
 #include <wx/hashmap.h>
+#include <wx/thread.h>
 #include <string>
 #include <vector>
 
@@ -77,6 +78,23 @@ WX_DECLARE_HASH_MAP(int, t_FileInfo*, wxIntegerHash, wxIntegerEqual, FileInfoHas
 // delete the files of a previous scan and empty the map (clear() alone leaks every t_FileInfo)
 void DeleteFileInfoHash(FileInfoHash *finfohash);
 
+// the files a running scan has found and the window hasn't taken yet - the scan thread adds, the window takes
+class CFoundFiles {
+public:
+    void Add(t_FileInfo *pFile) {
+        wxCriticalSectionLocker lock(m_cs);
+        m_vFiles.push_back(pFile);
+    }
+    void Take(std::vector<t_FileInfo *> &vFiles) {
+        wxCriticalSectionLocker lock(m_cs);
+        vFiles.swap(m_vFiles);
+        m_vFiles.clear();
+    }
+private:
+    wxCriticalSection m_cs;
+    std::vector<t_FileInfo *> m_vFiles;
+};
+
 class CRecoveryDrive {
 public:
     CRecoveryDrive();
@@ -90,9 +108,17 @@ public:
     // ERROR_INVALID_DRIVE: the volume doesn't hold this engine's file system.
     virtual int ReadVolume(wxString wxsSelectedDrive) = 0;
 
-    // put every deleted file into the map. Returns ERROR_CANCELLED if the cancel flag was set -
-    // the map then holds what was found so far.
-    virtual int GetFileList(FileInfoHash *finfohash) = 0;
+    // A scan in two parts, so the window can show files while they are found:
+    // ScanFiles (in the scan thread) puts every deleted file into the map - and into the SetFoundFiles queue -
+    // and changes no file once it is there. Returns ERROR_CANCELLED if the cancel flag was set: the map then
+    // holds what was found so far.
+    // FinishScan (once the scan has stopped, in the thread that owns the files) completes them: folder paths,
+    // Recycle Bin names. It deletes the Recycle Bin's $I files from the map - nothing may point to them.
+    virtual int ScanFiles(FileInfoHash *finfohash) = 0;
+    virtual void FinishScan(FileInfoHash *finfohash);
+    int GetFileList(FileInfoHash *finfohash); // both, one after the other
+
+    void SetFoundFiles(CFoundFiles *pFound) { m_pFound = pFound; }
 
     // the whole file in a buffer allocated with new[] - the caller deletes it
     virtual int Read_File(DWORD dwFileId, BYTE *&puchFileData, DWORD &dwFileDataLen) = 0;
@@ -120,8 +146,15 @@ protected:
     volatile bool *m_pbCancel;
     volatile LONG *m_plProgressKB;
     volatile LONG *m_plScanPercent;
+    CFoundFiles *m_pFound;
 
     bool IsCancelled() const { return m_pbCancel && *m_pbCancel; }
+    // a file the scan found: into the map, and to the window
+    void AddFoundFile(FileInfoHash *finfohash, t_FileInfo *pFile) {
+        (*finfohash)[pFile->iRecordId] = pFile;
+        if (m_pFound)
+            m_pFound->Add(pFile);
+    }
     void ReportScanProgress(int iPercent) {
         if (m_plScanPercent)
             *m_plScanPercent = iPercent;

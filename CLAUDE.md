@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 **GetMyFilesBack** (internal name "UndeleteWizzard") — a Windows GUI file-undelete/recovery utility written in
-C++ with wxWidgets. It scans an NTFS or FAT12/16/32 drive for deleted-but-recoverable files, shows them in a wizard UI,
+C++ with wxWidgets. It scans an NTFS or FAT12/16/32 drive for deleted-but-recoverable files, shows them in its window as they are found,
 and copies recovered files to a destination chosen by the user. It was built/sold as a small commercial
 product; its expiry check in `main.cpp` has since been removed (see below).
 
@@ -44,9 +44,10 @@ images and check the recovered files byte-for-byte, plus what the engine reports
   FAT16 and FAT32 images. Run it after touching `FATDrive.*` or `RecoveryDrive.*`.
 
 Both use one harness (`tests\ntfs-image\harness.cpp`), which picks the engine by the image's boot sector.
-The GUI and Windows-specific behaviour are still tested by hand: run the wizard against a real/virtual drive
+The GUI and Windows-specific behaviour are still tested by hand: run the app against a real/virtual drive
 and check the recovered files. Without admin rights the GUI can still be tried on a disk image:
-`set __COMPAT_LAYER=RunAsInvoker` and `GetMyFilesBack.exe out\fat-test\fat32.img` (the image shows up as a drive).
+`set __COMPAT_LAYER=RunAsInvoker` and `GetMyFilesBack.exe out\fat-test\fat32.img` (the image shows up in the
+drive strip).
 
 ## Architecture
 
@@ -54,25 +55,30 @@ and check the recovered files. Without admin rights the GUI can still be tried o
   opens the window. Command-line arguments are disk image files, offered beside the drives. The original
   commercial build had a hardcoded expiry check (a popup after 2016-01-01, `exit(0)` after 2016-10-01) — removed,
   the app has no date-based behaviour.
-- `WizardFrame.{h,cpp}` — `CWizardFrame`, the window: step list on the left, the current step's page, Back /
-  Next / Cancel at the bottom. It holds what the steps share (source drive, destination, the scan's
-  `FileInfoHash`, the drive's engine) and runs the flow: `GoToStep`, `UpdateFooter` (pages call it when their
-  state changes), the scan and recovery threads, polled by a timer. Shared state belongs here, not in pages.
-- `WizardPages.cpp` — the four pages: `CSourcePage` (drive cards), `CDestinationPage` (folder, suggestions, the
-  same-drive warning), `CFilesPage` (scan/recovery progress, then the list, filters and details pane),
-  `CDonePage`. The engine is chosen in the scan thread by the boot sector (`OpenRecoveryDrive`: NTFS, else FAT).
+- `MainFrame.{h,cpp}` — `CMainFrame`, the one window: drive strip and search at the top; filters (type with
+  counts, recoverability, contents), the file list and the details pane in the middle; scan progress, Stop scan
+  and Recover at the bottom. Picking a drive starts its scan, and the deleted files **stream into the list** as
+  they are found (a timer takes them from the scan thread) - they can be ticked right away. It holds the
+  shared state: the source, the scan's `FileInfoHash`, the drive's engine. Recover stops a running scan first.
+- `RecoverDialog.{h,cpp}` — `CRecoverDialog`: the destination (suggestions, same-drive warning), then the copy
+  (it runs the copy thread), then the result. The log file is opened in the destination when copying starts.
+- The engine is chosen in the scan thread by the boot sector (`OpenRecoveryDrive`: NTFS, else FAT).
 - `Theme.{h,cpp}`, `Widgets.{h,cpp}` — the look: colours, fonts, the design's stroke icons as SVG (nanosvg,
   sharp at any DPI - the manifest declares PerMonitorV2), and hand-drawn controls Windows doesn't have
-  (`CFlatButton`, `CSegmented`, `CBanner`, `CStepList`, `CDriveCard`, `CThinBar`). Sizes in DIPs (`FromDIP`).
-  The design these follow is the "GetMyFilesBack redesign" canvas (claude.ai artifact) - step 1, the wizard.
+  (`CFlatButton`, `CBanner`, `CDriveCard`, `CThinBar`). Sizes in DIPs (`FromDIP`). The design they follow is
+  the "GetMyFilesBack redesign" canvas (claude.ai artifact), step 2 - the main window.
 - `FileDetailsPanel.{h,cpp}` — the preview and details of the focused file; showing a file checks its contents.
 - `Volumes.{h,cpp}` — `IsOnSameVolume` (by volume GUID, mount points and SUBST included; never for a disk image)
   and the destination suggestions. `AppLog.{h,cpp}` — the UTF-8 log file in the destination folder; lines are
   buffered until the destination is known, nothing is ever shown as a message box by the log.
-- `RecoveryDrive.{h,cpp}` — `CRecoveryDrive`, the engine interface the window, threads and pages use, and what
-  the engines share: `ST_FILEINFO`/`FileInfoHash`, the volume (or disk image) handle, scan progress, the
-  content check and the Recycle Bin names (`$R`/`$I`, read through the engine's `Read_File`). `iRecordId` is
-  the engine's own id of a file: the MFT record on NTFS, an index into the scan's file list on FAT.
+- `RecoveryDrive.{h,cpp}` — `CRecoveryDrive`, the engine interface the window and threads use, and what the
+  engines share: `ST_FILEINFO`/`FileInfoHash`, the volume (or disk image) handle, scan progress, the content
+  check and the Recycle Bin names (`$R`/`$I`, read through the engine's `Read_File`). `iRecordId` is the
+  engine's own id of a file: the MFT record on NTFS, an index into the scan's file list on FAT.
+  A scan is two calls: `ScanFiles` (scan thread) adds files to the map and to the `CFoundFiles` queue and never
+  changes a file once it is there; `FinishScan` (GUI thread, after the thread is done) completes them - NTFS
+  folder paths, Recycle Bin names - and deletes the `$I` files, so the list must let go of them first
+  (`CDeletedFilesList::SetFiles` after it). `GetFileList` does both, for the test harness.
 - `NTFSDrive.{h,cpp}` / `MFTRecord.{h,cpp}` — the NTFS recovery engine: parses the MFT (`CNTFSDrive`/
   `CMFTRecord`), builds a `FileInfoHash` of recoverable file records, copies a given MFT record's data to disk.
 - `FATDrive.{h,cpp}` — `CFATDrive`, the FAT12/16/32 engine. Deleted entries have `0xE5` as their first byte, and
@@ -83,9 +89,10 @@ and check the recovered files. Without admin rights the GUI can still be tried o
   contiguous. The FAT is read once per scan; only the in-use bitmap is kept for recovery, so recovery uses the
   same guess the recoverability was judged by. Limits are in README.md's "FAT support".
 - `MyThreadClass.{h,cpp}` — `CScanThread`, `CCopyThread`: scanning and copying so the window stays responsive.
-  They never touch a control: the window polls their progress (volatile counters) with a timer, and each posts
-  one `wxEVT_THREAD` (`THREAD_SCAN_DONE` / `THREAD_COPY_DONE`) when done. The scan thread only fills the
-  `FileInfoHash`; the copy thread gets a `std::vector<t_FileInfo*>` collected by the window. Threads are joinable:
+  They never touch a control: the window polls their progress (volatile counters) and the scan's new files
+  (`TakeNewFiles`) with a timer, and each posts one `wxEVT_THREAD` (`THREAD_SCAN_DONE` / `THREAD_COPY_DONE`)
+  when done. The scan thread only runs `ScanFiles`; the copy thread gets a `std::vector<t_FileInfo*>` collected
+  by the window. Threads are joinable:
   the window `Wait()`s for them (also after Cancel, which they notice via a flag the engine checks) and reads the
   outcome from `m_iResult` - no message boxes from threads or the engine. While a thread runs, nothing else reads
   the drive (no preview, no content check) - the engines aren't thread-safe. Free scan results with
@@ -93,8 +100,9 @@ and check the recovered files. Without admin rights the GUI can still be tried o
 - `DeletedFilesList.{h,cpp}` — `CDeletedFilesList`, the virtual (`wxLC_VIRTUAL`) list of deleted files. It
   holds only pointers and draws visible rows on demand, because a big drive yields hundreds of thousands of
   files. The files to recover are the *ticked* ones (first column; only ticked files that are shown count), not
-  the highlighted rows. Search, sorting and the "Show" / "Type" filters work on its pointer vector; the columns
-  fill the list's width. File types come from one extension table, `FileTypeOf()` — icons, filter, preview.
+  the highlighted rows. Search, sorting and the filters work on its pointer vector; the columns fill the list's
+  width. During a scan `AddFiles` appends in the order found; `SetFiles` at the end sorts and keeps the ticks.
+  File types come from one extension table, `FileTypeOf()` (cached per file) — icons, filter, counts, preview.
 - Recoverability (NTFS): `CNTFSDrive` loads `$Bitmap` at the start of a scan and marks each deleted file Good /
   Partly overwritten / Overwritten by whether its clusters are in use now. "Good" can't tell whether a since-deleted file
   used the clusters in between - that is what the content check is for.

@@ -111,6 +111,7 @@ public:
     };
 protected:
     void ResolveFolders(FileInfoHash *finfohash, const std::vector<ST_FOLDER> &vFolders);
+    std::vector<ST_FOLDER> m_vFolders; // what ScanFiles saw, for FinishScan
 
     BYTE *m_puchMFTRecord; // 1K, or the cluster size, whichever is larger
     LONGLONG m_llMFTRecordSz; // MFT record size
@@ -128,7 +129,8 @@ public:
     void SetStartSector(DWORD dwStartSector, DWORD dwBytesPerSector);
     bool IsInitialised();
     int ReadVolume(wxString wxsSelectedDrive) override;
-    int GetFileList(FileInfoHash *finfohash) override;
+    int ScanFiles(FileInfoHash *finfohash) override;
+    void FinishScan(FileInfoHash *finfohash) override;
     int RetreiveAndWriteFileToDestination(int iFileRecordId, const wchar_t *wszDestinationFileName) override;
 
     int Initialize();

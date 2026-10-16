@@ -40,12 +40,11 @@ enum {
 int FileTypeOf(const wchar_t *szFilename);
 wxString FileTypeFilterLabel(int iType); // "All types", "Images", ... - translated
 
-// the "Show" filter on the Recoverable column
+// the "Recoverable" filter
 enum {
     RECOVERABILITY_FILTER_ALL = 0,
     RECOVERABILITY_FILTER_GOOD, // only files whose clusters are all free
     RECOVERABILITY_FILTER_NOT_OVERWRITTEN, // everything except overwritten files
-    RECOVERABILITY_FILTER_CONTENT_OK, // checked files whose contents look valid
     RECOVERABILITY_FILTER_COUNT
 };
 
@@ -78,7 +77,10 @@ class CDeletedFilesList : public wxListCtrl {
 public:
     CDeletedFilesList(wxWindow *parent, wxWindowID id);
 
-    // show the files of a finished scan (main thread only)
+    // files a running scan has just found - shown at the end of the list, in the order found
+    void AddFiles(const std::vector<t_FileInfo *> &vFiles);
+    // the files of a finished scan, sorted. Ticks stay on the files that are still there (FinishScan removes
+    // the Recycle Bin's $I files - their pointers are only compared, never followed).
     void SetFiles(FileInfoHash *finfohash);
     void Clear();
 
@@ -86,7 +88,12 @@ public:
     void SetNameFilter(const wxString &sFilter);
     void SetRecoverabilityFilter(int iFilter); // RECOVERABILITY_FILTER_*
     void SetTypeFilter(int iType); // FILE_TYPE_*, FILE_TYPE_ANY = all
+    void SetValidOnly(bool bValidOnly); // only files whose contents were checked and look valid
+    void ClearFilters();
     void Refilter() { Rebuild(); } // after the files changed (e.g. their contents were checked)
+
+    // how many files of each type pass the other filters - aCounts[FILE_TYPE_ANY] is all of them
+    void CountByType(int aCounts[FILE_TYPE_COUNT]) const;
 
     // sort by a column - clicking the same column again reverses the order
     void SortByColumn(int iColumn);
@@ -113,6 +120,7 @@ protected:
 
 private:
     std::vector<t_FileInfo *> m_vAll; // every file of the scan
+    std::vector<unsigned char> m_vAllTypes; // FileTypeOf() of each of m_vAll - the filters ask it a lot
     std::vector<t_FileInfo *> m_vVisible; // what the list shows, filtered and sorted
     std::unordered_set<const t_FileInfo *> m_setChecked;
     int m_iCheckedShown;
@@ -120,6 +128,7 @@ private:
     wxString m_sFilterUpper;
     int m_iRecoverabilityFilter;
     int m_iTypeFilter;
+    bool m_bValidOnly;
     int m_iSortColumn;
     bool m_bSortAscending;
 
@@ -130,7 +139,8 @@ private:
     mutable wxItemAttr m_aAttr[CELL_KINDS][2];
 
     void Rebuild(); // re-apply filters and sort, keep the focus
-    bool PassesFilters(const t_FileInfo *pFile) const;
+    void FilterChanged();
+    bool PassesFilters(const t_FileInfo *pFile, int iType, bool bTypeFilter = true) const;
     void CountChecked();
     void SetChecked(t_FileInfo *pFile, bool bCheck);
     void NotifyChecked();

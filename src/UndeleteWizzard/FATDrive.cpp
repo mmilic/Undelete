@@ -786,11 +786,11 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
         ST_FATFILE file = {dwCluster, e.dwFileSize};
         pFileInfo->iRecordId = (int) m_vFiles.size();
         m_vFiles.push_back(file);
-        (*finfohash)[pFileInfo->iRecordId] = pFileInfo;
+        AddFoundFile(finfohash, pFileInfo);
     }
 }
 
-int CFATDrive::GetFileList(FileInfoHash *finfohash) {
+int CFATDrive::ScanFiles(FileInfoHash *finfohash) {
     if (!m_bInitialized)
         return ERROR_INVALID_ACCESS;
 
@@ -825,6 +825,5 @@ int CFATDrive::GetFileList(FileInfoHash *finfohash) {
 
     wxLogMessage("No more files to add to the list (%u folders scanned).", uFolders);
     std::vector<DWORD>().swap(m_vFAT); // the chains are only needed to walk the folders - which clusters are in use stays
-    ResolveRecycleBinNames(finfohash);
-    return ERROR_SUCCESS;
+    return ERROR_SUCCESS; // the Recycle Bin names come in FinishScan
 }

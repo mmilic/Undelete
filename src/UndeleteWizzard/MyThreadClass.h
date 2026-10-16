@@ -32,8 +32,13 @@ public:
     void Cancel() { m_bCancel = true; }
     int GetPercent() const { return (int) m_lPercent; } // -1 while the engine can't tell
 
+    // the files found since the last call - the window shows them while the scan goes on. They are complete
+    // except for what the engine's FinishScan adds (folder paths on NTFS, Recycle Bin names).
+    void TakeNewFiles(std::vector<t_FileInfo *> &vFiles) { m_found.Take(vFiles); }
+
     // after Wait(): ERROR_SUCCESS, ERROR_CANCELLED (the hash holds what was found until then) or an error,
-    // and the drive's engine - the caller takes it over (NULL if the drive couldn't be opened)
+    // and the drive's engine - the caller takes it over (NULL if the drive couldn't be opened) and calls its
+    // FinishScan
     int m_iResult;
     CRecoveryDrive *m_pDrive;
 
@@ -46,6 +51,7 @@ private:
     FileInfoHash *m_pHash;
     volatile bool m_bCancel;
     volatile LONG m_lPercent;
+    CFoundFiles m_found;
 };
 
 class CCopyThread : public wxThread {

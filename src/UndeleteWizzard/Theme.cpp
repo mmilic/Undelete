@@ -42,6 +42,10 @@ namespace Theme {
         return font;
     }
 
+    wxFont Pixels(double dPixels) {
+        return BaseFont(dPixels);
+    }
+
     wxFont Body() {
         return BaseFont(14);
     }
@@ -52,10 +56,6 @@ namespace Theme {
 
     wxFont Tiny() {
         return BaseFont(12);
-    }
-
-    wxFont Heading() {
-        return Bold(BaseFont(22));
     }
 
     wxFont Title() {

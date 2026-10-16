@@ -42,6 +42,17 @@ CRecoveryDrive::CRecoveryDrive() {
     m_pbCancel = 0;
     m_plProgressKB = 0;
     m_plScanPercent = 0;
+    m_pFound = 0;
+}
+
+void CRecoveryDrive::FinishScan(FileInfoHash *finfohash) {
+    ResolveRecycleBinNames(finfohash);
+}
+
+int CRecoveryDrive::GetFileList(FileInfoHash *finfohash) {
+    int nRet = ScanFiles(finfohash);
+    FinishScan(finfohash);
+    return nRet;
 }
 
 CRecoveryDrive::~CRecoveryDrive() {

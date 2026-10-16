@@ -176,106 +176,6 @@ void CFlatButton::Paint(wxDC &dc) {
     dc.DrawText(sLabel, rect.x + (rect.width - extent.x) / 2, rect.y + (rect.height - extent.y) / 2);
 }
 
-/////////////////////////////////// CSegmented ///////////////////////////////////
-
-CSegmented::CSegmented(wxWindow *parent, wxWindowID id, const std::vector<wxString> &vOptions)
-: CPaintedControl(parent, id) {
-    m_vOptions = vOptions;
-    m_iSelection = 0;
-    m_iClicked = -1;
-    SetFont(Theme::Small());
-    SetCursor(wxCursor(wxCURSOR_HAND));
-    Bind(wxEVT_LEFT_DOWN, &CSegmented::OnLeftDown, this);
-    Bind(wxEVT_KEY_DOWN, &CSegmented::OnKeyDown, this);
-}
-
-void CSegmented::SetSelection(int iSelection) {
-    if (iSelection >= 0 && iSelection < (int) m_vOptions.size() && iSelection != m_iSelection) {
-        m_iSelection = iSelection;
-        Refresh();
-    }
-}
-
-std::vector<wxRect> CSegmented::SegmentRects() const {
-    std::vector<wxRect> vRects;
-    wxClientDC dc(const_cast<CSegmented *> (this));
-    dc.SetFont(Theme::Bold(GetFont())); // as wide as the selected (bold) label needs
-    int x = 0, iHeight = GetClientSize().y;
-    for (size_t i = 0; i < m_vOptions.size(); i++) {
-        int iWidth = dc.GetTextExtent(m_vOptions[i]).x + FromDIP(28);
-        vRects.push_back(wxRect(x, 0, iWidth, iHeight));
-        x += iWidth;
-    }
-    return vRects;
-}
-
-wxSize CSegmented::DoGetBestClientSize() const {
-    std::vector<wxRect> vRects = SegmentRects();
-    return wxSize(vRects.empty() ? 0 : vRects.back().GetRight() + 1, FromDIP(40));
-}
-
-void CSegmented::OnLeftDown(wxMouseEvent &event) {
-    m_iClicked = -1;
-    std::vector<wxRect> vRects = SegmentRects();
-    for (size_t i = 0; i < vRects.size(); i++)
-        if (vRects[i].Contains(event.GetPosition()))
-            m_iClicked = (int) i;
-    event.Skip(); // CPaintedControl takes it from here - OnClick on release
-}
-
-void CSegmented::OnClick() {
-    if (m_iClicked < 0 || m_iClicked == m_iSelection)
-        return;
-    m_iSelection = m_iClicked;
-    Refresh();
-    wxCommandEvent event(wxEVT_CHOICE, GetId());
-    event.SetEventObject(this);
-    event.SetInt(m_iSelection);
-    ProcessWindowEvent(event);
-}
-
-void CSegmented::OnKeyDown(wxKeyEvent &event) {
-    int iKey = event.GetKeyCode();
-    if (iKey == WXK_LEFT || iKey == WXK_RIGHT) {
-        m_iClicked = m_iSelection + (iKey == WXK_LEFT ? -1 : 1);
-        if (m_iClicked >= 0 && m_iClicked < (int) m_vOptions.size())
-            OnClick();
-        return;
-    }
-    if (iKey == WXK_SPACE || iKey == WXK_RETURN)
-        return; // the selection is already where the arrows put it
-    event.Skip();
-}
-
-void CSegmented::Paint(wxDC &dc) {
-    wxRect rect = GetClientRect();
-    double dRadius = FromDIP(6);
-    Theme::DrawRoundedBox(dc, rect, dRadius, Theme::PanelBg, wxNullColour);
-
-    std::vector<wxRect> vRects = SegmentRects();
-    for (size_t i = 0; i < vRects.size(); i++) {
-        bool bSelected = (int) i == m_iSelection;
-        wxRect seg = vRects[i];
-        if (bSelected) {
-            // only the outer corners are round - clip a rounded box to this segment
-            dc.SetClippingRegion(seg);
-            Theme::DrawRoundedBox(dc, rect, dRadius, Theme::Accent, wxNullColour);
-            dc.DestroyClippingRegion();
-        } else if (m_bHover && seg.Contains(ScreenToClient(wxGetMousePosition()))) {
-            dc.SetClippingRegion(seg.Deflate(1));
-            Theme::DrawRoundedBox(dc, rect.Deflate(1), dRadius, wxColour(0xF3, 0xF3, 0xF3), wxNullColour);
-            dc.DestroyClippingRegion();
-        }
-        dc.SetFont(bSelected ? Theme::Bold(GetFont()) : GetFont());
-        dc.SetTextForeground(bSelected ? *wxWHITE : Theme::Text);
-        wxSize extent = dc.GetTextExtent(m_vOptions[i]);
-        dc.DrawText(m_vOptions[i], seg.x + (seg.width - extent.x) / 2, seg.y + (seg.height - extent.y) / 2);
-    }
-    Theme::DrawRoundedBox(dc, rect, dRadius, wxNullColour, Theme::ControlBorder);
-    if (HasFocus() && m_iSelection >= 0 && m_iSelection < (int) vRects.size())
-        DrawFocusRing(dc, vRects[m_iSelection].Deflate(FromDIP(3)), FromDIP(3));
-}
-
 /////////////////////////////////// CBanner ///////////////////////////////////
 
 CBanner::CBanner(wxWindow *parent, int iKind)
@@ -345,73 +245,6 @@ void CBanner::OnPaint(wxPaintEvent &WXUNUSED(event)) {
     wxGCDC dc(dcPaint);
     Theme::DrawRoundedBox(dc, GetClientRect(), FromDIP(6), GetBackgroundColour(),
             m_iKind == BANNER_WARNING ? Theme::WarningBorder : wxNullColour);
-}
-
-/////////////////////////////////// CStepList ///////////////////////////////////
-
-CStepList::CStepList(wxWindow *parent, const std::vector<wxString> &vSteps)
-: wxWindow(parent, wxID_ANY) {
-    m_vSteps = vSteps;
-    m_iCurrent = 0;
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
-    SetFont(Theme::Body());
-    Bind(wxEVT_PAINT, &CStepList::OnPaint, this);
-}
-
-void CStepList::SetCurrent(int iStep) {
-    m_iCurrent = iStep;
-    Refresh();
-}
-
-wxSize CStepList::DoGetBestClientSize() const {
-    return wxSize(FromDIP(200), FromDIP(24 + 48 * (int) m_vSteps.size()));
-}
-
-void CStepList::OnPaint(wxPaintEvent &WXUNUSED(event)) {
-    wxAutoBufferedPaintDC dcPaint(this);
-    dcPaint.SetBackground(wxBrush(GetParent()->GetBackgroundColour()));
-    dcPaint.Clear();
-    wxGCDC dc(dcPaint);
-
-    int x = FromDIP(12), y = FromDIP(24), iRowHeight = FromDIP(48), iWidth = GetClientSize().x - FromDIP(24);
-    int iCircle = FromDIP(28);
-    for (size_t i = 0; i < m_vSteps.size(); i++, y += iRowHeight + FromDIP(4)) {
-        bool bDone = (int) i < m_iCurrent, bCurrent = (int) i == m_iCurrent;
-        wxRect row(x, y, iWidth, iRowHeight);
-        if (bCurrent) {
-            // a white box with a faint shadow under it
-            Theme::DrawRoundedBox(dc, wxRect(row.x, row.y + 1, row.width, row.height), FromDIP(6), wxColour(0, 0, 0, 20), wxNullColour);
-            Theme::DrawRoundedBox(dc, row, FromDIP(6), Theme::PanelBg, wxNullColour);
-        }
-        wxRect circle(row.x + FromDIP(12), row.y + (row.height - iCircle) / 2, iCircle, iCircle);
-        if (bCurrent) {
-            dc.SetBrush(wxBrush(Theme::Accent));
-            dc.SetPen(wxPen(Theme::Accent));
-        } else if (bDone) {
-            dc.SetBrush(wxBrush(Theme::PanelBg));
-            dc.SetPen(wxPen(Theme::Accent));
-        } else {
-            dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            dc.SetPen(wxPen(Theme::TextDisabled));
-        }
-        dc.DrawEllipse(circle);
-
-        if (bDone) {
-            wxBitmap tick = Theme::Icon(Theme::Icons::Check, Theme::Accent, 16, 2.2).GetBitmapFor(this);
-            dc.DrawBitmap(tick, circle.x + (circle.width - tick.GetLogicalWidth()) / 2, circle.y + (circle.height - tick.GetLogicalHeight()) / 2, true);
-        } else {
-            dc.SetFont(Theme::Bold(GetFont().Scaled(13.0f / 14)));
-            dc.SetTextForeground(bCurrent ? *wxWHITE : Theme::TextSecondary);
-            wxString sNumber = wxString::Format("%d", (int) i + 1);
-            wxSize extent = dc.GetTextExtent(sNumber);
-            dc.DrawText(sNumber, circle.x + (circle.width - extent.x) / 2, circle.y + (circle.height - extent.y) / 2);
-        }
-
-        dc.SetFont(bCurrent ? Theme::Bold(GetFont()) : GetFont());
-        dc.SetTextForeground(bCurrent || bDone ? Theme::Text : Theme::TextSecondary);
-        wxSize extent = dc.GetTextExtent(m_vSteps[i]);
-        dc.DrawText(m_vSteps[i], circle.GetRight() + FromDIP(12), row.y + (row.height - extent.y) / 2);
-    }
 }
 
 /////////////////////////////////// drives ///////////////////////////////////
@@ -523,15 +356,13 @@ ST_DRIVE DiskImageDrive(const wxString &sPath) {
 
 /////////////////////////////////// CDriveCard ///////////////////////////////////
 
-CDriveCard::CDriveCard(wxWindow *parent, wxWindowID id, const ST_DRIVE &drive, bool bCompact)
+CDriveCard::CDriveCard(wxWindow *parent, wxWindowID id, const ST_DRIVE &drive)
 : CPaintedControl(parent, id) {
     m_drive = drive;
-    m_bCompact = bCompact;
     m_bSelected = false;
-    int iIconSize = bCompact ? 26 : 36;
     const char *szIcon = drive.bImage ? Theme::Icons::DiskImage : (drive.bRemovable ? Theme::Icons::UsbDrive : Theme::Icons::HardDisk);
-    m_icon = Theme::Icon(szIcon, drive.bSupported ? wxColour(0x44, 0x44, 0x44) : Theme::TextDisabled, iIconSize, 1.5);
-    SetFont(bCompact ? Theme::Small() : Theme::Body());
+    m_icon = Theme::Icon(szIcon, drive.bSupported ? wxColour(0x44, 0x44, 0x44) : Theme::TextDisabled, 26, 1.5);
+    SetFont(Theme::Small());
     SetCursor(drive.bSupported ? wxCursor(wxCURSOR_HAND) : wxNullCursor);
     if (!drive.bSupported) {
         m_bFocusable = false;
@@ -546,10 +377,24 @@ void CDriveCard::SetSelected(bool bSelected) {
     }
 }
 
+// "NTFS · 930 GB" - or why it can't be scanned
+static wxString DriveMeta(const ST_DRIVE &drive) {
+    wxString sMeta = drive.sFileSystem;
+    if (!drive.bSupported)
+        return sMeta + L" · " + drive.sNote;
+    if (drive.ullTotal)
+        sMeta += L" · " + FormatDriveSize(drive.ullTotal);
+    return sMeta;
+}
+
 wxSize CDriveCard::DoGetBestClientSize() const {
-    if (m_bCompact)
-        return wxSize(FromDIP(220), FromDIP(64));
-    return wxSize(FromDIP(300), FromDIP(104));
+    wxClientDC dc(const_cast<CDriveCard *> (this));
+    dc.SetFont(Theme::Bold(GetFont()));
+    int iText = dc.GetTextExtent(m_drive.sName).x;
+    dc.SetFont(GetFont().Scaled(12.0f / 13));
+    iText = wxMax(iText, dc.GetTextExtent(DriveMeta(m_drive)).x);
+    iText = wxMax(iText, FromDIP(130)); // the usage bar
+    return wxSize(wxMin(FromDIP(14 + 26 + 10 + 14) + iText, FromDIP(320)), FromDIP(64));
 }
 
 void CDriveCard::Paint(wxDC &dc) {
@@ -560,69 +405,44 @@ void CDriveCard::Paint(wxDC &dc) {
     if (HasFocus())
         DrawFocusRing(dc, rect.Deflate(FromDIP(4)), FromDIP(5));
 
-    wxColour text = bEnabled ? Theme::Text : Theme::TextDisabled;
-    wxColour secondary = bEnabled ? Theme::TextSecondary : Theme::TextDisabled;
-    wxFont font = GetFont();
-    wxFont bold = Theme::Bold(m_bCompact ? font : font.Scaled(15.0f / 14));
-    wxFont small = m_bCompact ? font.Scaled(12.0f / 13) : font.Scaled(13.0f / 14);
-    wxFont tiny = font.Scaled(12.0f / 14);
+    wxFont bold = Theme::Bold(GetFont());
+    wxFont small = GetFont().Scaled(12.0f / 13);
+    wxString sMeta = DriveMeta(m_drive);
+    int iUsed = (m_drive.ullTotal && !m_drive.bImage && bEnabled) ? (int) ((m_drive.ullTotal - m_drive.ullFree) * 100 / m_drive.ullTotal) : -1;
 
-    wxString sMeta = m_drive.sFileSystem;
-    if (m_drive.ullTotal)
-        sMeta += L" · " + FormatDriveSize(m_drive.ullTotal);
-    int iUsed = -1;
-    if (m_drive.ullTotal && !m_drive.bImage) {
-        iUsed = (int) ((m_drive.ullTotal - m_drive.ullFree) * 100 / m_drive.ullTotal);
-        if (!m_bCompact)
-            sMeta += wxString(L" · ") + wxString::Format("%d %% ", iUsed) + Tr(L"used");
-    }
-
-    int iPad = FromDIP(m_bCompact ? 14 : 16);
+    int iPad = FromDIP(14);
     wxBitmap icon = m_icon.GetBitmapFor(this);
-    int iIconY = m_bCompact ? rect.y + (rect.height - icon.GetLogicalHeight()) / 2 : rect.y + iPad;
-    dc.DrawBitmap(icon, rect.x + iPad, iIconY, true);
+    dc.DrawBitmap(icon, rect.x + iPad, rect.y + (rect.height - icon.GetLogicalHeight()) / 2, true);
 
-    int x = rect.x + iPad + icon.GetLogicalWidth() + FromDIP(m_bCompact ? 10 : 14);
+    int x = rect.x + iPad + icon.GetLogicalWidth() + FromDIP(10);
     int iTextWidth = rect.GetRight() - iPad - x;
     dc.SetClippingRegion(wxRect(x, rect.y, iTextWidth, rect.height));
 
-    // the lines of the card, top to bottom
+    // name, file system and size, how full - centred as one block
     wxCoord iNameHeight, iMetaHeight;
     dc.SetFont(bold);
     dc.GetTextExtent(m_drive.sName, NULL, &iNameHeight);
     dc.SetFont(small);
     dc.GetTextExtent(sMeta, NULL, &iMetaHeight);
-    int iBar = FromDIP(m_bCompact ? 4 : 6);
-    int iGap = FromDIP(m_bCompact ? 3 : 6);
+    int iBar = FromDIP(4), iGap = FromDIP(3);
     int iBlock = iNameHeight + iGap + iMetaHeight + (iUsed >= 0 ? iGap + iBar : 0);
-    int y = m_bCompact ? rect.y + (rect.height - iBlock) / 2 : rect.y + iPad;
+    int y = rect.y + (rect.height - iBlock) / 2;
 
     dc.SetFont(bold);
-    dc.SetTextForeground(text);
+    dc.SetTextForeground(bEnabled ? Theme::Text : Theme::TextDisabled);
     dc.DrawText(m_drive.sName, x, y);
     y += iNameHeight + iGap;
     dc.SetFont(small);
-    dc.SetTextForeground(secondary);
+    dc.SetTextForeground(bEnabled ? Theme::TextSecondary : Theme::Partial);
     dc.DrawText(sMeta, x, y);
     y += iMetaHeight + iGap;
 
     if (iUsed >= 0) {
-        int iBarWidth = m_bCompact ? wxMin(FromDIP(130), iTextWidth) : iTextWidth;
-        wxRect bar(x, y, iBarWidth, iBar);
+        wxRect bar(x, y, wxMin(FromDIP(130), iTextWidth), iBar);
         Theme::DrawRoundedBox(dc, bar, iBar / 2.0, Theme::Border, wxNullColour);
         bar.width = bar.width * iUsed / 100;
         if (bar.width > 0)
-            Theme::DrawRoundedBox(dc, bar, iBar / 2.0, !bEnabled ? Theme::TextDisabled : (iUsed > 80 ? Theme::UsageHigh : Theme::Accent), wxNullColour);
-        y += iBar + iGap;
-    }
-
-    if (!m_bCompact) {
-        wxString sNote = !bEnabled ? m_drive.sNote : (m_bSelected ? wxString(Tr(L"Selected")) : wxString());
-        if (!sNote.IsEmpty()) {
-            dc.SetFont(m_bSelected && bEnabled ? Theme::Bold(tiny) : tiny);
-            dc.SetTextForeground(bEnabled ? Theme::Accent : Theme::Partial);
-            dc.DrawText(sNote, x, y);
-        }
+            Theme::DrawRoundedBox(dc, bar, iBar / 2.0, iUsed > 80 ? Theme::UsageHigh : Theme::Accent, wxNullColour);
     }
     dc.DestroyClippingRegion();
 }

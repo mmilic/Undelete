@@ -1,9 +1,9 @@
 /*
  * File:   Widgets.h
  *
- * The design's controls that Windows doesn't have: flat buttons in the accent colour, a segmented filter,
- * banners, the step list, drive cards and a thin progress bar. All drawn by hand, sized in DIPs, so they
- * look the same at any DPI. Clicks arrive as ordinary wxEVT_BUTTON / wxEVT_CHOICE events.
+ * The design's controls that Windows doesn't have: flat buttons in the accent colour, banners, drive cards
+ * and a thin progress bar. All drawn by hand, sized in DIPs, so they
+ * look the same at any DPI. Clicks arrive as ordinary wxEVT_BUTTON events.
  */
 
 #ifndef WIDGETS_H
@@ -57,28 +57,6 @@ private:
     int m_iStyle;
 };
 
-// "All files | Good only | Hide overwritten" - one of them pressed
-
-class CSegmented : public CPaintedControl {
-public:
-    CSegmented(wxWindow *parent, wxWindowID id, const std::vector<wxString> &vOptions);
-    int GetSelection() const { return m_iSelection; }
-    void SetSelection(int iSelection);
-
-protected:
-    void Paint(wxDC &dc) override;
-    wxSize DoGetBestClientSize() const override;
-    void OnClick() override;
-
-private:
-    std::vector<wxString> m_vOptions;
-    int m_iSelection;
-    int m_iClicked; // the segment under the mouse when it was pressed
-    std::vector<wxRect> SegmentRects() const;
-    void OnLeftDown(wxMouseEvent &event);
-    void OnKeyDown(wxKeyEvent &event);
-};
-
 // a coloured box with an icon and a message - a warning, or a confirmation
 
 enum {
@@ -101,22 +79,6 @@ private:
     void OnSize(wxSizeEvent &event);
 };
 
-// the wizard's steps down the left side: done (tick), current (filled), still to come
-
-class CStepList : public wxWindow {
-public:
-    CStepList(wxWindow *parent, const std::vector<wxString> &vSteps);
-    void SetCurrent(int iStep); // 0-based
-
-protected:
-    wxSize DoGetBestClientSize() const override;
-
-private:
-    std::vector<wxString> m_vSteps;
-    int m_iCurrent;
-    void OnPaint(wxPaintEvent &event);
-};
-
 // a drive to scan
 
 struct ST_DRIVE {
@@ -136,10 +98,11 @@ std::vector<ST_DRIVE> ListDrives();
 // a disk image file as a drive (the test images, a dd copy of a failing disk...)
 ST_DRIVE DiskImageDrive(const wxString &sPath);
 
+// a drive in the drive strip: icon, name, file system and size, how full it is
+
 class CDriveCard : public CPaintedControl {
 public:
-    // bCompact: one row high, for the main window's drive strip
-    CDriveCard(wxWindow *parent, wxWindowID id, const ST_DRIVE &drive, bool bCompact);
+    CDriveCard(wxWindow *parent, wxWindowID id, const ST_DRIVE &drive);
     const ST_DRIVE &GetDrive() const { return m_drive; }
     void SetSelected(bool bSelected);
     bool IsSelected() const { return m_bSelected; }
@@ -150,7 +113,6 @@ protected:
 
 private:
     ST_DRIVE m_drive;
-    bool m_bCompact;
     bool m_bSelected;
     wxBitmapBundle m_icon;
 };

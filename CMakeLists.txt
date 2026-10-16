@@ -44,8 +44,8 @@ if(UNDELETE_BUILD_APP)
     # linked either - FAT drives are read by the engine's own FATDrive.cpp (README.md, "FAT support").
     add_executable(GetMyFilesBack WIN32
         "${SRC}/main.cpp"
-        "${SRC}/WizardFrame.cpp"
-        "${SRC}/WizardPages.cpp"
+        "${SRC}/MainFrame.cpp"
+        "${SRC}/RecoverDialog.cpp"
         "${SRC}/Widgets.cpp"
         "${SRC}/Theme.cpp"
         "${SRC}/FileDetailsPanel.cpp"

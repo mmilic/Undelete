@@ -42,8 +42,8 @@ namespace Theme {
     wxFont Body(); // 14 px
     wxFont Small(); // 13 px
     wxFont Tiny(); // 12 px
-    wxFont Heading(); // 22 px, semibold
     wxFont Title(); // 20 px, semibold
+    wxFont Pixels(double dPixels); // any other size
     wxFont Bold(const wxFont &font);
 
     // the design's stroke icons: an SVG path in a 24x24 box

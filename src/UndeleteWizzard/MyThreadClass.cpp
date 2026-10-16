@@ -38,7 +38,9 @@ CScanThread::CScanThread(wxEvtHandler *pOwner, const wxString &sSource, FileInfo
     m_pDrive = NULL;
 }
 
-// The scan only fills the hash map - the window shows it after the thread is done.
+// The scan only fills the hash map and hands each file to the window as it is found (TakeNewFiles). What
+// changes files after that - FinishScan - is left to the window, once the thread is done: the window may be
+// showing those files meanwhile.
 
 void *CScanThread::Entry() {
     wxLogMessage("Scan of %s started.", m_sSource);
@@ -49,7 +51,9 @@ void *CScanThread::Entry() {
         wxLogMessage("%s is %s.", m_sSource, m_pDrive->FileSystemName());
         m_pDrive->SetCancelFlag(&m_bCancel);
         m_pDrive->SetScanProgress(&m_lPercent);
-        m_iResult = m_pDrive->GetFileList(m_pHash);
+        m_pDrive->SetFoundFiles(&m_found);
+        m_iResult = m_pDrive->ScanFiles(m_pHash);
+        m_pDrive->SetFoundFiles(NULL);
         m_pDrive->SetCancelFlag(NULL);
         m_pDrive->SetScanProgress(NULL);
         wxLogMessage("Scan finished: %u deleted files found (result %d).", (unsigned) m_pHash->size(), m_iResult);

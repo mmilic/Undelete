@@ -1,7 +1,7 @@
 #include "main.h"
 #include <wx/filename.h>
 #include "AppLog.h"
-#include "WizardFrame.h"
+#include "MainFrame.h"
 #include "languages/LanguageDialog.h"
 #include "languages/LanguageFactory.h"
 #include "languages/Translate.h"
@@ -42,7 +42,7 @@ bool MyApp::OnInit() {
             SetUiLanguage(pLanguage);
     }
 
-    CWizardFrame *pFrame = new CWizardFrame(m_vImages);
+    CMainFrame *pFrame = new CMainFrame(m_vImages);
     pFrame->Show();
     return true;
 }

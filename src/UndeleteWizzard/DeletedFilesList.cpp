@@ -159,7 +159,6 @@ wxString RecoverabilityFilterLabel(int iFilter) {
     switch (iFilter) {
         case RECOVERABILITY_FILTER_GOOD: return Tr(L"Good only");
         case RECOVERABILITY_FILTER_NOT_OVERWRITTEN: return Tr(L"Hide overwritten");
-        case RECOVERABILITY_FILTER_CONTENT_OK: return Tr(L"Looks valid only");
         default: return Tr(L"All files");
     }
 }
@@ -215,6 +214,7 @@ CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id)
     m_bSortAscending = true;
     m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
     m_iTypeFilter = FILE_TYPE_ANY;
+    m_bValidOnly = false;
     m_iCheckedShown = 0;
     m_llCheckedShownBytes = 0;
     SetFont(Theme::Small());
@@ -292,18 +292,40 @@ void CDeletedFilesList::FitColumns() {
     }
 }
 
+void CDeletedFilesList::AddFiles(const std::vector<t_FileInfo *> &vFiles) {
+    if (vFiles.empty())
+        return;
+    for (size_t i = 0; i < vFiles.size(); i++) {
+        int iType = FileTypeOf(vFiles[i]->sFilename.c_str());
+        m_vAll.push_back(vFiles[i]);
+        m_vAllTypes.push_back((unsigned char) iType);
+        if (PassesFilters(vFiles[i], iType))
+            m_vVisible.push_back(vFiles[i]);
+    }
+    SetItemCount((long) m_vVisible.size()); // the rows on screen stay where they are
+    UpdateHeaderCheckBox();
+}
+
 void CDeletedFilesList::SetFiles(FileInfoHash *finfohash) {
     m_vAll.clear();
+    m_vAllTypes.clear();
     m_vAll.reserve(finfohash->size());
-    for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
+    m_vAllTypes.reserve(finfohash->size());
+    std::unordered_set<const t_FileInfo *> setChecked;
+    for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it) {
         m_vAll.push_back(it->second);
-    m_setChecked.clear();
+        m_vAllTypes.push_back((unsigned char) FileTypeOf(it->second->sFilename.c_str()));
+        if (m_setChecked.count(it->second))
+            setChecked.insert(it->second);
+    }
+    m_setChecked.swap(setChecked);
     Rebuild();
     NotifyChecked();
 }
 
 void CDeletedFilesList::Clear() {
     m_vAll.clear();
+    m_vAllTypes.clear();
     m_vVisible.clear();
     m_setChecked.clear();
     SetItemCount(0);
@@ -312,32 +334,57 @@ void CDeletedFilesList::Clear() {
     Refresh();
 }
 
+void CDeletedFilesList::FilterChanged() {
+    Rebuild();
+    NotifyChecked(); // the ticked files that are hidden now don't count
+}
+
 void CDeletedFilesList::SetNameFilter(const wxString &sFilter) {
     m_sFilterUpper = sFilter.Upper();
-    Rebuild();
-    NotifyChecked();
+    FilterChanged();
 }
 
 void CDeletedFilesList::SetRecoverabilityFilter(int iFilter) {
     m_iRecoverabilityFilter = iFilter;
-    Rebuild();
-    NotifyChecked();
+    FilterChanged();
 }
 
 void CDeletedFilesList::SetTypeFilter(int iType) {
     m_iTypeFilter = iType;
-    Rebuild();
-    NotifyChecked();
+    FilterChanged();
 }
 
-bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile) const {
+void CDeletedFilesList::SetValidOnly(bool bValidOnly) {
+    m_bValidOnly = bValidOnly;
+    FilterChanged();
+}
+
+void CDeletedFilesList::ClearFilters() {
+    m_sFilterUpper.clear();
+    m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
+    m_iTypeFilter = FILE_TYPE_ANY;
+    m_bValidOnly = false;
+    FilterChanged();
+}
+
+void CDeletedFilesList::CountByType(int aCounts[FILE_TYPE_COUNT]) const {
+    for (int i = 0; i < FILE_TYPE_COUNT; i++)
+        aCounts[i] = 0;
+    for (size_t i = 0; i < m_vAll.size(); i++)
+        if (PassesFilters(m_vAll[i], m_vAllTypes[i], false)) {
+            aCounts[FILE_TYPE_ANY]++;
+            aCounts[m_vAllTypes[i]]++;
+        }
+}
+
+bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile, int iType, bool bTypeFilter) const {
     if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_GOOD && pFile->iRecoverability != RECOVERABILITY_GOOD)
         return false;
     if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_NOT_OVERWRITTEN && pFile->iRecoverability == RECOVERABILITY_OVERWRITTEN)
         return false;
-    if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_CONTENT_OK && pFile->iContent != CONTENT_OK)
+    if (m_bValidOnly && pFile->iContent != CONTENT_OK)
         return false;
-    if (m_iTypeFilter != FILE_TYPE_ANY && FileTypeOf(pFile->sFilename.c_str()) != m_iTypeFilter)
+    if (bTypeFilter && m_iTypeFilter != FILE_TYPE_ANY && iType != m_iTypeFilter)
         return false;
     if (!m_sFilterUpper.IsEmpty()) { // the whole path, so "Pictures\IMG" or a folder name finds files too
         wxString sPath(pFile->sFolder.c_str());
@@ -497,11 +544,11 @@ void CDeletedFilesList::Rebuild() {
     t_FileInfo *pFocused = GetFocusedFile();
 
     m_vVisible.clear();
-    if (m_sFilterUpper.IsEmpty() && m_iRecoverabilityFilter == RECOVERABILITY_FILTER_ALL && m_iTypeFilter == FILE_TYPE_ANY)
+    if (m_sFilterUpper.IsEmpty() && m_iRecoverabilityFilter == RECOVERABILITY_FILTER_ALL && m_iTypeFilter == FILE_TYPE_ANY && !m_bValidOnly)
         m_vVisible = m_vAll;
     else
         for (size_t i = 0; i < m_vAll.size(); i++)
-            if (PassesFilters(m_vAll[i]))
+            if (PassesFilters(m_vAll[i], m_vAllTypes[i]))
                 m_vVisible.push_back(m_vAll[i]);
 
     DeletedFilesOrder order;

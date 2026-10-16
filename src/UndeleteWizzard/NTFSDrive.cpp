@@ -566,13 +566,14 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     return (ERROR_SUCCESS);
 }
 
-// scan the whole MFT and put every deleted (non-system) file into the map.
+// scan the whole MFT and put every deleted (non-system) file into the map - their folders come in FinishScan.
 // Returns ERROR_CANCELLED if the cancel flag was set - the map then holds what was found so far.
 
-int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
+int CNTFSDrive::ScanFiles(FileInfoHash *m_FileInfoHash) {
     t_FileInfo stFileInfo;
     int nRet, i;
-    std::vector<ST_FOLDER> vFolders;
+    std::vector<ST_FOLDER> &vFolders = m_vFolders;
+    vFolders.clear();
 
     // which clusters are in use right now - to tell which deleted files are probably still intact
     if (LoadVolumeBitmap())
@@ -585,7 +586,7 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
             if (IsCancelled()) {
                 wxLogMessage("Scan cancelled at MFT record %d.", i);
                 std::vector<BYTE>().swap(m_vVolumeBitmap);
-                return ERROR_CANCELLED;
+                return ERROR_CANCELLED; // FinishScan still gives what was found its folders
             }
             LONGLONG llRecords = m_llMFTSize / m_llMFTRecordSz;
             if (llRecords > 0)
@@ -619,15 +620,21 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
                 && !(stFileInfo.dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 ) {
             stFileInfo.iRecordId = i;
-            (*m_FileInfoHash)[i] = new t_FileInfo(stFileInfo);
+            AddFoundFile(m_FileInfoHash, new t_FileInfo(stFileInfo));
         }
     }
 
     wxLogMessage("No more files to add to the list (%u folders seen).", (unsigned) vFolders.size());
     std::vector<BYTE>().swap(m_vVolumeBitmap); // only needed during the scan
-    ResolveFolders(m_FileInfoHash, vFolders);
-    ResolveRecycleBinNames(m_FileInfoHash);
     return (ERROR_SUCCESS);
+}
+
+// the folder paths, from the folders the scan saw - a folder only seen later can complete a file's path
+
+void CNTFSDrive::FinishScan(FileInfoHash *finfohash) {
+    ResolveFolders(finfohash, m_vFolders);
+    std::vector<ST_FOLDER>().swap(m_vFolders);
+    CRecoveryDrive::FinishScan(finfohash); // the Recycle Bin names
 }
 
 // builds folder paths from the scan's folder records, remembering each folder's path once

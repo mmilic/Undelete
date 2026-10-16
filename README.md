@@ -1,6 +1,6 @@
 # GetMyFilesBack (UndeleteWizzard)
 
-A Windows GUI file-undelete/recovery tool (wxWidgets wizard) that scans an NTFS or FAT (FAT12/16/32)
+A Windows GUI file-undelete/recovery tool (wxWidgets) that scans an NTFS or FAT (FAT12/16/32)
 drive for deleted-but-recoverable files and copies them to a destination you choose.
 
 It builds as one 64-bit exe with everything linked in statically - no DLLs, no installer. That is
@@ -116,8 +116,8 @@ The GitHub build runs both tests on every push.
 
 - `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json` - the build; `build.ps1` / `build-env.ps1` run it.
 - `.github/workflows/build.yml` - the GitHub Actions build and test.
-- `src/UndeleteWizzard/` — the application source (wxWidgets wizard: NTFS and FAT scan/recovery,
-  multi-language UI, wizard pages). See `CLAUDE.md` for the internal architecture.
+- `src/UndeleteWizzard/` — the application source (the window, NTFS and FAT scan/recovery,
+  multi-language UI). See `CLAUDE.md` for the internal architecture.
 - `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept for reference only.
   **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT support" below.
 - `src/UndeleteWizzard/Makefile`, `nbproject/`, `*.conf` — the original NetBeans/MinGW build files of the
@@ -127,8 +127,8 @@ The GitHub build runs both tests on every push.
 ## FAT support
 
 FAT12, FAT16 and FAT32 drives (USB sticks, memory cards) are scanned by `FATDrive.cpp`, the app's own
-engine; the wizard picks it when Windows reports the drive as `FAT` or `FAT32`. **exFAT is not supported
-yet** - the wizard says so when an exFAT drive is chosen.
+engine; the app picks it by the drive's boot sector. **exFAT is not supported yet** - an exFAT drive
+is shown greyed out, with a note.
 
 What FAT leaves of a deleted file decides what can be recovered:
 - Windows marks the file's directory entry as deleted (its first byte becomes `0xE5`) and frees its

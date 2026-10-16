@@ -101,7 +101,7 @@ public:
     int GetFATType() const { return m_iFATType; }
 
     int ReadVolume(wxString wxsSelectedDrive) override;
-    int GetFileList(FileInfoHash *finfohash) override;
+    int ScanFiles(FileInfoHash *finfohash) override;
     int Read_File(DWORD dwFileId, BYTE *&puchFileData, DWORD &dwFileDataLen) override;
     int ReadFileStart(DWORD dwFileId, std::vector<BYTE> &vData, DWORD dwMax) override;
     int RetreiveAndWriteFileToDestination(int iFileId, const wchar_t *wszDestinationFileName) override;
