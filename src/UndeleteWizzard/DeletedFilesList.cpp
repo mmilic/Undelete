@@ -47,7 +47,7 @@ struct DeletedFilesOrder {
     }
 };
 
-static wxString FormatSize(LONGLONG llSize) {
+wxString FormatFileSize(LONGLONG llSize) {
     if (llSize < 1024)
         return wxString::Format("%d B", (int) llSize);
     if (llSize < 1024 * 1024)
@@ -180,7 +180,7 @@ wxString CDeletedFilesList::OnGetItemText(long lItem, long lColumn) const {
         case DELETED_FILES_COLUMN_NAME:
             return wxString(pFile->sFilename.c_str());
         case DELETED_FILES_COLUMN_SIZE:
-            return FormatSize(pFile->n64RealSize);
+            return FormatFileSize(pFile->n64RealSize);
         case DELETED_FILES_COLUMN_RECOVERABILITY:
             if (pFile->iRecoverability == RECOVERABILITY_PARTIAL)
                 return wxString::Format("%s (%d%% intact)", RecoverabilityLabel(pFile->iRecoverability), pFile->iPercentIntact);

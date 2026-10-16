@@ -37,6 +37,8 @@ CMFTRecord::CMFTRecord() {
     m_dwBytesPerCluster = 0;
     m_n64StartPos = 0;
     m_pbCancel = 0;
+    m_plProgressKB = 0;
+    m_llProgressPending = 0;
 
     m_puchFileData = 0; // collected file data buffer
     m_llFileDataSz = 0; // file data size , ie. m_pchFileData buffer length
@@ -352,6 +354,7 @@ int CMFTRecord::ExtractData(const BYTE *puchAttr, const NTFS_ATTRIBUTE &ntfsAttr
                 wxLogError("WriteFile returned error code %d . Possibly not enough drive space", dwErrorCode);
                 return dwErrorCode ? dwErrorCode : ERROR_WRITE_FAULT;
             }
+            AddProgress((DWORD) llDataLen);
         } else {
             puchData = new (std::nothrow) BYTE[llDataLen ? llDataLen : 1];
             if (!puchData)
@@ -462,6 +465,7 @@ int CMFTRecord::ExtractData(const BYTE *puchAttr, const NTFS_ATTRIBUTE &ntfsAttr
                     wxLogError("WriteFile returned error code %d . Possibly not enough drive space", dwErrorCode);
                     return dwErrorCode ? dwErrorCode : ERROR_WRITE_FAULT;
                 }
+                AddProgress(dwUseful);
             } else {
                 memcpy(puchOut, &vBuffer[0], dwUseful);
                 puchOut += dwUseful;
@@ -474,6 +478,20 @@ int CMFTRecord::ExtractData(const BYTE *puchAttr, const NTFS_ATTRIBUTE &ntfsAttr
 
     llDataLen = llRealSize;
     return ERROR_SUCCESS;
+}
+
+// the GUI thread shows how much of the selection has been written - counted in KB, so a 32-bit
+// interlocked add is enough (2 TB of selected files)
+
+void CMFTRecord::AddProgress(DWORD dwBytes) {
+    if (!m_plProgressKB)
+        return;
+    m_llProgressPending += dwBytes;
+    LONG lKB = (LONG) (m_llProgressPending >> 10);
+    if (lKB) {
+        InterlockedExchangeAdd((LONG *) m_plProgressKB, lKB);
+        m_llProgressPending -= (LONGLONG) lKB << 10;
+    }
 }
 
 // read dwLen bytes (a whole number of clusters) starting at cluster n64LCN of the volume

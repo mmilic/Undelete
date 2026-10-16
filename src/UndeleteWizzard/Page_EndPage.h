@@ -17,9 +17,13 @@ public:
     wxEndPage(wxWizard *parent);
     void OnWizardPageChanging(wxWizardEvent& event);
     void OnPageShown(wxWizardEvent& event);
+    void OnOpenFolderClick(wxCommandEvent & event);
+    void OpenDestinationFolder();
 
-    wxString m_wxEndMessage;
-    wxStaticText *m_wxEndPageText;
+    wxStaticText *m_wxEndPageText; // "recovered N of M files, you can find them in ..."
+    wxStaticText *m_wxOverwrittenText; // shown when overwritten files were recovered after the warning
+    wxStaticText *m_wxFailuresLabel;
+    wxTextCtrl *m_wxFailuresList; // "name - reason", one per line
 private:
     DECLARE_EVENT_TABLE()
 };

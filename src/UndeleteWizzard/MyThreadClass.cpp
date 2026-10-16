@@ -253,6 +253,39 @@ wxString * MyThreadCopyFiles::GetMwPtr_strSelectedDir() const {
     return mwPtr_strSelectedDir;
 }
 
+// why a file could not be recovered, in words for the end page
+
+static wxString RecoveryErrorText(int iError, const t_FileInfo *pFile) {
+    wxString sReason;
+    switch (iError) {
+        case ERROR_NOT_SUPPORTED:
+            sReason = "compressed or very fragmented file - not supported";
+            break;
+        case ERROR_FILE_CORRUPT:
+        case ERROR_FILE_INVALID:
+            sReason = "its record on the drive is damaged";
+            break;
+        case ERROR_DISK_FULL:
+        case ERROR_HANDLE_DISK_FULL:
+            sReason = "the destination drive is full";
+            break;
+        case ERROR_ACCESS_DENIED:
+        case ERROR_PATH_NOT_FOUND:
+        case ERROR_FILE_EXISTS:
+        case ERROR_CANNOT_MAKE:
+            sReason.Printf("the file could not be created in the destination folder (error %d)", iError);
+            break;
+        case ERROR_NOT_ENOUGH_MEMORY:
+            sReason = "not enough memory";
+            break;
+        default:
+            sReason.Printf("the drive could not be read (error %d)", iError);
+    }
+    if (pFile->iRecoverability == RECOVERABILITY_OVERWRITTEN)
+        sReason += "; it was marked as overwritten";
+    return sReason;
+}
+
 // the files to copy are collected by the GUI thread before this thread starts - the thread must not read the list control
 
 void MyThreadCopyFiles::SetFilesToCopy(const std::vector<t_FileInfo *> &vFiles) {
@@ -263,6 +296,9 @@ void *MyThreadCopyFiles::Entry() {
     wxLogMessage("Started execution of ThreadCopyFiles");
     // cancel stops a long file in the middle (checked per 1 MB), not only between files
     m_pUsedNTFSDrive->SetCancelFlag(&m_CancelProgresControl);
+    m_lKBWritten = 0;
+    m_vFailures.clear();
+    m_pUsedNTFSDrive->SetProgressCounter(&m_lKBWritten);
 
     wxFileName wxDestinationFileName;
     wxDestinationFileName.AssignDir(*m_wxpDestinationDir);
@@ -312,9 +348,12 @@ void *MyThreadCopyFiles::Entry() {
             break;
 
         int iRet = m_pUsedNTFSDrive->RetreiveAndWriteFileToDestination(pTempFInfo->iRecordId, wxsDestinationPath.wc_str());
-        if (iRet)
+        if (iRet == ERROR_CANCELLED)
+            break;
+        if (iRet) {
             wxLogMessage("Undeleting of %s FAILED.", wxsDestinationPath);
-        else {
+            m_vFailures.push_back(wxString(pTempFInfo->sFilename.c_str()) + " - " + RecoveryErrorText(iRet, pTempFInfo));
+        } else {
             (*m_iptrNumberOfCopiedFiles)++;
             wxLogMessage("Undeleting of %s SUCCESSFULL.", wxsDestinationPath);
         }
@@ -322,6 +361,7 @@ void *MyThreadCopyFiles::Entry() {
     }
 
     m_pUsedNTFSDrive->SetCancelFlag(NULL);
+    m_pUsedNTFSDrive->SetProgressCounter(NULL);
     ThrowSelectFilesDialogStopEvent();
     wxLogMessage("%s\nCheck %s", IsCancelProgresControl() ? "CANCELLED!" : "FINISHED!", wxDestinationFileName.GetPath());
 

@@ -124,85 +124,117 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
 #ifdef DEMO_BUILD
         wxMessageDialog *dial = new wxMessageDialog(NULL,
                 wxT("This is a DEMO version!\n File saving is not possible.\n To buy full version, visit www.getmyfilesback.com\n"), wxT("Error"), wxOK | wxICON_ERROR);
-        dial->ShowModal(); 
+        dial->ShowModal();
         event.Veto();
         return;
-#else        
-        ILanguage *languagePack = ((MyWizard *) GetParent())->GetLanguagePack();
-        int *ptrNumberOfSelectedFiles = ((MyWizard *) GetParent())->GetMw_ptriNumberOfSelectedFiles();
+#else
+        MyWizard *pWizard = (MyWizard *) GetParent();
+        ILanguage *languagePack = pWizard->GetLanguagePack();
+        int *ptrNumberOfSelectedFiles = pWizard->GetMw_ptriNumberOfSelectedFiles();
+        int *ptrNumberOfCopiedFiles = pWizard->GetIptrNumberOfCopiedFiles();
 
         // collect the selection here, in the GUI thread - the copy thread gets the list of files, not the control
         std::vector<t_FileInfo *> vFilesToCopy;
         m_lcFilesInSelectedDrive->GetSelectedFiles(vFilesToCopy);
         *ptrNumberOfSelectedFiles = (int) vFilesToCopy.size();
-        //        (*this->m_NumberOfSelectedFiles) = ;//sto je ovo glupo resenje - katastrofa - ne treba mu jos jedna referenca na isti pointer
 
         if (vFilesToCopy.empty()) {
-            wxMessageDialog dial(NULL, wxT("Please select the files you want to retrieve."), wxT("Info"), wxOK | wxICON_INFORMATION);
+            wxMessageDialog dial(this, wxT("Please select the files you want to retrieve."), wxT("Info"), wxOK | wxICON_INFORMATION);
             dial.ShowModal();
             event.Veto();
             return;
         }
 
-        wxProgressDialog dialog("Scanning the selected source drive.",
-                // "Reserve" enough space for the multiline
-                // messages below, we'll change it anyhow
-                // immediately in the loop below
-                wxString("Scanning your hard drive for deleted files...") + "\n\n\n\n",
-                *ptrNumberOfSelectedFiles, // range
-                this, // parent
-                // wxPD_APP_MODAL |
-                wxPD_CAN_ABORT |
-                //                wxPD_CAN_SKIP | // testing purposes - should be disabled in prod version
-                wxPD_AUTO_HIDE | // -- try this as well
-                wxPD_ELAPSED_TIME |
-                wxPD_SMOOTH // - makes indeterminate mode bar on WinXP very small
-                );
+        // overwritten files: other files now use their clusters - warn before spending time on them
+        int iOverwritten = 0;
+        LONGLONG llTotalBytes = 0;
+        for (size_t i = 0; i < vFilesToCopy.size(); i++) {
+            if (vFilesToCopy[i]->iRecoverability == RECOVERABILITY_OVERWRITTEN)
+                iOverwritten++;
+            llTotalBytes += vFilesToCopy[i]->n64RealSize;
+        }
+        if (iOverwritten) {
+            wxString sQuestion;
+            if (iOverwritten == (int) vFilesToCopy.size())
+                sQuestion.Printf("The selected file%s marked as overwritten: other files are now stored where %s data was.\n\n"
+                    "%s will most likely be unreadable. Recover anyway?",
+                    iOverwritten == 1 ? " is" : "s are", iOverwritten == 1 ? "its" : "their", iOverwritten == 1 ? "It" : "They");
+            else
+                sQuestion.Printf("%d of the %d selected files are marked as overwritten: other files are now stored where their data was. "
+                    "They will most likely be unreadable.\n\n"
+                    "Recover them anyway?\n(Choose No to go back and change the selection.)",
+                    iOverwritten, (int) vFilesToCopy.size());
+            if (wxMessageBox(sQuestion, wxT("Overwritten files"), wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this) != wxYES) {
+                event.Veto();
+                return;
+            }
+        }
+        *pWizard->GetPtrNumberOfOverwrittenSelected() = iOverwritten;
+        pWizard->GetPtrRecoveryFailures()->clear();
 
+        // progress in KB written, so a single big file moves the bar too
+        LONGLONG llTotalKB = llTotalBytes / 1024;
+        int iRange = (int) (llTotalKB < 1 ? 1 : (llTotalKB > 0x7FFFFFFF ? 0x7FFFFFFF : llTotalKB));
+
+        // app-modal and never hidden automatically: the wizard can't be used until the recovery has finished
+        // (or was cancelled) - otherwise a second Retrieve would start a second copy over the same drive
+        wxProgressDialog dialog(wxT("Recovering files"),
+                wxString("Preparing...") + "\n\n\n\n",
+                iRange, // range
+                this, // parent
+                wxPD_APP_MODAL |
+                wxPD_CAN_ABORT |
+                wxPD_ELAPSED_TIME |
+                wxPD_REMAINING_TIME |
+                wxPD_SMOOTH
+                );
 
         MyThreadCopyFiles *thCopyFiles = new MyThreadCopyFiles(this);
 
-        thCopyFiles->SetNTFSDrivePtr(((MyWizard *) GetParent())->GetPtrCNTFSDrive());
-        thCopyFiles->SetFinfoHashPtr(((MyWizard *) GetParent())->GetPtrFileInfoHash());
+        thCopyFiles->SetNTFSDrivePtr(pWizard->GetPtrCNTFSDrive());
+        thCopyFiles->SetFinfoHashPtr(pWizard->GetPtrFileInfoHash());
         thCopyFiles->SetFilesToCopy(vFilesToCopy);
-        thCopyFiles->SetDestinationDirPtr(((MyWizard *) GetParent())->GetMw_ptrDestinationDir());
-        thCopyFiles->SetMutexLockPtr(((MyWizard *) GetParent())->GetPtrListMutex()); // ovo nicemu ne sluzi
+        thCopyFiles->SetDestinationDirPtr(pWizard->GetMw_ptrDestinationDir());
+        thCopyFiles->SetMutexLockPtr(pWizard->GetPtrListMutex()); // ovo nicemu ne sluzi
         thCopyFiles->SetCancelProgresControl(false);
-        thCopyFiles->SetMwPtr_strSelectedDir(((MyWizard *) GetParent())->GetMw_ptrDestinationDir());
-        thCopyFiles->SetIptrNumberOfCopiedFiles(((MyWizard *) GetParent())->GetIptrNumberOfCopiedFiles());
+        thCopyFiles->SetMwPtr_strSelectedDir(pWizard->GetMw_ptrDestinationDir());
+        thCopyFiles->SetIptrNumberOfCopiedFiles(ptrNumberOfCopiedFiles);
 
         if (thCopyFiles->Create() != wxTHREAD_NO_ERROR) {
             delete thCopyFiles;
-            wxMessageDialog dial(NULL, languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR),
+            wxMessageDialog dial(this, languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR),
                     languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
             dial.ShowModal();
             event.Veto();
             return;
         }
 
-        SetDialogString("Copying deleted files...");
+        SetDialogString("Preparing...");
         this->m_NumberOfFileBeingCopied = 0;
         this->mw_bRunDialog = true;
 
         thCopyFiles->Run();
 
-        bool cont = true; // ovaj se koristi ako je stisnut cancel - to moram da vidim gde sta treba da implementiram...
-        // moguce da cu na ovoj strani da stavim cancel a na sledecoj oba, i skip i cancel hmmm...
+        bool cont = true; // ovaj se koristi ako je stisnut cancel
         while (this->mw_bRunDialog) {
+            // the bar's maximum would end the dialog - keep it just below until the thread is done
+            LONG lKBWritten = thCopyFiles->m_lKBWritten;
+            int iValue = (lKBWritten < iRange) ? (int) lKBWritten : iRange - 1;
+            wxString sMessage = GetDialogString() + "\n" +
+                    FormatFileSize((LONGLONG) lKBWritten * 1024) + " of " + FormatFileSize(llTotalBytes);
+
             // will be set to true if "Skip" button was clicked
             bool skip = false;
-            cont = dialog.Update(this->m_NumberOfFileBeingCopied, GetDialogString(), &skip);
+            cont = dialog.Update(iValue, sMessage, &skip);
 
-            // each skip will move progress about quarter forward
             if (skip) // ovo se ne koristi
                 cont = false;
 
             if (!cont) {
                 if (wxMessageBox(languagePack->getWXText(SELECT_DESTINATION_PAGE, DO_YOU_REALLY_WANT_TO_CANCEL),
                         languagePack->getWXText(GENERAL, PROGRESS_DIALOG_QUESTION), // caption
-                        wxYES_NO | wxICON_QUESTION) == wxYES) {
+                        wxYES_NO | wxICON_QUESTION, &dialog) == wxYES) {
                     thCopyFiles->SetCancelProgresControl(true); //stop processing in the thread
-                    event.Veto();
                     break;
                 } else {
                     cont = true;
@@ -217,13 +249,21 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
             wxBusyCursor busy;
             thCopyFiles->Wait();
         }
+        *pWizard->GetPtrRecoveryFailures() = thCopyFiles->m_vFailures;
         delete thCopyFiles;
         wxLog::FlushActive(); // the thread's log lines
+        dialog.Hide();
 
         if (!cont) {
             wxLogStatus(languagePack->getWXText(GENERAL, PROGRESS_DIALOG_ABORTED));
+            wxString sMessage;
+            sMessage.Printf("Recovery cancelled.\n\n%d of the %d selected files were recovered to\n%s",
+                    *ptrNumberOfCopiedFiles, *ptrNumberOfSelectedFiles, *pWizard->GetMw_ptrDestinationDir());
+            wxMessageDialog dial(this, sMessage, wxT("Info"), wxOK | wxICON_INFORMATION);
+            dial.ShowModal();
+            event.Veto(); // stay on the list
         } else {
-            wxLogStatus(wxT("Countdown from %d finished"), *ptrNumberOfSelectedFiles);
+            wxLogMessage("Recovery finished: %d of %d files.", *ptrNumberOfCopiedFiles, *ptrNumberOfSelectedFiles);
         }
 #endif
     }
@@ -237,7 +277,7 @@ void wxSelectFilesPage::OnStopDialogEvent(wxCommandEvent & event) {
 
 void wxSelectFilesPage::OnPulseDialogEvent(wxCommandEvent & event) {
     int *ptrNumberOfSelectedFiles = ((MyWizard *) GetParent())->GetMw_ptriNumberOfSelectedFiles();
-    SetDialogString(wxString::Format("Copying %d/%d\nFilename: %s", event.GetInt(), *ptrNumberOfSelectedFiles, event.GetString()));
+    SetDialogString(wxString::Format("Recovering file %d of %d:\n%s", event.GetInt(), *ptrNumberOfSelectedFiles, event.GetString()));
     this->m_NumberOfFileBeingCopied = event.GetInt();
 }
 

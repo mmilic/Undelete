@@ -16,6 +16,9 @@
 #include <vector>
 #include "NTFSDrive.h"
 
+// "512 B", "12.3 KB", "4.5 MB", "1.20 GB"
+wxString FormatFileSize(LONGLONG llSize);
+
 enum {
     DELETED_FILES_COLUMN_NAME = 0,
     DELETED_FILES_COLUMN_SIZE,

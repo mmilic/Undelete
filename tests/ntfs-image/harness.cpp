@@ -44,15 +44,27 @@ int main(int argc, char **argv) {
     drive.GetFileList(&hash);
     printf("deleted files found: %u\n", (unsigned) hash.size());
 
+    // the copy progress bar's counter: KB written, over all files
+    volatile LONG lKBWritten = 0;
+    drive.SetProgressCounter(&lKBWritten);
+    LONGLONG llBytesRecovered = 0;
+    int iRecovered = 0;
+
     wxString outDir(argv[2]);
     for (FileInfoHash::iterator it = hash.begin(); it != hash.end(); ++it) {
         t_FileInfo *pInfo = it->second;
         wxString name(pInfo->sFilename.c_str());
         wxString dest = outDir + "\\" + name;
         nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
+        if (!nRet) {
+            llBytesRecovered += pInfo->n64RealSize;
+            iRecovered++;
+        }
         // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result
         printf("FILE\t%d\t%s\t%s\t%d\t%s\n", pInfo->iRecordId, (const char *) name.utf8_str(),
                 RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok");
     }
+    // each file can leave up to 1 KB uncounted (the counter is in whole KB)
+    printf("PROGRESS\t%ld\t%ld\t%d\n", (long) lKBWritten, (long) (llBytesRecovered / 1024), iRecovered);
     return 0;
 }

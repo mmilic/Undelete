@@ -25,12 +25,22 @@ if ($LASTEXITCODE -ne 0) { throw "harness failed - see $OutDir\run.log" }
 
 # recoverability the engine reported for each file (from the harness's tab separated FILE lines)
 $recoverability = @{}
+$progress = $null
 foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "run.log")) {
     $f = $line -split "`t"
     if ($f[0] -eq "FILE") { $recoverability[$f[2]] = $f[3] }
+    if ($f[0] -eq "PROGRESS") { $progress = $f }
 }
 
 $failed = 0
+
+# the copy progress counter must match what was written (whole KB, so up to 1 KB per file may be missing)
+$kbCounted, $kbExpected, $files = [long]$progress[1], [long]$progress[2], [long]$progress[3]
+if ($kbCounted -le $kbExpected -and $kbExpected - $kbCounted -le $files) {
+    Write-Host "Progress counter: $kbCounted KB counted for $kbExpected KB recovered ($files files) - OK"
+} else {
+    Write-Host "Progress counter: $kbCounted KB counted for $kbExpected KB recovered ($files files) - WRONG"; $failed++
+}
 foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "expected.sha256")) {
     $hash, $name = $line -split '\s+', 2
     $file = Join-Path $RecDir $name

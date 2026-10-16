@@ -38,7 +38,8 @@ enum {
     FILTER_IMAGES_BUTTON,
     FILTER_VIDEO_BUTTON,
     FILTER_MUSIC_BUTTON,
-    SEARCH_CONTROL
+    SEARCH_CONTROL,
+    END_PAGE_OPEN_FOLDER_BUTTON
 };
 
 #define SET_COLOR_FOR_CURRENT_INSTANCE          this->SetOwnBackgroundColour(wxColour(210, 222, 255)); \
@@ -93,6 +94,10 @@ public:
     ILanguage *GetLanguagePack();
     int SetLanguagePack(std::string languageName);
 
+    // outcome of the last recovery, for the end page
+    std::vector<wxString> *GetPtrRecoveryFailures() { return &mw_vRecoveryFailures; } // "name - reason"
+    int *GetPtrNumberOfOverwrittenSelected() { return &mw_iNumberOfOverwrittenSelected; } // recovered anyway after the warning
+
 private:
     wxWizardPageSimple *m_page1;
 
@@ -105,6 +110,8 @@ private:
     CDeletedFilesList *mwPtr_SelectedFiles;
     int mw_iNumberOfCopiedFiles;
     int mw_iNumberOfSelectedFiles;
+    int mw_iNumberOfOverwrittenSelected;
+    std::vector<wxString> mw_vRecoveryFailures;
     wxMutex *mwPtr_ListMutex;
     HANDLE *mwPtr_hLogFile;
     ILanguage *languagePack;

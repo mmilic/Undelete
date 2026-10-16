@@ -101,4 +101,7 @@ public:
     wxTextCtrl * m_DestTextBox; // ovo ce moci da se brise verovatno
     wxString *mwPtr_strSelectedDir;
     std::vector<t_FileInfo *> m_vFilesToCopy;
+
+    volatile LONG m_lKBWritten; // progress: KB written so far, all files together (read by the GUI thread)
+    std::vector<wxString> m_vFailures; // "name - reason" for each file that could not be recovered (read after Wait())
 };

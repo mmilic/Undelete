@@ -148,6 +148,7 @@ protected:
     // $Bitmap - one bit per cluster, set = in use. Loaded once per scan to judge recoverability.
     std::vector<BYTE> m_vVolumeBitmap;
     volatile bool *m_pbCancel;
+    volatile LONG *m_plProgressKB;
     bool m_bOwnsHandle; // m_hDrive was opened by ReadVolume (not passed in with SetDriveHandle)
     bool IsCancelled() const { return m_pbCancel && *m_pbCancel; }
     int LoadVolumeBitmap();
@@ -170,6 +171,9 @@ public:
 
     // long operations (scan, recovery of one file) stop with ERROR_CANCELLED once *pbCancel becomes true
     void SetCancelFlag(volatile bool *pbCancel);
+
+    // RetreiveAndWriteFileToDestination adds the KB it writes here (for the copy progress bar)
+    void SetProgressCounter(volatile LONG *plKBWritten) { m_plProgressKB = plKBWritten; }
     void ResolveRecycleBinNames(FileInfoHash *finfohash);
     int RetreiveAndWriteFileToDestination(int iFileRecordId, const wchar_t *wszDestinationFileName);
 

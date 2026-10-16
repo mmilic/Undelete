@@ -153,6 +153,9 @@ protected:
     DWORD m_dwBytesPerCluster;
     LONGLONG m_n64StartPos;
     volatile bool *m_pbCancel;
+    volatile LONG *m_plProgressKB;
+    LONGLONG m_llProgressPending; // bytes written but not yet added to *m_plProgressKB (less than 1 KB)
+    void AddProgress(DWORD dwBytes);
 
     int ApplyFixups(BYTE *puchRecord, DWORD dwRecSize);
     int ParseDataRuns(const BYTE *puchRuns, DWORD dwRunsLen, std::vector<NTFS_DATA_RUN> &vRuns);
@@ -179,6 +182,7 @@ public:
     int SetRecordInfo(LONGLONG n64StartPos, DWORD dwRecSize, DWORD dwBytesPerCluster);
     void SetDriveHandle(HANDLE hDrive);
     void SetCancelFlag(volatile bool *pbCancel) { m_pbCancel = pbCancel; } // data extraction stops with ERROR_CANCELLED
+    void SetProgressCounter(volatile LONG *plKBWritten) { m_plProgressKB = plKBWritten; } // KB written to the file are added here
 
     int ExtractFile(BYTE *puchMFTBuffer, LONGLONG dwLen, bool bExcludeData = false, HANDLE hFile = NULL);
 

@@ -39,6 +39,7 @@ CNTFSDrive::CNTFSDrive() {
 
     m_llStartSector = 0;
     m_pbCancel = 0;
+    m_plProgressKB = 0;
     m_bOwnsHandle = false;
 }
 
@@ -722,6 +723,7 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *w
     wxLogMessage("Extracting file \'%s\'.", sDestintationFileName);
 
     cFile.SetCancelFlag(m_pbCancel);
+    cFile.SetProgressCounter(m_plProgressKB);
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, false, hFile);
     if (nRet) {
         wxLogMessage("Extracting file \'%s\' FAILED (error %d)!!!", sDestintationFileName, nRet);

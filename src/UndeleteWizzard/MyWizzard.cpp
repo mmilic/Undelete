@@ -35,6 +35,9 @@
 
 
 MyWizard::MyWizard(wxFrame *frame, bool useSizer) {
+    mw_iNumberOfCopiedFiles = 0;
+    mw_iNumberOfSelectedFiles = 0;
+    mw_iNumberOfOverwrittenSelected = 0;
 
     //    SetExtraStyle(wxWIZARD_EX_HELPBUTTON);
     std::wstring wcWindowName = L"GetMyFilesBack "; 
