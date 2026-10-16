@@ -219,6 +219,11 @@ def build(out_dir, name, fat_type, size):
     fs.makedir("/Old Stuff")
     write(fs, "/Old Stuff/notes.txt", b"Shopping list\r\n- milk\r\n- bread\r\nCall Ana about the trip.\r\n")
     expect("/Old Stuff/notes.txt", folder="\\Old Stuff", content="Looks valid")
+    # a deleted folder bigger than one cluster: its later clusters lie after its files' data, its chain is gone
+    fs.makedir("/Big Folder")
+    for i in range(40):
+        write(fs, f"/Big Folder/holiday photo {i:02d}.bin", rnd.randbytes(700 + i))
+        expect(f"/Big Folder/holiday photo {i:02d}.bin", folder="\\Big Folder")
 
     # Recycle Bin: $R<6 chars><ext> holds the data, $I<same> the original path. $RQ1W2E3 has no long name -
     # in the Recycle Bin the lost first character can only be "$"
@@ -252,9 +257,10 @@ def build(out_dir, name, fat_type, size):
 
     raw = RawFat(img)
     for path in files:
-        if path != "/overwritten.bin" and not path.startswith("/Old Stuff/"):
+        if path != "/overwritten.bin" and not path.startswith(("/Old Stuff/", "/Big Folder/")):
             raw.delete(path)
     raw.delete("/Old Stuff")
+    raw.delete("/Big Folder")
     raw.save()
 
     with open(os.path.join(out_dir, name + ".expected.tsv"), "w", encoding="utf-8", newline="\n") as f:

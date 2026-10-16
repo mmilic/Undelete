@@ -148,7 +148,10 @@ What FAT leaves of a deleted file decides what can be recovered:
   - If its first cluster is in use, the file is judged like a contiguous one: "Overwritten" or "Partly
     overwritten".
 - **Folders**: the scan walks the folder tree, so every file comes with its folder. A deleted folder is
-  walked too, while its first cluster is free and still holds directory entries.
+  walked too, while its first cluster is free and still holds directory entries. A folder that grew beyond
+  one cluster lost the chain to its other clusters as well: they are looked for further on (up to 64 MB past
+  its first cluster) - free clusters that hold directory entries and no other folder has taken. If two
+  deleted folders grew at the same time, a file can end up listed under the wrong one of them.
 
 The TestDisk/PhotoRec source in `FAT/` was the original plan for FAT and isn't used: it is written for GCC,
 its recovery runs its own interactive ncurses UI, and it is GPL-licensed - linking it in would put the

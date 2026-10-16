@@ -154,8 +154,9 @@ private:
     // the data of runs, at most dwLen bytes: into puchOut, or written to hFile when it's given
     int ReadRuns(const std::vector<FAT_RUN> &vRuns, DWORD dwLen, BYTE *puchOut, HANDLE hFile);
 
-    // the clusters of a directory: the chain of one that exists, the guessed clusters of a deleted one
-    int ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &vData);
+    // the clusters of a directory: the chain of one that exists, the guessed clusters of a deleted one -
+    // never one in setClaimed (another deleted folder's), and the ones it takes go there
+    int ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &vData, std::set<DWORD> &setClaimed);
 
     struct ST_DIR_TO_SCAN {
         DWORD dwCluster; // 0: the fixed root directory of FAT12/16

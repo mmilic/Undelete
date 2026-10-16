@@ -32,6 +32,8 @@ Needs Python 3 on Windows. The first run makes a venv in `out\fat-test\venv` and
      `.docx` files must be "Damaged".
    - `Photos\2014\holiday.png` (the folder stays) and `Old Stuff\notes.txt` (the folder is deleted too) must come
      back with their folders. The deleted folder is read from its first cluster, which is free.
+   - `Big Folder` with 40 long-named files is deleted too. It needs several clusters, with its files' data
+     between them, so its chain has to be guessed. All 40 files must be found, in `\Big Folder`.
    - Three Recycle Bin pairs in `$RECYCLE.BIN\S-1-5-21-1`, written by the NTFS test's
      `make_recycle_info.py`. Each `$R` file must come back under its original name and folder, and the `$I`
      files must not be listed. `$RQ1W2E3` has no long name: its lost first character can only be `$`.

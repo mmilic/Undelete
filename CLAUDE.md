@@ -83,7 +83,8 @@ drive strip).
   `CMFTRecord`), builds a `FileInfoHash` of recoverable file records, copies a given MFT record's data to disk.
 - `FATDrive.{h,cpp}` — `CFATDrive`, the FAT12/16/32 engine. Deleted entries have `0xE5` as their first byte, and
   their cluster chain is freed. The scan walks the folder tree from the root, deleted folders included while
-  their first cluster is free. Long names come back whole, and the lost first byte of the 8.3 name is restored
+  their first cluster is free; a deleted folder's later clusters are searched for further on
+  (`ReadDirectory`, strict `LooksLikeDirectory` so file data never passes). Long names come back whole, and the lost first byte of the 8.3 name is restored
   through the long-name checksum. The data's clusters are guessed (`GuessClusters`): from the first cluster on,
   skipping clusters in use. Clusters had to be skipped → never "Good". First cluster in use → judged as
   contiguous. The FAT is read once per scan; only the in-use bitmap is kept for recovery, so recovery uses the

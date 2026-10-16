@@ -20,6 +20,7 @@
 #define MAX_DIRECTORY_SIZE (65536 * 32) // a FAT directory has at most 65536 entries
 #define MAX_FAT_SIZE (512 * 1024 * 1024) // FAT32 of a 2 TB volume with 32 KB clusters: 256 MB
 #define COPY_CHUNK_SIZE (1024 * 1024)
+#define MAX_DELETED_DIRECTORY_SEARCH (64 * 1024 * 1024) // how far past its first cluster a deleted folder's next ones are looked for
 
 // how far the cluster guess may go past clusters in use before it gives up: as many as the file has, at least
 // this many - a file fragmented around a big file that still exists is out of reach anyway
@@ -491,16 +492,28 @@ static bool IsDotEntry(const FAT_DIR_ENTRY &e) {
     return !memcmp(e.uchName, ".          ", 11) || !memcmp(e.uchName, "..         ", 11);
 }
 
-// does this look like directory entries? Used for clusters of deleted folders, which may hold anything by now
+// does this look like directory entries? Used for clusters of deleted folders, which may hold anything by now -
+// strict, because a file's data must not pass: every entry valid, and after the end of the directory only zeros
+// (the rest of a folder's last cluster is zeroed when the folder gets it)
 
 static bool LooksLikeDirectory(const BYTE *puchData, DWORD dwLen) {
     for (DWORD i = 0; i + 32 <= dwLen; i += 32) {
         const FAT_DIR_ENTRY &e = *(const FAT_DIR_ENTRY *) (puchData + i);
-        if (!e.uchName[0])
-            return true; // the end of the directory
-        if (e.uchAttributes == ATTR_LONG_NAME)
+        if (!e.uchName[0]) { // the end of the directory
+            for (DWORD j = i; j < dwLen; j++)
+                if (puchData[j])
+                    return false;
+            return true;
+        }
+        if (e.uchAttributes == ATTR_LONG_NAME) {
+            const FAT_LFN_ENTRY &lfn = *(const FAT_LFN_ENTRY *) (puchData + i);
+            if (lfn.uchType || lfn.wFirstCluster)
+                return false;
             continue;
-        if ((e.uchAttributes & 0xC0) || IsDotEntry(e))
+        }
+        if (e.uchAttributes & 0xC0)
+            return false; // bits no FAT entry has
+        if (IsDotEntry(e))
             continue;
         if (e.uchName[0] != DELETED_ENTRY && e.uchName[0] != 0x05 && !IsShortNameChar(e.uchName[0]))
             return false;
@@ -518,7 +531,7 @@ static bool HasEndOfDirectory(const BYTE *puchData, DWORD dwLen) {
     return false;
 }
 
-int CFATDrive::ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &vData) {
+int CFATDrive::ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &vData, std::set<DWORD> &setClaimed) {
     vData.clear();
     if (!dwCluster) { // the fixed root directory of FAT12/16
         vData.resize(m_dwRootDirBytes);
@@ -550,27 +563,51 @@ int CFATDrive::ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &
         return ERROR_SUCCESS;
     }
 
-    // a deleted folder: its chain is gone - its first cluster, then the next free clusters, for as long as they
-    // look like directory entries and the end of the directory hasn't come yet
-    std::vector<BYTE> vCluster(m_dwBytesPerCluster);
-    for (DWORD c = dwCluster, dwRead = 0, dwSkipped = 0; c <= m_dwMaxCluster && dwRead < dwMaxClusters && dwSkipped < 256; c++) {
-        if (IsClusterInUse(c)) {
-            if (!dwRead)
-                return ERROR_FILE_CORRUPT; // its first cluster belongs to something else now
-            dwSkipped++;
+    // A deleted folder: its chain is gone, only its first cluster is known. It must still be free and still
+    // start with the "." entry - else it holds something else by now.
+    if (IsClusterInUse(dwCluster))
+        return ERROR_FILE_CORRUPT;
+    vData.resize(m_dwBytesPerCluster);
+    int nRet = ReadClusters(dwCluster, 1, &vData[0]);
+    if (nRet || !IsDotEntry(*(const FAT_DIR_ENTRY *) &vData[0]) || !LooksLikeDirectory(&vData[0], m_dwBytesPerCluster)) {
+        vData.clear();
+        return nRet ? nRet : ERROR_FILE_CORRUPT;
+    }
+    if (HasEndOfDirectory(&vData[0], m_dwBytesPerCluster))
+        return ERROR_SUCCESS;
+
+    // It grew: a folder gets its next cluster when it fills up - from the free space of that moment, usually
+    // after the data of the files it held by then. That data is free now too, so look further on for free
+    // clusters that hold directory entries, until the one with the end of the folder. Not an empty one (a
+    // folder's next cluster starts with an entry), not one starting another folder (its "." entry), not one
+    // another folder already took. The data in between can be large - only so far, read in big pieces.
+    DWORD dwSearch = MAX_DELETED_DIRECTORY_SEARCH / m_dwBytesPerCluster;
+    DWORD dwChunk = wxMax((DWORD) 1, (DWORD) (COPY_CHUNK_SIZE / m_dwBytesPerCluster));
+    std::vector<BYTE> vChunk((size_t) dwChunk * m_dwBytesPerCluster);
+    DWORD dwRead = 1;
+    for (DWORD c = dwCluster + 1; c <= m_dwMaxCluster && c - dwCluster <= dwSearch && dwRead < dwMaxClusters;) {
+        if (IsClusterInUse(c) || setClaimed.count(c)) {
+            c++;
             continue;
         }
-        int nRet = ReadClusters(c, 1, &vCluster[0]);
-        if (nRet)
-            return vData.empty() ? nRet : ERROR_SUCCESS;
-        if (!LooksLikeDirectory(&vCluster[0], m_dwBytesPerCluster))
-            break;
-        vData.insert(vData.end(), vCluster.begin(), vCluster.end());
-        dwRead++;
-        if (HasEndOfDirectory(&vCluster[0], m_dwBytesPerCluster))
-            break;
+        // the free clusters from here on, in one read
+        DWORD dwCount = 1;
+        while (dwCount < dwChunk && c + dwCount <= m_dwMaxCluster && !IsClusterInUse(c + dwCount) && !setClaimed.count(c + dwCount))
+            dwCount++;
+        if (ReadClusters(c, dwCount, &vChunk[0]))
+            break; // what was found so far
+        for (DWORD i = 0; i < dwCount; i++) {
+            const BYTE *puchCluster = &vChunk[(size_t) i * m_dwBytesPerCluster];
+            if (!puchCluster[0] || IsDotEntry(*(const FAT_DIR_ENTRY *) puchCluster) || !LooksLikeDirectory(puchCluster, m_dwBytesPerCluster))
+                continue;
+            setClaimed.insert(c + i);
+            vData.insert(vData.end(), puchCluster, puchCluster + m_dwBytesPerCluster);
+            if (HasEndOfDirectory(puchCluster, m_dwBytesPerCluster) || ++dwRead >= dwMaxClusters)
+                return ERROR_SUCCESS;
+        }
+        c += dwCount;
     }
-    return vData.empty() ? ERROR_FILE_CORRUPT : ERROR_SUCCESS;
+    return ERROR_SUCCESS;
 }
 
 static BYTE ShortNameChecksum(const BYTE *puchName) {
@@ -706,7 +743,7 @@ static std::wstring ChildPath(const std::wstring &sParent, const std::wstring &s
 void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_SCAN> &vToScan, std::set<DWORD> &setSeen,
         FileInfoHash *finfohash) {
     std::vector<BYTE> vData;
-    int nRet = ReadDirectory(dir.dwCluster, dir.bDeleted, vData);
+    int nRet = ReadDirectory(dir.dwCluster, dir.bDeleted, vData, setSeen);
     if (nRet) {
         if (!dir.bDeleted)
             wxLogMessage("Cannot read the folder %s (error %d).", wxString(dir.sPath.c_str()), nRet);
@@ -804,7 +841,7 @@ int CFATDrive::ScanFiles(FileInfoHash *finfohash) {
 
     // the folders still to scan - a stack: the order doesn't matter, every folder carries its own path
     std::vector<ST_DIR_TO_SCAN> vToScan;
-    std::set<DWORD> setSeen; // folders already found - a damaged or reused folder must not make a loop
+    std::set<DWORD> setSeen; // folder clusters already taken - a damaged or reused folder must not make a loop
     ST_DIR_TO_SCAN root = {m_dwRootCluster, false, L"\\"};
     vToScan.push_back(root);
     if (m_dwRootCluster)
