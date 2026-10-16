@@ -5,6 +5,8 @@
 #include <wx/wx.h>
 #include <wx/init.h>
 #include <wx/log.h>
+#include <wx/image.h>
+#include <wx/mstream.h>
 #include <stdio.h>
 #include "NTFSDrive.h"
 
@@ -66,5 +68,28 @@ int main(int argc, char **argv) {
     }
     // each file can leave up to 1 KB uncounted (the counter is in whole KB)
     printf("PROGRESS\t%ld\t%ld\t%d\n", (long) lKBWritten, (long) (llBytesRecovered / 1024), iRecovered);
+
+    // the image preview's path: read the deleted data into memory and decode it (like wxSelectFilesPage::OnPreviewTimer)
+    wxInitAllImageHandlers();
+    for (FileInfoHash::iterator it = hash.begin(); it != hash.end(); ++it) {
+        t_FileInfo *pInfo = it->second;
+        wxString name(pInfo->sFilename.c_str());
+        if (!name.Lower().EndsWith(".png") && !name.Lower().EndsWith(".jpg"))
+            continue;
+
+        BYTE *puchData = NULL;
+        DWORD dwLen = 0;
+        wxImage image;
+        if (!drive.Read_File(pInfo->iRecordId, puchData, dwLen)) {
+            wxLogNull noLog;
+            wxMemoryInputStream stream(puchData, dwLen);
+            image.LoadFile(stream, wxBITMAP_TYPE_ANY);
+            delete[] puchData;
+        }
+        if (image.IsOk())
+            printf("PREVIEW\t%s\t%dx%d\n", (const char *) name.utf8_str(), image.GetWidth(), image.GetHeight());
+        else
+            printf("PREVIEW\t%s\tno image\n", (const char *) name.utf8_str());
+    }
     return 0;
 }

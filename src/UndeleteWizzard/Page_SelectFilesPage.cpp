@@ -4,6 +4,8 @@
 #include <wx/wizard.h>
 #include <wx/dir.h>
 #include <wx/tglbtn.h>
+#include <wx/mstream.h>
+#include <wx/image.h>
 //#include <wx/srchctrl.h>
 
 #include "NTFSDrive.h"
@@ -16,7 +18,6 @@
 
 DEFINE_EVENT_TYPE(wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG)
 DEFINE_EVENT_TYPE(wxEVT_SELECT_FILES_PAGE_STOP_DIALOG)
-DEFINE_EVENT_TYPE(wxEVT_SELECT_FILES_SEARCH_ACTION)
 
 wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(parent) {
     m_bitmap = wxBitmap(SidePicture3_xpm);
@@ -55,6 +56,18 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     sizerHoldingTheButtonsOnTheRightSide->Add(wxFilterImages, 0, wxTOP, 35);
     sizerHoldingTheButtonsOnTheRightSide->Add(wxFilterVideo, 0, wxTOP, 4);
     sizerHoldingTheButtonsOnTheRightSide->Add(wxFilterMusic, 0, wxTOP, 4);
+
+    // preview of the focused file, read straight from the drive - if it doesn't decode, the data is damaged
+    m_bmpPreview = new wxStaticBitmap(this, -1, wxNullBitmap, wxDefaultPosition, wxSize(PREVIEW_SIZE, PREVIEW_SIZE));
+    m_txtPreview = new wxStaticText(this, -1, wxT("Select an image\nto see a preview."), wxDefaultPosition,
+            wxSize(PREVIEW_SIZE, -1), wxST_NO_AUTORESIZE);
+    m_txtPreview->SetForegroundColour(wxColour(60, 60, 60));
+    sizerHoldingTheButtonsOnTheRightSide->Add(new wxStaticText(this, -1, wxT("Preview:")), 0, wxTOP, 20);
+    sizerHoldingTheButtonsOnTheRightSide->Add(m_bmpPreview, 0, wxTOP, 4);
+    sizerHoldingTheButtonsOnTheRightSide->Add(m_txtPreview, 0, wxTOP, 4);
+
+    m_previewTimer.SetOwner(this, PREVIEW_TIMER);
+    m_bCopying = false;
 
     sizerHoldingButtonsAboveTheList->Add(wxSellectAllButton, 0, wxLEFT, 0);
     sizerHoldingButtonsAboveTheList->Add(wxUnselectAllButton, 0, wxLEFT, 5);
@@ -195,9 +208,7 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         thCopyFiles->SetFinfoHashPtr(pWizard->GetPtrFileInfoHash());
         thCopyFiles->SetFilesToCopy(vFilesToCopy);
         thCopyFiles->SetDestinationDirPtr(pWizard->GetMw_ptrDestinationDir());
-        thCopyFiles->SetMutexLockPtr(pWizard->GetPtrListMutex()); // ovo nicemu ne sluzi
         thCopyFiles->SetCancelProgresControl(false);
-        thCopyFiles->SetMwPtr_strSelectedDir(pWizard->GetMw_ptrDestinationDir());
         thCopyFiles->SetIptrNumberOfCopiedFiles(ptrNumberOfCopiedFiles);
 
         if (thCopyFiles->Create() != wxTHREAD_NO_ERROR) {
@@ -213,6 +224,9 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         this->m_NumberOfFileBeingCopied = 0;
         this->mw_bRunDialog = true;
 
+        // the copy thread now owns the drive - no previews until it's done (the timer still fires in the dialog's loop)
+        m_previewTimer.Stop();
+        m_bCopying = true;
         thCopyFiles->Run();
 
         bool cont = true; // ovaj se koristi ako je stisnut cancel
@@ -251,6 +265,7 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         }
         *pWizard->GetPtrRecoveryFailures() = thCopyFiles->m_vFailures;
         delete thCopyFiles;
+        m_bCopying = false;
         wxLog::FlushActive(); // the thread's log lines
         dialog.Hide();
 
@@ -368,6 +383,68 @@ void wxSelectFilesPage::OnFilesListClick(wxCommandEvent & event) {
     wxFilterImages->SetValue(false);
     wxFilterVideo->SetValue(false);
     wxFilterMusic->SetValue(false);
+
+    // a short delay, so scrolling through the list with the arrow keys doesn't read every file on the way
+    m_previewTimer.Start(250, wxTIMER_ONE_SHOT);
+}
+
+// show the focused file in the preview box. Reads the deleted file's data from the drive (in the GUI thread -
+// only while no scan or copy thread is using the drive) and tries to decode it as an image.
+
+#define MAX_PREVIEW_FILE_SIZE (32 * 1024 * 1024)
+
+void wxSelectFilesPage::OnPreviewTimer(wxTimerEvent & event) {
+    if (m_bCopying)
+        return;
+
+    long lItem = m_lcFilesInSelectedDrive->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+    t_FileInfo *pFile = m_lcFilesInSelectedDrive->GetFile(lItem);
+
+    m_bmpPreview->SetBitmap(wxNullBitmap);
+    if (!pFile) {
+        m_txtPreview->SetLabel(wxT("Select an image\nto see a preview."));
+        return;
+    }
+    if (!_isImage(pFile->sFilename.c_str())) {
+        m_txtPreview->SetLabel(wxT("No preview -\nnot an image."));
+        return;
+    }
+    if (pFile->n64RealSize > MAX_PREVIEW_FILE_SIZE) {
+        m_txtPreview->SetLabel(wxT("Too large\nfor a preview."));
+        return;
+    }
+
+    BYTE *puchData = NULL;
+    DWORD dwLen = 0;
+    int nRet;
+    {
+        wxBusyCursor busy;
+        nRet = ((MyWizard *) GetParent())->GetPtrCNTFSDrive()->Read_File(pFile->iRecordId, puchData, dwLen);
+    }
+    if (nRet) {
+        m_txtPreview->SetLabel(wxT("No preview -\nthe data can't be read."));
+        return;
+    }
+
+    wxImage image;
+    {
+        wxLogNull noLog; // a damaged image is expected here, not an error worth a message
+        wxMemoryInputStream stream(puchData, dwLen);
+        image.LoadFile(stream, wxBITMAP_TYPE_ANY);
+    }
+    delete[] puchData;
+
+    if (!image.IsOk()) {
+        m_txtPreview->SetLabel(wxT("No preview - the data\nis probably damaged."));
+        return;
+    }
+
+    wxString sSize = wxString::Format("%d x %d", image.GetWidth(), image.GetHeight());
+    double dScale = wxMin((double) PREVIEW_SIZE / image.GetWidth(), (double) PREVIEW_SIZE / image.GetHeight());
+    if (dScale < 1.0)
+        image.Rescale(wxMax(1, (int) (image.GetWidth() * dScale)), wxMax(1, (int) (image.GetHeight() * dScale)), wxIMAGE_QUALITY_HIGH);
+    m_bmpPreview->SetBitmap(wxBitmap(image));
+    m_txtPreview->SetLabel(sSize);
 }
 
 void wxSelectFilesPage::OnListColumnClick(wxCommandEvent & event) {
@@ -402,6 +479,7 @@ EVT_WIZARD_PAGE_SHOWN(wxID_ANY, wxSelectFilesPage::OnPageShown)
 EVT_SEARCHCTRL_SEARCH_BTN(SEARCH_CONTROL, wxSelectFilesPage::OnSearchAction)
 EVT_TEXT_ENTER(SEARCH_CONTROL, wxSelectFilesPage::OnSearchAction)
 EVT_SEARCHCTRL_CANCEL_BTN(SEARCH_CONTROL, wxSelectFilesPage::OnSearchCancel)
+EVT_TIMER(PREVIEW_TIMER, wxSelectFilesPage::OnPreviewTimer)
 //EVT_WIZARD_CANCEL(wxID_ANY, wxSelectFilesPage::OnWizardCancel)
 END_EVENT_TABLE()
 

@@ -47,18 +47,19 @@ real/virtual drive and check the recovered files.
   hardcoded expiry check: a "this version expires" popup after 2016-01-01, and an `exit(0)` after 2016-10-01.
   Both have been removed — the app no longer has any date-based behaviour.
 - `MyWizzard.{h,cpp}` — the `wxWizard` (`MyWizard`) driving the UX: select source drive → select destination
-  dir → select files to recover → done. Shared state (selected drive/dir, file hash map, mutex/critical
-  section for cross-thread list updates, log file handle, active language pack) lives on the wizard instance
-  and is passed down to each page via getters/setters — follow this pattern for new wizard-wide state.
+  dir → select files to recover → done. Shared state (selected drive/dir, file hash map, the files list,
+  recovery counts and failures, active language pack) lives on the wizard instance and is passed down to each
+  page via getters/setters — follow this pattern for new wizard-wide state.
 - `Page_*.{h,cpp}` — one `wxWizardPage` per step. `Page_SelectFilesPage` is the core page (lists recoverable
   files, filter buttons, triggers scan/copy). `Page_SelectDestinationDirPage` is where the FAT/NTFS branch
   happens (see "FAT support" below).
 - `NTFSDrive.{h,cpp}` / `MFTRecord.{h,cpp}` — the actual NTFS recovery engine: parses the MFT (`CNTFSDrive`/
   `CMFTRecord`), builds a `FileInfoHash` of recoverable file records, copies a given MFT record's data to disk.
   This is the real, finished, working feature.
-- `MyThreadClass.{h,cpp}` — background-thread scanning/copying so the GUI stays responsive; posts custom
-  events (`wxEVT_SHOW_NOTIFICATION`, `wxEVT_ENABLE_GUI_FIELDS`) back to the main thread, guarded by the
-  wizard's mutex/critical section when touching shared state. Threads must not touch wx controls: the scan
+- `MyThreadClass.{h,cpp}` — background-thread scanning/copying so the GUI stays responsive; reports progress
+  with custom events (`wxEVT_SELECT_*_PULSE_DIALOG` / `_STOP_DIALOG`) sent with `ProcessEvent`, so the handlers
+  run in the worker thread and only store values (the progress text behind a critical section on the page).
+  Threads must not touch wx controls: the scan
   thread only fills the `FileInfoHash`, the page fills the list afterwards; the copy thread gets a
   `std::vector<t_FileInfo*>` collected by the page. Threads are joinable: the page `Wait()`s for them (also
   after Cancel, which they notice via a flag the engine checks) and reads the outcome from `m_iResult` - no

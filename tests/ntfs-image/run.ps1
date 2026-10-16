@@ -1,4 +1,4 @@
-# End-to-end check of the NTFS recovery engine, no admin rights needed:
+﻿# End-to-end check of the NTFS recovery engine, no admin rights needed:
 #   1. builds an NTFS disk image with deleted test files (WSL + ntfs-3g)
 #   2. builds the harness, which runs CNTFSDrive/CMFTRecord against the image
 #   3. recovers every deleted file and compares the test files with their original checksums
@@ -25,14 +25,23 @@ if ($LASTEXITCODE -ne 0) { throw "harness failed - see $OutDir\run.log" }
 
 # recoverability the engine reported for each file (from the harness's tab separated FILE lines)
 $recoverability = @{}
+$preview = @{}
 $progress = $null
 foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "run.log")) {
     $f = $line -split "`t"
     if ($f[0] -eq "FILE") { $recoverability[$f[2]] = $f[3] }
     if ($f[0] -eq "PROGRESS") { $progress = $f }
+    if ($f[0] -eq "PREVIEW") { $preview[$f[1]] = $f[2] }
 }
 
 $failed = 0
+
+# the image preview reads deleted data and decodes it: the real PNG must decode, random bytes named .jpg must not
+foreach ($check in @(@("preview.png", "120x80"), @("фотографија.jpg", "no image"))) {
+    $got = $preview[$check[0]]
+    if ($got -eq $check[1]) { Write-Host "Preview of $($check[0]): $got - OK" }
+    else { Write-Host "Preview of $($check[0]): '$got' instead of '$($check[1])' - WRONG"; $failed++ }
+}
 
 # the copy progress counter must match what was written (whole KB, so up to 1 KB per file may be missing)
 $kbCounted, $kbExpected, $files = [long]$progress[1], [long]$progress[2], [long]$progress[3]

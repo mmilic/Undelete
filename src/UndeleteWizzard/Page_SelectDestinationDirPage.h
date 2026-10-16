@@ -20,7 +20,6 @@ public:
     //event processing
     void OnWizardPageChanging(wxWizardEvent& event);
     void ChooseDestination(wxCommandEvent & event);
-    void OnShowNotification(wxCommandEvent & event);
     void OnPulseDialogEvent(wxCommandEvent & event);
     void OnStopDialogEvent(wxCommandEvent & event);  
     void OnPageShown(wxWizardEvent& event);

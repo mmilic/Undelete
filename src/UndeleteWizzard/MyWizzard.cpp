@@ -165,26 +165,6 @@ MyWizard::MyWizard(wxFrame *frame, bool useSizer) {
     //    }
 }
 
-void MyWizard::SetPtrHLogFile(HANDLE *PtrHLogFile) {
-
-    this->mwPtr_hLogFile = PtrHLogFile;
-}
-
-HANDLE *MyWizard::GetPtrHLogFile() {
-
-    return mwPtr_hLogFile;
-}
-
-void MyWizard::SetPtrListMutex(wxMutex *PtrListMutex) {
-
-    this->mwPtr_ListMutex = PtrListMutex;
-}
-
-wxMutex *MyWizard::GetPtrListMutex() {
-
-    return mwPtr_ListMutex;
-}
-
 void MyWizard::SetPtrFileInfoHash(FileInfoHash *PtrFileInfoHash) {
 
     this->mwPtr_FileInfoHash = PtrFileInfoHash;
@@ -193,16 +173,6 @@ void MyWizard::SetPtrFileInfoHash(FileInfoHash *PtrFileInfoHash) {
 FileInfoHash *MyWizard::GetPtrFileInfoHash() {
 
     return mwPtr_FileInfoHash;
-}
-
-void MyWizard::SetPtrCritsect(wxCriticalSection *PtrCritsect) {
-
-    this->mwPtr_critsect = PtrCritsect;
-}
-
-wxCriticalSection *MyWizard::GetPtrCritsect() {
-
-    return mwPtr_critsect;
 }
 
 void MyWizard::SetPtrCNTFSDrive(CNTFSDrive *PtrCNTFSDrive) {

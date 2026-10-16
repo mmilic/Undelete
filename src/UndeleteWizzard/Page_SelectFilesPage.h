@@ -13,6 +13,9 @@
 #endif	/* PAGE_SELECTFILESPAGE_H */
 
 #define FILE_NAME_COLUMN 0
+#define PREVIEW_SIZE 160 // the preview box, in pixels
+
+#include <wx/timer.h>
 
 #include <wx/srchctrl.h>
 #include "DeletedFilesList.h"
@@ -39,6 +42,12 @@ public:
 
     void SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect);
     void UpdateFoundFilesLabel();
+    void OnPreviewTimer(wxTimerEvent & event);
+
+    wxStaticBitmap *m_bmpPreview;
+    wxStaticText *m_txtPreview;
+    wxTimer m_previewTimer; // the preview is loaded a moment after the focus stops moving
+    bool m_bCopying; // the copy thread uses the drive - no preview reads meanwhile
 
     CDeletedFilesList *m_lcFilesInSelectedDrive;
     //    int m_NumberOfSelectedFiles;

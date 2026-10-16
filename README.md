@@ -24,11 +24,12 @@ uses the compiler and static libraries vendored in `tools/`.
 
 ### Running it
 
-The built exe's manifest requests `requestedExecutionLevel="highestAvailable"` (it needs raw NTFS
+The built exe's manifest requests `requestedExecutionLevel="requireAdministrator"` (it needs raw NTFS
 volume access), so:
+- Started from Explorer, Windows shows the UAC prompt (a standard user is asked for admin
+  credentials) - the app never runs without admin rights.
 - Launching it from a non-elevated shell fails outright (`CreateProcess` error 740) rather than
-  prompting for UAC.
-- Launch it from Explorer or an elevated PowerShell/cmd.
+  prompting for UAC. Launch it from Explorer or an elevated PowerShell/cmd.
 
 ## Repo layout
 

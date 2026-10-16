@@ -22,6 +22,8 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
    - three Recycle Bin pairs, `$R…` (the data) plus `$I…` (the original path), written by
      `make_recycle_info.py`. One uses the Vista–8.1 `$I` format with a Cyrillic path, one the Windows 10+ format,
      and one has no file extension. Each must come back under its original name.
+   - `preview.png`, a real image written by `make_png.py`. The image preview's read-and-decode path must
+     show it, and must reject `фотографија.jpg`, which is random bytes.
    - `keeper.bin`, which is not deleted: it takes the rest of the freed filler clusters, so some deleted
      fillers really are overwritten. The engine must flag those, and flag every test file Good.
 2. `build_harness.ps1` compiles `harness.cpp` with the engine sources from `src\`. With `-WithOld` it also

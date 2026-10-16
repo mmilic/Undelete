@@ -39,7 +39,8 @@ enum {
     FILTER_VIDEO_BUTTON,
     FILTER_MUSIC_BUTTON,
     SEARCH_CONTROL,
-    END_PAGE_OPEN_FOLDER_BUTTON
+    END_PAGE_OPEN_FOLDER_BUTTON,
+    PREVIEW_TIMER
 };
 
 #define SET_COLOR_FOR_CURRENT_INSTANCE          this->SetOwnBackgroundColour(wxColour(210, 222, 255)); \
@@ -65,17 +66,8 @@ public:
     void OnWizardCancel(wxWizardEvent& event);
     void OnWizardFinished(wxWizardEvent& event);
 
-    void SetPtrHLogFile(HANDLE *PtrHLogFile);
-    HANDLE *GetPtrHLogFile();
-
-    void SetPtrListMutex(wxMutex *PtrListMutex);
-    wxMutex *GetPtrListMutex();
-
     void SetPtrFileInfoHash(FileInfoHash *PtrFileInfoHash);
     FileInfoHash *GetPtrFileInfoHash();
-
-    void SetPtrCritsect(wxCriticalSection *PtrCritsect);
-    wxCriticalSection *GetPtrCritsect();
 
     void SetPtrCNTFSDrive(CNTFSDrive *PtrCNTFSDrive);
     CNTFSDrive *GetPtrCNTFSDrive();
@@ -106,14 +98,11 @@ private:
     wxString *mwPtr_strSourceDrive;
     wxString *mwPtr_DestinationDir;
     FileInfoHash *mwPtr_FileInfoHash;
-    wxCriticalSection *mwPtr_critsect; //Critical section mutex for control of hash map update :) :) sounds nice ;)
     CDeletedFilesList *mwPtr_SelectedFiles;
     int mw_iNumberOfCopiedFiles;
     int mw_iNumberOfSelectedFiles;
     int mw_iNumberOfOverwrittenSelected;
     std::vector<wxString> mw_vRecoveryFailures;
-    wxMutex *mwPtr_ListMutex;
-    HANDLE *mwPtr_hLogFile;
     ILanguage *languagePack;
 
     DECLARE_EVENT_TABLE()

@@ -201,7 +201,6 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
         thLoadFiles->SetDestinationDirPtr(ptrDestinationDir);
         thLoadFiles->SetCancelProgresControl(false);
         thLoadFiles->SetSourceDrive(((MyWizard *) GetParent())->GetMwPtr_strSourceDrive());
-        thLoadFiles->SetMutexLockPtr(((MyWizard *) GetParent())->GetPtrListMutex()); // ovo nicemu ne sluzi        
 
         if (thLoadFiles->Create() != wxTHREAD_NO_ERROR) {
             delete thLoadFiles;
@@ -366,10 +365,6 @@ void wxSelectDestinationDirPage::ChooseDestination(wxCommandEvent & event) {
     }
 }
 
-void wxSelectDestinationDirPage::OnShowNotification(wxCommandEvent & event) {
-    wxMessageDialog *dial = new wxMessageDialog(NULL, event.GetString(), wxT("Info"), wxOK | wxICON_INFORMATION);
-    dial->ShowModal();
-}
 
 void wxSelectDestinationDirPage::OnDialogColourChanging(wxSysColourChangedEvent & event) {
     printf("sranje");

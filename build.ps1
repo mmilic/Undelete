@@ -108,4 +108,4 @@ $linkArgs += @("-o", $exePath)
 if ($LASTEXITCODE -ne 0) { throw "link failed" }
 
 Write-Host "Built: $exePath"
-Write-Host "Note: the embedded manifest requests elevation (highestAvailable) - launch it from an elevated shell/Explorer, and expect a UAC prompt, since it needs raw NTFS volume access."
+Write-Host "Note: the embedded manifest requires administrator rights (raw NTFS volume access) - launch it from Explorer or an elevated shell, and expect a UAC prompt."

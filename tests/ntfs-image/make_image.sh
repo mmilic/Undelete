@@ -48,8 +48,11 @@ head -c 3000 /dev/urandom > "$MNT/Čačak ćevapi.txt"
 head -c 3000 /dev/urandom > "$MNT/фотографија.jpg"
 head -c 3000 /dev/urandom > "$MNT/Grüße.txt"
 
+# a real image (the preview must decode it) - "фотографија.jpg" above is random bytes (the preview must not)
+python3 "$(dirname "$0")/make_png.py" 120 80 "$MNT/preview.png"
+
 (cd "$MNT" && sha256sum fragmented.bin "$LONG" tiny_resident.bin sparse.bin \
-  "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt") > "$D/expected.sha256"
+  "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt" preview.png) > "$D/expected.sha256"
 
 # Recycle Bin: the deleted file is $R<6 chars><ext>, its original path is in the matching $I file.
 # The engine should recover each $R file under its original name.
@@ -75,7 +78,7 @@ done
 
 ntfs-3g "$IMG" "$MNT"
 rm "$MNT/fragmented.bin" "$MNT/$LONG" "$MNT/tiny_resident.bin" "$MNT/sparse.bin" \
-  "$MNT/Čačak ćevapi.txt" "$MNT/фотографија.jpg" "$MNT/Grüße.txt" \
+  "$MNT/Čačak ćevapi.txt" "$MNT/фотографија.jpg" "$MNT/Grüße.txt" "$MNT/preview.png" \
   "$MNT"/'$R'* "$MNT"/'$I'*
 umount "$MNT"
 echo "image ready: $IMG"

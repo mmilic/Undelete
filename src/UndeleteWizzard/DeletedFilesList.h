@@ -50,6 +50,7 @@ public:
 protected:
     virtual wxString OnGetItemText(long lItem, long lColumn) const;
     virtual wxListItemAttr *OnGetItemAttr(long lItem) const;
+    void OnListKeyDown(wxListEvent &event);
 
 private:
     void Rebuild(); // re-apply filter and sort, keep the selection

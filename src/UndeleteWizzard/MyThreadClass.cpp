@@ -8,39 +8,15 @@
 #include "MyThreadClass.h"
 #include "IsValidFileName.h"
 
-
-
-
-#define MY_SHOW_ERROR_MESSAGE(Str)      {                                                               \
-                                        wxString myErrorMessage;                                        \
-                                        myErrorMessage.Printf(Str);\
-                                                                                                        \
-                                        wxMessageDialog *dial = new wxMessageDialog(NULL,               \
-                                        myErrorMessage, wxT("Error"), wxOK | wxICON_ERROR);             \
-                                        dial->ShowModal();                                              \
-                                        }                                                               \
-                                        
-#define MY_SHOW_INFO_MESSAGE(Str)      {                                                                \
-                                        wxString myErrorMessage;                                        \
-                                        myErrorMessage.Printf(Str);\
-                                                                                                        \
-                                        wxMessageDialog *dial = new wxMessageDialog(NULL,               \
-                                        myErrorMessage, wxT("Info"), wxOK | wxICON_INFORMATION);        \
-                                        dial->ShowModal();                                              \
-                                        }    
-
-#define LOG(args...) if(log_file)    log_file << args << std::endl;
-
-DEFINE_EVENT_TYPE(wxEVT_SHOW_NOTIFICATION)
-DEFINE_EVENT_TYPE(wxEVT_ENABLE_GUI_FIELDS)
-
 //First define the thread classes. In some other versions, this should probably go into a different file so that it is more readoble, but for now, it stays here.
 
 void MyThreadClass::Init() {
-    m_count = 0;
     m_pUsedNTFSDrive = NULL;
     m_finfohash = NULL;
+    m_wxpDestinationDir = NULL;
+    m_wxpSourceDrive = NULL;
     m_parent = NULL; //treba mi da bi ovaj thread mogao da baca evente
+    m_iptrNumberOfCopiedFiles = NULL;
     m_CancelProgresControl = false;
     m_iResult = ERROR_SUCCESS;
 }
@@ -69,11 +45,6 @@ MyThreadClass::MyThreadClass()
     Init();
 }
 
-//MyThreadClass::MyThreadClass(wxFrame *parent) : wxThread() {
-//    Init();
-//    m_parent = parent; //treba mi da bi ovaj thread mogao da baca evente
-//}
-
 MyThreadClass::MyThreadClass(wxWindow *parent) : wxThread(wxTHREAD_JOINABLE) {
     Init();
     m_parent = parent; //treba mi da bi ovaj thread mogao da baca evente
@@ -95,14 +66,6 @@ void MyThreadClass::SetSourceDrive(wxString *ptr) {
     m_wxpSourceDrive = ptr;
 }
 
-void MyThreadClass::SetMutexLockPtr(wxMutex *ptr) {
-    m_LockPtr = ptr;
-}
-
-void MyThreadClass::SetLogHndl(HANDLE hFile) {
-    hFileLog = hFile;
-}
-
 MyThreadClass::~MyThreadClass() {
 }
 
@@ -110,31 +73,8 @@ MyThreadLoadFilesFromDiskNTFS::MyThreadLoadFilesFromDiskNTFS(wxWindow *parent)
 : MyThreadClass(parent) {
 }
 
-//MyThreadSearchAction::MyThreadSearchAction(wxWindow *parent)
-//: MyThreadClass(parent) {
-//}
-
-// ovaj ne sluzi nicemu, moze i da se obrise
-
-void MyThreadClass::ThrowInfoEvent(wxString wxstrMessage) {
-    wxCommandEvent event(wxEVT_SHOW_NOTIFICATION, m_parent->GetId());
-
-    //Give it some contents
-    event.SetString(wxstrMessage);
-    // Send it
-    if (!m_parent->GetEventHandler()->ProcessEvent(event)) {
-        wxLogMessage("Unable to send event: wxEVT_SHOW_NOTIFICATION");
-    }
-}
-
-// ovaj ne sluzi nicemu, moze i da se obrise
-
-void MyThreadClass::ThrowEnableGuiEvent() {
-    wxCommandEvent event(wxEVT_ENABLE_GUI_FIELDS, m_parent->GetId());
-
-    if (!m_parent->GetEventHandler()->ProcessEvent(event))
-        printf("sranje");
-}
+// The events below are sent with ProcessEvent, so their handlers run in this (worker) thread: the handlers only
+// store values, behind a lock where needed (see the pages' SetDialogString).
 
 void MyThreadClass::ThrowSelectDestinationDrivePulseEvent(wxString wxstrMessage) {
     wxCommandEvent event(wxEVT_SELECT_DESTINATION_DRIVE_PAGE_PULSE_DIALOG, m_parent->GetId());
@@ -155,17 +95,6 @@ void MyThreadClass::ThrowSelectDestinationDriveStopEvent() {
         wxLogMessage("Unable to send event: wxEVT_SELECT_DESTINATION_DRIVE_PAGE_STOP_DIALOG");
 }
 
-void MyThreadClass::ThrowSelectFilesDialogPulseEvent(wxString wxstrMessage) {
-    wxCommandEvent event(wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG, m_parent->GetId());
-
-    // Give it some contents
-    event.SetString(wxstrMessage);
-
-    // Do send it
-    if (!m_parent->GetEventHandler()->ProcessEvent(event))
-        wxLogMessage("Unable to send event: wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG");
-}
-
 void MyThreadClass::ThrowSelectFilesDialogPulseEvent(wxString wxstrMessage, int iCount) {
     wxCommandEvent event(wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG, m_parent->GetId());
 
@@ -180,14 +109,6 @@ void MyThreadClass::ThrowSelectFilesDialogPulseEvent(wxString wxstrMessage, int 
 
 void MyThreadClass::ThrowSelectFilesDialogStopEvent() {
     wxCommandEvent event(wxEVT_SELECT_FILES_PAGE_STOP_DIALOG, m_parent->GetId());
-
-    // Do send it
-    if (!m_parent->GetEventHandler()->ProcessEvent(event))
-        wxLogMessage("Unable to send event: wxEVT_SELECT_FILES_PAGE_STOP_DIALOG");
-}
-
-void MyThreadClass::ThrowSearchActionEvent() {
-    wxCommandEvent event(wxEVT_SELECT_FILES_SEARCH_ACTION, m_parent->GetId());
 
     // Do send it
     if (!m_parent->GetEventHandler()->ProcessEvent(event))
@@ -239,18 +160,6 @@ MyThreadCopyFiles::MyThreadCopyFiles() : MyThreadClass() {
 }
 
 MyThreadCopyFiles::MyThreadCopyFiles(wxWindow * parent) : MyThreadClass(parent) {
-}
-
-void MyThreadCopyFiles::SetDestTextBox(wxTextCtrl * ptr) {
-    m_DestTextBox = ptr;
-}
-
-void MyThreadCopyFiles::SetMwPtr_strSelectedDir(wxString * mwPtr_strSelectedDir) {
-    this->mwPtr_strSelectedDir = mwPtr_strSelectedDir;
-}
-
-wxString * MyThreadCopyFiles::GetMwPtr_strSelectedDir() const {
-    return mwPtr_strSelectedDir;
 }
 
 // why a file could not be recovered, in words for the end page
@@ -370,13 +279,6 @@ void *MyThreadCopyFiles::Entry() {
     return (NULL);
 }
 
-MyThreadLoadFilesFromDiskFAT::MyThreadLoadFilesFromDiskFAT(wxWindow *parent)
-: MyThreadClass(parent) {
-}
-
-void *MyThreadLoadFilesFromDiskFAT::Entry() { //ovde pocinje izvrsavanje threada
-    return ScanVolume();
-}
 
 //TODO popravi mesta gde pise sranje
 //TODO razvoji thread akcije u razlicite fajlove

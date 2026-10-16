@@ -13,6 +13,9 @@ bool MyApp::OnInit() {
     if (!wxApp::OnInit())
         return false;
 
+    // JPEG, PNG, GIF, TIFF... decoders for the image preview on the "select files" page
+    wxInitAllImageHandlers();
+
     //    MyFrame *frame = new MyFrame(wxT("wxWizard Sample"));
     MyWizard wizard(NULL);
     wizard.RunWizard(wizard.GetFirstPage());

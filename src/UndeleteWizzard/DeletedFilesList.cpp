@@ -71,6 +71,16 @@ CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPo
     m_attrOverwritten.SetTextColour(wxColour(150, 150, 150)); // grey
 
     SetItemCount(0);
+
+    Connect(id, wxEVT_COMMAND_LIST_KEY_DOWN, wxListEventHandler(CDeletedFilesList::OnListKeyDown));
+}
+
+// Ctrl+A - the Windows list view doesn't do it by itself
+
+void CDeletedFilesList::OnListKeyDown(wxListEvent &event) {
+    if ((event.GetKeyCode() == 'A' || event.GetKeyCode() == 'a') && wxGetKeyState(WXK_CONTROL))
+        SelectAll(true);
+    event.Skip();
 }
 
 void CDeletedFilesList::SetFiles(FileInfoHash *finfohash) {
