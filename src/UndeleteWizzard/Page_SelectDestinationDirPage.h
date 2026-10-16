@@ -41,5 +41,10 @@ private:
     wxString mw_sDialogString; // only through Set/GetDialogString - shared with the scan thread
     wxCriticalSection m_csDialogString;
 
+    // the destination this page filled in itself - replaced when another source drive is chosen,
+    // kept as soon as the user types or browses another one
+    wxString m_sSuggestedDestination;
+    static wxString SuggestDestination(const wxString &sSourceDrive);
+
     DECLARE_EVENT_TABLE()
 };

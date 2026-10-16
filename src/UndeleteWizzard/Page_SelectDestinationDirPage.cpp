@@ -45,17 +45,8 @@ wxSelectDestinationDirPage::wxSelectDestinationDirPage(wxWizard *parent) : wxWiz
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(wxSelectDestinationDirMessage, 0, wxALL, 5);
 
-    //Fajlovi se snimaju na desktop
-    wchar_t localAppData[256];
-    SHGetFolderPath(NULL,
-            CSIDL_DESKTOPDIRECTORY,
-            NULL,
-            SHGFP_TYPE_CURRENT,
-            localAppData);
-
-    wcscat(localAppData, L"\\RetrievedFiles\\");
-    //m_DestDirTextBox = new wxTextCtrl(this, -1, wxT("D:\\RetrievedFiles\\"), wxPoint(-1, -1), wxSize(-1, -1));
-    m_DestDirTextBox = new wxTextCtrl(this, -1, localAppData, wxPoint(-1, -1), wxSize(-1, -1), wxTE_LEFT);
+    // filled in by OnPageShown, once the source drive is known
+    m_DestDirTextBox = new wxTextCtrl(this, -1, wxEmptyString, wxPoint(-1, -1), wxSize(-1, -1), wxTE_LEFT);
     m_buttonBrowseDestinationDir = new wxButton(this, BROWSE_BUTTON_ID, languagePack->getWXText(GENERAL, BROWSE_BUTTON_LABEL));
     m_buttonBrowseDestinationDir->SetBackgroundColour(wxCOLOUR_BUTTON);
 
@@ -70,6 +61,61 @@ wxSelectDestinationDirPage::wxSelectDestinationDirPage(wxWizard *parent) : wxWiz
 
     Connect(this->GetId(), wxEVT_SELECT_DESTINATION_DRIVE_PAGE_STOP_DIALOG,
             wxCommandEventHandler(wxSelectDestinationDirPage::OnStopDialogEvent));
+}
+
+// The volume a path is on, as "\\?\Volume{GUID}\". A folder where another drive is mounted (C:\Mount\USB)
+// belongs to that drive, not to the drive letter it starts with. The path doesn't have to exist yet - its
+// deepest existing folder decides. Empty if Windows can't tell.
+
+static wxString VolumeOf(const wxString &sPath) {
+    wxFileName fn = wxFileName::DirName(sPath);
+    fn.MakeAbsolute();
+    while (fn.GetDirCount() && !fn.DirExists())
+        fn.RemoveLastDir();
+
+    wchar_t wszMountPoint[MAX_PATH + 1], wszVolume[64];
+    if (!GetVolumePathNameW(fn.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR).wc_str(), wszMountPoint, MAX_PATH + 1))
+        return wxEmptyString;
+    if (!GetVolumeNameForVolumeMountPointW(wszMountPoint, wszVolume, 64))
+        return wxString(wszMountPoint).Upper(); // a network share has no volume name - its path will do
+    return wxString(wszVolume).Upper();
+}
+
+// writing recovered files to the drive they are recovered from would overwrite the deleted files still there
+
+static bool IsOnSameVolume(const wxString &sPath1, const wxString &sPath2) {
+    wxString sVolume1 = VolumeOf(sPath1), sVolume2 = VolumeOf(sPath2);
+    if (sVolume1.IsEmpty() || sVolume2.IsEmpty()) // can't tell - compare the drive letters
+        return !sPath1.IsEmpty() && !sPath2.IsEmpty() && wxToupper(sPath1[0]) == wxToupper(sPath2[0]);
+    return sVolume1 == sVolume2;
+}
+
+// RetrievedFiles on the Desktop - unless the Desktop is on the source drive, as it usually is when C: is
+// scanned. Then RetrievedFiles on the first other hard disk or USB drive, or nothing: the user has to choose.
+
+wxString wxSelectDestinationDirPage::SuggestDestination(const wxString &sSourceDrive) {
+    wchar_t wszDesktop[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, wszDesktop))) {
+        wxString sDestination = wxString(wszDesktop) + "\\RetrievedFiles\\";
+        if (!IsOnSameVolume(sDestination, sSourceDrive))
+            return sDestination;
+    }
+
+    // an empty card reader must not bring up a "no disk in the drive" message box
+    DWORD dwOldErrorMode;
+    SetThreadErrorMode(SEM_FAILCRITICALERRORS, &dwOldErrorMode);
+    wxString sDestination;
+    wchar_t wszDrives[512];
+    DWORD dwLen = GetLogicalDriveStringsW(511, wszDrives);
+    for (wchar_t *pDrive = wszDrives; dwLen && dwLen < 512 && *pDrive && sDestination.IsEmpty(); pDrive += wcslen(pDrive) + 1) {
+        UINT uType = GetDriveTypeW(pDrive);
+        if ((uType == DRIVE_FIXED || uType == DRIVE_REMOVABLE)
+                && GetVolumeInformationW(pDrive, NULL, 0, NULL, NULL, NULL, NULL, 0) // a disk is in it
+                && !IsOnSameVolume(pDrive, sSourceDrive))
+            sDestination = wxString(pDrive) + "RetrievedFiles\\";
+    }
+    SetThreadErrorMode(dwOldErrorMode, NULL);
+    return sDestination;
 }
 
 void getFilesystemTypeFromDisk(wchar_t * szFileSys, wxString *ptrSourceDrive) {//TODO mozda da vrati neki integer, da znam da li je sve proslo OK
@@ -101,9 +147,20 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         ILanguage *languagePack = ((MyWizard *) GetParent())->GetLanguagePack();
 
+        // empty when no drive but the source one could be suggested (SuggestDestination)
+        wxString sDestination = m_DestDirTextBox->GetValue();
+        sDestination.Trim().Trim(false);
+        if (sDestination.IsEmpty()) {
+            wxMessageDialog dial(NULL, languagePack->getWXText(SELECT_DESTINATION_PAGE, PLEASE_SELECT_DESTINATION),
+                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
+            return;
+        }
+
         // postavi destination dir vrednost u MyWizard klasi
         wxString *ptrDestinationDir = ((MyWizard *) GetParent())->GetMw_ptrDestinationDir();
-        ptrDestinationDir->Printf("%s\\", m_DestDirTextBox->GetValue());
+        ptrDestinationDir->Printf("%s\\", sDestination);
 
         // da li drajv postoji i da li mozes da pises po njemu
         wchar_t tmpDestDir[3 + 1];
@@ -117,6 +174,17 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         ptrDestinationDir->Replace(wxT("\\\\"), wxT("\\"));
 
+        // before anything is written: even creating the folder or the log file there could overwrite the
+        // clusters of the deleted files
+        wxString *ptrSourceDrive = ((MyWizard *) GetParent())->GetMwPtr_strSourceDrive();
+        if (IsOnSameVolume(*ptrDestinationDir, *ptrSourceDrive)) {
+            wxMessageDialog dial(NULL, languagePack->getWXText(SELECT_DESTINATION_PAGE, SAME_DRIVE_ERROR),
+                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
+            return;
+        }
+
         wxFileName DestDir;
 
         if (!DestDir.DirExists(*ptrDestinationDir))
@@ -129,21 +197,6 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
                 event.Veto();
                 return;
             }
-
-        // TODO Ovde napravi proveru da li ti je dest drajv isti kao i source drajv
-        wxString *ptrSourceDrive = ((MyWizard *) GetParent())->GetMwPtr_strSourceDrive();
-        // same drive letter (the paths start with it)
-        if (!ptrDestinationDir->IsEmpty() && !ptrSourceDrive->IsEmpty()
-                && wxToupper((*ptrDestinationDir)[0]) == wxToupper((*ptrSourceDrive)[0])) {
-            wxMessageDialog *dial = new wxMessageDialog(NULL,
-                    languagePack->getWXText(SELECT_DESTINATION_PAGE, SAME_DRIVE_ERROR),
-                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
-            dial->ShowModal();
-            event.Veto();
-            return;
-        }
-
-
 
         //Initiate log file, from this point on, it is possible to write logs :)
         InitLogFile(*ptrDestinationDir);
@@ -385,6 +438,12 @@ void wxSelectDestinationDirPage::OnPageShown(wxWizardEvent& event) {
     ILanguage *languagePackLocal = ((MyWizard *) GetParent())->GetLanguagePack();
 
     NextButton->SetLabel(languagePackLocal->getWXText(GENERAL, NEXT_BUTTON_LABEL));
+
+    // a destination the user chose stays; one this page suggested follows the source drive
+    if (m_DestDirTextBox->GetValue() == m_sSuggestedDestination) {
+        m_sSuggestedDestination = SuggestDestination(*((MyWizard *) GetParent())->GetMwPtr_strSourceDrive());
+        m_DestDirTextBox->ChangeValue(m_sSuggestedDestination);
+    }
 }
 
 
