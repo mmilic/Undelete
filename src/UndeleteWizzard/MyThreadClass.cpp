@@ -286,6 +286,16 @@ static wxString RecoveryErrorText(int iError, const t_FileInfo *pFile) {
     return sReason;
 }
 
+// "photo.jpg", 2 -> "photo (2).jpg"; the number goes before the extension, so the file still opens
+// with the right program. Names without an extension (or only a leading dot, ".config") get it at the end.
+
+wxString NumberedFileName(const wxString &sName, int iNumber) {
+    int iDot = sName.Find('.', true); // the last dot
+    if (iDot <= 0)
+        return wxString::Format("%s (%d)", sName, iNumber);
+    return wxString::Format("%s (%d)%s", sName.Left(iDot), iNumber, sName.Mid(iDot));
+}
+
 // the files to copy are collected by the GUI thread before this thread starts - the thread must not read the list control
 
 void MyThreadCopyFiles::SetFilesToCopy(const std::vector<t_FileInfo *> &vFiles) {
@@ -304,7 +314,6 @@ void *MyThreadCopyFiles::Entry() {
     wxDestinationFileName.AssignDir(*m_wxpDestinationDir);
 
     t_FileInfo *pTempFInfo;
-    int iCount = 0;
     int iFileNo = 0;
 
     *m_iptrNumberOfCopiedFiles = 0;
@@ -317,10 +326,6 @@ void *MyThreadCopyFiles::Entry() {
 
         // Prepare destination and file name
 
-        //Ovde se odredjuje kompletno ime fajla, tu treba da se proba da li postoji ili ne :)
-        //Ovo bi moglo pedantnije da se uradi, da da novi broj samo ako postoji fajl sa tim imenom
-        //Zbog toga u ovom prvom postavljanju imena fajla nema iCount variable - prvo ime je originalno a uvek posle se vrsi dodavanje broja.
-
         //ovde proveravamo da li je dobro ime i odmah ga menjamo - names stay UTF-16 (wchar_t) all the way
         wchar_t pFullName[_MAX_PATH];
         wcsncpy(pFullName, pTempFInfo->sFilename.c_str(), _MAX_PATH - 1);
@@ -329,13 +334,11 @@ void *MyThreadCopyFiles::Entry() {
         IsValidFileName(pFullName, true);
         wxDestinationFileName.SetFullName(wxString(pFullName));
 
-        //sta ce mi ovaj wxsCompleteFileName - nemam pojma - al reko lakse je 'vako
-        wxString wxsCompleteFileName;
-        while (wxDestinationFileName.FileExists(wxDestinationFileName.GetFullPath())) {
-            iCount++;
-            wxsCompleteFileName.Printf("%d_%s", iCount, wxDestinationFileName.GetFullName());
-            wxDestinationFileName.SetFullName(wxsCompleteFileName);
-        }
+        // a file of that name is already there (recovered before, or two deleted files with the same name):
+        // number it the way Windows does - "photo (2).jpg", "photo (3).jpg"
+        wxString sOriginalName(pFullName);
+        for (int iNumber = 2; wxDestinationFileName.FileExists(wxDestinationFileName.GetFullPath()); iNumber++)
+            wxDestinationFileName.SetFullName(NumberedFileName(sOriginalName, iNumber));
 
         wxDestinationFileName.Normalize(); //skidamo duple // simbole i slicno
 
@@ -357,7 +360,6 @@ void *MyThreadCopyFiles::Entry() {
             (*m_iptrNumberOfCopiedFiles)++;
             wxLogMessage("Undeleting of %s SUCCESSFULL.", wxsDestinationPath);
         }
-        iCount++;
     }
 
     m_pUsedNTFSDrive->SetCancelFlag(NULL);

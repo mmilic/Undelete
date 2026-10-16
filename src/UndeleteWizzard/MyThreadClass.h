@@ -88,6 +88,9 @@ public:
     void *Entry();
 };
 
+// "photo.jpg", 2 -> "photo (2).jpg" - the name for a recovered file when the original name is taken
+wxString NumberedFileName(const wxString &sName, int iNumber);
+
 class MyThreadCopyFiles : public MyThreadClass {
 public:
     MyThreadCopyFiles();
