@@ -30,13 +30,6 @@ volume access), so:
   prompting for UAC.
 - Launch it from Explorer or an elevated PowerShell/cmd.
 
-### A note on the clock
-
-`src/UndeleteWizzard/main.cpp` has a hardcoded expiry check (`DateUsageLimit`, originally
-2016-10-01) left over from when this was sold commercially — on any later system clock it just
-`exit(0)`s immediately with no window. That check is currently commented out in this repo's copy
-of `main.cpp` so the wizard actually runs; if you restore it, update the dates first.
-
 ## Repo layout
 
 - `src/UndeleteWizzard/` — the application source (wxWidgets wizard: NTFS MFT scan/recovery,

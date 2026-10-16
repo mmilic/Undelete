@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **GetMyFilesBack** (internal name "UndeleteWizzard") — a Windows GUI file-undelete/recovery utility written in
 C++ with wxWidgets. It scans a drive's NTFS MFT for deleted-but-recoverable files, shows them in a wizard UI,
 and copies recovered files to a destination chosen by the user. It was built/sold as a small commercial
-product, which is why licensing/expiry logic lives in `main.cpp`.
+product; its expiry check in `main.cpp` has since been removed (see below).
 
 This repo is self-contained on purpose: `src/` has the application source and `tools/` vendors the exact
 compiler and static-library versions needed to build it, so `git clone` + `build.ps1` is enough — no MinGW or
@@ -43,9 +43,9 @@ real/virtual drive and check the recovered files.
 
 ## Architecture
 
-- `src/UndeleteWizzard/main.cpp` — `wxApp` entry point (`MyApp::OnInit`). Originally had a hardcoded date gate
-  (`DateUsageLimit`, 2016-10-01) that calls `exit(0)` immediately on any later system clock — commented out in
-  this repo's copy so the wizard actually runs. If you ever restore it, update the dates first.
+- `src/UndeleteWizzard/main.cpp` — `wxApp` entry point (`MyApp::OnInit`). The original commercial build had a
+  hardcoded expiry check: a "this version expires" popup after 2016-01-01, and an `exit(0)` after 2016-10-01.
+  Both have been removed — the app no longer has any date-based behaviour.
 - `MyWizzard.{h,cpp}` — the `wxWizard` (`MyWizard`) driving the UX: select source drive → select destination
   dir → select files to recover → done. Shared state (selected drive/dir, file hash map, mutex/critical
   section for cross-thread list updates, log file handle, active language pack) lives on the wizard instance
