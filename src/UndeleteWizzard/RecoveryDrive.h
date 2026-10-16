@@ -111,15 +111,24 @@ public:
     // RetreiveAndWriteFileToDestination adds the KB it writes here (for the copy progress bar)
     void SetProgressCounter(volatile LONG *plKBWritten) { m_plProgressKB = plKBWritten; }
 
+    // GetFileList keeps the share of the volume it has scanned here, 0..100 - or -1 if it can't tell
+    void SetScanProgress(volatile LONG *plPercent) { m_plScanPercent = plPercent; }
+
 protected:
     HANDLE m_hDrive;
     bool m_bOwnsHandle; // m_hDrive was opened by OpenVolume (not passed in with SetDriveHandle)
     volatile bool *m_pbCancel;
     volatile LONG *m_plProgressKB;
+    volatile LONG *m_plScanPercent;
 
     bool IsCancelled() const { return m_pbCancel && *m_pbCancel; }
+    void ReportScanProgress(int iPercent) {
+        if (m_plScanPercent)
+            *m_plScanPercent = iPercent;
+    }
 
-    // open "\\.\E:" for reading into m_hDrive (closing the previous scan's drive), returns the error
+    // open a drive ("E:", "E:\" -> "\\.\E:") or a disk image file for reading into m_hDrive (closing the
+    // previous scan's drive), returns the error
     int OpenVolume(const wxString &wxsSelectedDrive);
     void CloseVolume();
 

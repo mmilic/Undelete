@@ -95,6 +95,11 @@ volume access), so:
 - Launching it from a non-elevated shell fails outright (`CreateProcess` error 740) rather than
   prompting for UAC. Launch it from Explorer or an elevated PowerShell/cmd.
 
+**Disk images:** files named on the command line are offered beside the drives, as disk images
+(`GetMyFilesBack.exe E:\usb-stick.img`) - e.g. a copy of a failing card, so it is read only once. Reading an image
+needs no admin rights: `set __COMPAT_LAYER=RunAsInvoker` before starting it skips the UAC prompt, which is how
+the UI can be tried with the test images (`out\fat-test\fat32.img`) without touching a real drive.
+
 ## Tests
 
 `tests\ntfs-image\run.ps1` builds an NTFS disk image with deleted files (in WSL, with ntfs-3g), runs the

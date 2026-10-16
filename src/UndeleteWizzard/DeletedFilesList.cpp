@@ -3,10 +3,24 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <algorithm>
-#include <set>
 
 #include "DeletedFilesList.h"
 #include "FileContents.h"
+#include "Theme.h"
+#include "languages/Translate.h"
+
+wxDEFINE_EVENT(EVT_DELETED_FILES_CHECKED, wxCommandEvent);
+
+// the list's images, all on one canvas (the list's rows are as tall as its images)
+enum {
+    IMAGE_UNCHECKED = 0,
+    IMAGE_CHECKED,
+    IMAGE_FILE_TYPE, // + FILE_TYPE_IMAGE - 1 ... FILE_TYPE_OTHER - 1
+    IMAGE_DOT_GOOD = IMAGE_FILE_TYPE + FILE_TYPE_OTHER,
+    IMAGE_DOT_PARTIAL,
+    IMAGE_DOT_OVERWRITTEN,
+    IMAGE_DOT_UNKNOWN
+};
 
 // order of the "Recoverable" column: most promising first
 
@@ -63,11 +77,6 @@ struct DeletedFilesOrder {
                 r = ContentRank(a) - ContentRank(b);
                 if (!r)
                     r = RecoverabilityRank(a) - RecoverabilityRank(b);
-                break;
-            case DELETED_FILES_COLUMN_STATUS:
-                r = (int) a->bInRecycleBin - (int) b->bInRecycleBin; // group by status without building its text
-                if (!r)
-                    r = (a->dwAttributes < b->dwAttributes) ? -1 : (a->dwAttributes > b->dwAttributes ? 1 : 0);
                 break;
         }
         if (!r) // ties (and the name column) - by name, so the order is stable and predictable
@@ -133,25 +142,25 @@ int FileTypeOf(const wchar_t *szFilename) {
     return FILE_TYPE_OTHER;
 }
 
-const char *FileTypeFilterLabel(int iType) {
+wxString FileTypeFilterLabel(int iType) {
     switch (iType) {
-        case FILE_TYPE_ANY: return "All types";
-        case FILE_TYPE_IMAGE: return "Images";
-        case FILE_TYPE_VIDEO: return "Videos";
-        case FILE_TYPE_MUSIC: return "Music";
-        case FILE_TYPE_DOCUMENT: return "Documents (PDF, Office)";
-        case FILE_TYPE_TEXT: return "Text";
-        case FILE_TYPE_ARCHIVE: return "Archives";
-        default: return "Other";
+        case FILE_TYPE_ANY: return Tr(L"All types");
+        case FILE_TYPE_IMAGE: return Tr(L"Images");
+        case FILE_TYPE_VIDEO: return Tr(L"Videos");
+        case FILE_TYPE_MUSIC: return Tr(L"Music");
+        case FILE_TYPE_DOCUMENT: return Tr(L"Documents");
+        case FILE_TYPE_TEXT: return Tr(L"Text");
+        case FILE_TYPE_ARCHIVE: return Tr(L"Archives");
+        default: return Tr(L"Other");
     }
 }
 
-const char *RecoverabilityFilterLabel(int iFilter) {
+wxString RecoverabilityFilterLabel(int iFilter) {
     switch (iFilter) {
-        case RECOVERABILITY_FILTER_GOOD: return "Good only";
-        case RECOVERABILITY_FILTER_NOT_OVERWRITTEN: return "Hide overwritten";
-        case RECOVERABILITY_FILTER_CONTENT_OK: return "Contents look valid";
-        default: return "All files";
+        case RECOVERABILITY_FILTER_GOOD: return Tr(L"Good only");
+        case RECOVERABILITY_FILTER_NOT_OVERWRITTEN: return Tr(L"Hide overwritten");
+        case RECOVERABILITY_FILTER_CONTENT_OK: return Tr(L"Looks valid only");
+        default: return Tr(L"All files");
     }
 }
 
@@ -167,36 +176,120 @@ wxString FormatFileTime(LONGLONG llFileTime) {
     return wxString::Format("%04d-%02d-%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
 }
 
-CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size)
-: wxListCtrl(parent, id, pos, size, wxLC_REPORT | wxLC_VIRTUAL | wxBORDER_THEME | wxLC_HRULES | wxLC_VRULES) {
+wxString RecoverabilityText(const t_FileInfo &file) {
+    switch (file.iRecoverability) {
+        case RECOVERABILITY_GOOD: return Tr(L"Good");
+        case RECOVERABILITY_PARTIAL: return wxString::Format(Tr(L"Partly · %d %% intact"), file.iPercentIntact);
+        case RECOVERABILITY_OVERWRITTEN: return Tr(L"Overwritten");
+        default: return Tr(L"Unknown");
+    }
+}
+
+wxColour RecoverabilityColour(int iRecoverability) {
+    switch (iRecoverability) {
+        case RECOVERABILITY_GOOD: return Theme::Good;
+        case RECOVERABILITY_PARTIAL: return Theme::Partial;
+        default: return Theme::Overwritten;
+    }
+}
+
+wxString ContentText(int iContent) {
+    if (iContent == CONTENT_NOT_CHECKED)
+        return Tr(L"Not checked");
+    return Tr(wxString(ContentLabel(iContent)));
+}
+
+wxColour ContentColour(int iContent) {
+    switch (iContent) {
+        case CONTENT_OK: return Theme::Good;
+        case CONTENT_DAMAGED:
+        case CONTENT_ZEROS: return Theme::Damaged;
+        case CONTENT_NOT_CHECKED: return Theme::TextDisabled;
+        default: return Theme::Overwritten;
+    }
+}
+
+CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id)
+: wxListCtrl(parent, id, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL | wxBORDER_NONE) {
     m_iSortColumn = DELETED_FILES_COLUMN_RECOVERABILITY; // the most useful order: what can still be recovered first
     m_bSortAscending = true;
     m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
     m_iTypeFilter = FILE_TYPE_ANY;
+    m_iCheckedShown = 0;
+    m_llCheckedShownBytes = 0;
+    SetFont(Theme::Small());
 
-    // together about as wide as the list on the smallest wizard (the user can drag them wider)
-    InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, FromDIP(190));
-    InsertColumn(DELETED_FILES_COLUMN_FOLDER, wxT("Folder"), wxLIST_FORMAT_LEFT, FromDIP(170));
-    InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, FromDIP(70));
-    InsertColumn(DELETED_FILES_COLUMN_MODIFIED, wxT("Modified"), wxLIST_FORMAT_LEFT, FromDIP(105));
-    InsertColumn(DELETED_FILES_COLUMN_RECOVERABILITY, wxT("Recoverable"), wxLIST_FORMAT_LEFT, FromDIP(115));
-    InsertColumn(DELETED_FILES_COLUMN_CONTENTS, wxT("Contents"), wxLIST_FORMAT_LEFT, FromDIP(90));
-    InsertColumn(DELETED_FILES_COLUMN_STATUS, wxT("File Status"), wxLIST_FORMAT_LEFT, FromDIP(100));
+    // one canvas for all images: 20 x 30 - it makes the rows 30 px high
+    wxSize canvas(20, 30);
+    wxVector<wxBitmapBundle> vImages;
+    vImages.push_back(Theme::CheckBox(false, canvas, 16));
+    vImages.push_back(Theme::CheckBox(true, canvas, 16));
+    for (int iType = FILE_TYPE_IMAGE; iType <= FILE_TYPE_OTHER; iType++)
+        vImages.push_back(Theme::IconOnCanvas(Theme::FileTypeIcon(iType), wxColour(0x44, 0x44, 0x44), canvas, 18));
+    vImages.push_back(Theme::Dot(Theme::GoodDot, canvas, 8));
+    vImages.push_back(Theme::Dot(Theme::PartialDot, canvas, 8));
+    vImages.push_back(Theme::Dot(Theme::OverwrittenDot, canvas, 8));
+    vImages.push_back(Theme::Dot(Theme::Border, canvas, 8));
+    SetSmallImages(vImages);
 
-    m_attrPartial.SetTextColour(wxColour(170, 90, 0)); // dark orange
-    m_attrOverwritten.SetTextColour(wxColour(150, 150, 150)); // grey
+    InsertColumn(DELETED_FILES_COLUMN_CHECK, wxEmptyString, wxLIST_FORMAT_LEFT, FromDIP(34));
+    InsertColumn(DELETED_FILES_COLUMN_NAME, Tr(L"Name"), wxLIST_FORMAT_LEFT, FromDIP(230));
+    InsertColumn(DELETED_FILES_COLUMN_FOLDER, Tr(L"Folder"), wxLIST_FORMAT_LEFT, FromDIP(170));
+    InsertColumn(DELETED_FILES_COLUMN_SIZE, Tr(L"Size"), wxLIST_FORMAT_RIGHT, FromDIP(80));
+    InsertColumn(DELETED_FILES_COLUMN_MODIFIED, Tr(L"Modified"), wxLIST_FORMAT_LEFT, FromDIP(120));
+    InsertColumn(DELETED_FILES_COLUMN_RECOVERABILITY, Tr(L"Recoverable"), wxLIST_FORMAT_LEFT, FromDIP(160));
+    InsertColumn(DELETED_FILES_COLUMN_CONTENTS, Tr(L"Contents"), wxLIST_FORMAT_LEFT, FromDIP(110));
+    ShowSortIndicator(m_iSortColumn, m_bSortAscending);
+    UpdateHeaderCheckBox();
+
+    wxColour aText[CELL_KINDS] = {Theme::Text, Theme::TextSecondary, Theme::Good, Theme::Partial, Theme::Overwritten,
+        Theme::Damaged, Theme::TextDisabled};
+    for (int i = 0; i < CELL_KINDS; i++)
+        for (int iChecked = 0; iChecked < 2; iChecked++) {
+            m_aAttr[i][iChecked].SetTextColour(aText[i]);
+            m_aAttr[i][iChecked].SetBackgroundColour(iChecked ? Theme::RowChecked : Theme::PanelBg);
+        }
 
     SetItemCount(0);
 
-    Connect(id, wxEVT_COMMAND_LIST_KEY_DOWN, wxListEventHandler(CDeletedFilesList::OnListKeyDown));
+    Bind(wxEVT_LEFT_DOWN, &CDeletedFilesList::OnLeftDown, this);
+    Bind(wxEVT_LEFT_DCLICK, &CDeletedFilesList::OnLeftDown, this);
+    Bind(wxEVT_LIST_KEY_DOWN, &CDeletedFilesList::OnKeyDown, this);
+    Bind(wxEVT_LIST_COL_CLICK, &CDeletedFilesList::OnColumnClick, this);
+    Bind(wxEVT_SIZE, &CDeletedFilesList::OnSize, this);
 }
 
-// Ctrl+A - the Windows list view doesn't do it by itself
-
-void CDeletedFilesList::OnListKeyDown(wxListEvent &event) {
-    if ((event.GetKeyCode() == 'A' || event.GetKeyCode() == 'a') && wxGetKeyState(WXK_CONTROL))
-        SelectAll(true);
+void CDeletedFilesList::OnSize(wxSizeEvent &event) {
     event.Skip();
+    CallAfter([this] { FitColumns(); }); // after the list has its new size (and knows about its scroll bar)
+}
+
+// The tick box, size, date and contents have their width; name, folder and recoverability share the rest,
+// like the design's grid: 2.2 : 1.6 : 1.3
+
+void CDeletedFilesList::FitColumns() {
+    // room for the vertical scroll bar even before it shows - it comes with the files, after the last resize
+    int iWidth = GetSize().x - wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
+    int aFixed[] = {DELETED_FILES_COLUMN_CHECK, DELETED_FILES_COLUMN_SIZE, DELETED_FILES_COLUMN_MODIFIED, DELETED_FILES_COLUMN_CONTENTS};
+    int aFixedWidth[] = {34, 76, 120, 120};
+    for (size_t i = 0; i < WXSIZEOF(aFixed); i++) {
+        SetColumnWidth(aFixed[i], FromDIP(aFixedWidth[i]));
+        iWidth -= FromDIP(aFixedWidth[i]);
+    }
+    // each gets its minimum, the rest is shared - or, if even the minimums don't fit, they shrink alike
+    int aFlexible[] = {DELETED_FILES_COLUMN_NAME, DELETED_FILES_COLUMN_FOLDER, DELETED_FILES_COLUMN_RECOVERABILITY};
+    double aShare[] = {2.2, 1.6, 1.3};
+    int aMinimum[] = {120, 70, 130};
+    iWidth = wxMax(iWidth - FromDIP(2), 0); // rounding must not bring the horizontal scroll bar back
+    int iMinimums = 0;
+    for (size_t i = 0; i < WXSIZEOF(aFlexible); i++)
+        iMinimums += FromDIP(aMinimum[i]);
+    int iRest = iWidth - iMinimums;
+    for (size_t i = 0; i < WXSIZEOF(aFlexible); i++) {
+        int iColumn = (iRest >= 0) ? FromDIP(aMinimum[i]) + (int) (iRest * aShare[i] / 5.1)
+                : FromDIP(aMinimum[i]) * iWidth / wxMax(iMinimums, 1);
+        SetColumnWidth(aFlexible[i], iColumn);
+    }
 }
 
 void CDeletedFilesList::SetFiles(FileInfoHash *finfohash) {
@@ -204,32 +297,37 @@ void CDeletedFilesList::SetFiles(FileInfoHash *finfohash) {
     m_vAll.reserve(finfohash->size());
     for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
         m_vAll.push_back(it->second);
-
-    SelectAll(false);
+    m_setChecked.clear();
     Rebuild();
+    NotifyChecked();
 }
 
 void CDeletedFilesList::Clear() {
-    SelectAll(false);
     m_vAll.clear();
     m_vVisible.clear();
+    m_setChecked.clear();
     SetItemCount(0);
+    CountChecked();
+    UpdateHeaderCheckBox();
     Refresh();
 }
 
 void CDeletedFilesList::SetNameFilter(const wxString &sFilter) {
     m_sFilterUpper = sFilter.Upper();
     Rebuild();
+    NotifyChecked();
 }
 
 void CDeletedFilesList::SetRecoverabilityFilter(int iFilter) {
     m_iRecoverabilityFilter = iFilter;
     Rebuild();
+    NotifyChecked();
 }
 
 void CDeletedFilesList::SetTypeFilter(int iType) {
     m_iTypeFilter = iType;
     Rebuild();
+    NotifyChecked();
 }
 
 bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile) const {
@@ -253,7 +351,7 @@ bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile) const {
 }
 
 void CDeletedFilesList::SortByColumn(int iColumn) {
-    if (iColumn < 0 || iColumn >= DELETED_FILES_COLUMN_COUNT)
+    if (iColumn <= DELETED_FILES_COLUMN_CHECK || iColumn >= DELETED_FILES_COLUMN_COUNT)
         return;
     if (iColumn == m_iSortColumn)
         m_bSortAscending = !m_bSortAscending;
@@ -261,6 +359,7 @@ void CDeletedFilesList::SortByColumn(int iColumn) {
         m_iSortColumn = iColumn;
         m_bSortAscending = true;
     }
+    ShowSortIndicator(m_iSortColumn, m_bSortAscending);
     Rebuild();
 }
 
@@ -270,33 +369,132 @@ t_FileInfo *CDeletedFilesList::GetFile(long lItem) const {
     return m_vVisible[lItem];
 }
 
-void CDeletedFilesList::GetSelectedFiles(std::vector<t_FileInfo *> &vSelected) const {
-    vSelected.clear();
-    long lItem = -1;
-    while ((lItem = GetNextItem(lItem, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != -1)
-        if (lItem < (long) m_vVisible.size())
-            vSelected.push_back(m_vVisible[lItem]);
+t_FileInfo *CDeletedFilesList::GetFocusedFile() const {
+    return GetFile(GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED));
 }
 
-void CDeletedFilesList::SelectAll(bool bSelect) {
-    // index -1 changes every item in one message - item by item is far too slow with 100 000+ files
-    LVITEM lvi;
-    memset(&lvi, 0, sizeof (lvi));
-    lvi.stateMask = LVIS_SELECTED;
-    lvi.state = bSelect ? LVIS_SELECTED : 0;
-    ::SendMessage((HWND) GetHWND(), LVM_SETITEMSTATE, (WPARAM) - 1, (LPARAM) & lvi);
+void CDeletedFilesList::RefreshFile(const t_FileInfo *pFile) {
+    std::vector<t_FileInfo *>::const_iterator it = std::find(m_vVisible.begin(), m_vVisible.end(), pFile);
+    if (it != m_vVisible.end())
+        RefreshItem((long) (it - m_vVisible.begin()));
 }
 
-void CDeletedFilesList::SelectItem(long lItem, bool bSelect) {
-    SetItemState(lItem, bSelect ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED);
+void CDeletedFilesList::GetCheckedFiles(std::vector<t_FileInfo *> &vChecked) const {
+    vChecked.clear();
+    if (m_setChecked.empty())
+        return;
+    for (size_t i = 0; i < m_vVisible.size(); i++)
+        if (m_setChecked.count(m_vVisible[i]))
+            vChecked.push_back(m_vVisible[i]);
+}
+
+void CDeletedFilesList::CountChecked() {
+    m_iCheckedShown = 0;
+    m_llCheckedShownBytes = 0;
+    if (m_setChecked.empty())
+        return;
+    for (size_t i = 0; i < m_vVisible.size(); i++)
+        if (m_setChecked.count(m_vVisible[i])) {
+            m_iCheckedShown++;
+            m_llCheckedShownBytes += m_vVisible[i]->n64RealSize;
+        }
+}
+
+// for a file that is shown - the counts are of shown files
+
+void CDeletedFilesList::SetChecked(t_FileInfo *pFile, bool bCheck) {
+    if (bCheck == (m_setChecked.count(pFile) != 0))
+        return;
+    if (bCheck) {
+        m_setChecked.insert(pFile);
+        m_iCheckedShown++;
+        m_llCheckedShownBytes += pFile->n64RealSize;
+    } else {
+        m_setChecked.erase(pFile);
+        m_iCheckedShown--;
+        m_llCheckedShownBytes -= pFile->n64RealSize;
+    }
+}
+
+void CDeletedFilesList::CheckAllShown(bool bCheck) {
+    for (size_t i = 0; i < m_vVisible.size(); i++)
+        SetChecked(m_vVisible[i], bCheck);
+    Refresh();
+    NotifyChecked();
+}
+
+void CDeletedFilesList::CheckFiles(const std::vector<t_FileInfo *> &vFiles, bool bCheck) {
+    for (size_t i = 0; i < vFiles.size(); i++)
+        SetChecked(vFiles[i], bCheck);
+    Refresh();
+    NotifyChecked();
+}
+
+void CDeletedFilesList::NotifyChecked() {
+    UpdateHeaderCheckBox();
+    wxCommandEvent event(EVT_DELETED_FILES_CHECKED, GetId());
+    event.SetEventObject(this);
+    ProcessWindowEvent(event);
+}
+
+// the header of the tick column shows whether every shown file is ticked - a click on it ticks them all, or none
+
+void CDeletedFilesList::UpdateHeaderCheckBox() {
+    wxListItem column;
+    column.SetMask(wxLIST_MASK_IMAGE);
+    column.SetImage(AreAllShownChecked() ? IMAGE_CHECKED : IMAGE_UNCHECKED);
+    SetColumn(DELETED_FILES_COLUMN_CHECK, column);
+}
+
+void CDeletedFilesList::OnColumnClick(wxListEvent &event) {
+    if (event.GetColumn() == DELETED_FILES_COLUMN_CHECK)
+        CheckAllShown(!AreAllShownChecked());
+    else
+        SortByColumn(event.GetColumn());
+}
+
+// a click on the tick box ticks the file (the row also gets the focus, as for any click)
+
+void CDeletedFilesList::OnLeftDown(wxMouseEvent &event) {
+    int iFlags = 0;
+    long lColumn = -1;
+    long lItem = HitTest(event.GetPosition(), iFlags, &lColumn);
+    if (lItem >= 0 && lColumn == DELETED_FILES_COLUMN_CHECK) {
+        t_FileInfo *pFile = GetFile(lItem);
+        if (pFile) {
+            SetChecked(pFile, !m_setChecked.count(pFile));
+            RefreshItem(lItem);
+            NotifyChecked();
+        }
+    }
+    event.Skip();
+}
+
+// Space ticks (or unticks) the highlighted files, Ctrl+A ticks every shown file
+
+void CDeletedFilesList::OnKeyDown(wxListEvent &event) {
+    if ((event.GetKeyCode() == 'A' || event.GetKeyCode() == 'a') && wxGetKeyState(WXK_CONTROL)) {
+        CheckAllShown(true);
+        return;
+    }
+    if (event.GetKeyCode() == WXK_SPACE) {
+        std::vector<t_FileInfo *> vHighlighted;
+        bool bAllChecked = true;
+        long lItem = -1;
+        while ((lItem = GetNextItem(lItem, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != -1)
+            if (t_FileInfo *pFile = GetFile(lItem)) {
+                vHighlighted.push_back(pFile);
+                bAllChecked = bAllChecked && m_setChecked.count(pFile);
+            }
+        if (!vHighlighted.empty())
+            CheckFiles(vHighlighted, !bAllChecked);
+        return;
+    }
+    event.Skip();
 }
 
 void CDeletedFilesList::Rebuild() {
-    // the selection belongs to row numbers - remember it by file, so filtering/sorting keeps it
-    std::vector<t_FileInfo *> vSelected;
-    GetSelectedFiles(vSelected);
-    std::set<t_FileInfo *> setSelected(vSelected.begin(), vSelected.end());
-    SelectAll(false);
+    t_FileInfo *pFocused = GetFocusedFile();
 
     m_vVisible.clear();
     if (m_sFilterUpper.IsEmpty() && m_iRecoverabilityFilter == RECOVERABILITY_FILTER_ALL && m_iTypeFilter == FILE_TYPE_ANY)
@@ -311,19 +509,21 @@ void CDeletedFilesList::Rebuild() {
     order.bAscending = m_bSortAscending;
     std::sort(m_vVisible.begin(), m_vVisible.end(), order);
 
+    // the highlight belongs to row numbers - clear it, keep only the focus on the same file
+    long lItem = -1;
+    while ((lItem = GetNextItem(lItem, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != -1)
+        SetItemState(lItem, 0, wxLIST_STATE_SELECTED);
     SetItemCount((long) m_vVisible.size());
-    if (!setSelected.empty()) {
-        std::vector<long> vReselect;
-        for (size_t i = 0; i < m_vVisible.size(); i++)
-            if (setSelected.count(m_vVisible[i]))
-                vReselect.push_back((long) i);
-
-        if (!vReselect.empty() && vReselect.size() == m_vVisible.size())
-            SelectAll(true); // e.g. after "Select all" - one message instead of one per row
-        else
-            for (size_t i = 0; i < vReselect.size(); i++)
-                SelectItem(vReselect[i], true);
+    if (pFocused) {
+        std::vector<t_FileInfo *>::const_iterator it = std::find(m_vVisible.begin(), m_vVisible.end(), pFocused);
+        if (it != m_vVisible.end()) {
+            long lFocus = (long) (it - m_vVisible.begin());
+            SetItemState(lFocus, wxLIST_STATE_FOCUSED | wxLIST_STATE_SELECTED, wxLIST_STATE_FOCUSED | wxLIST_STATE_SELECTED);
+            EnsureVisible(lFocus);
+        }
     }
+    CountChecked();
+    UpdateHeaderCheckBox();
     Refresh();
 }
 
@@ -342,22 +542,65 @@ wxString CDeletedFilesList::OnGetItemText(long lItem, long lColumn) const {
         case DELETED_FILES_COLUMN_MODIFIED:
             return FormatFileTime(pFile->n64Modify);
         case DELETED_FILES_COLUMN_CONTENTS:
-            return wxString(ContentLabel(pFile->iContent));
+            return ContentText(pFile->iContent);
         case DELETED_FILES_COLUMN_RECOVERABILITY:
-            if (pFile->iRecoverability == RECOVERABILITY_PARTIAL)
-                return wxString::Format("%s (%d%% intact)", RecoverabilityLabel(pFile->iRecoverability), pFile->iPercentIntact);
-            return wxString(RecoverabilityLabel(pFile->iRecoverability));
-        case DELETED_FILES_COLUMN_STATUS:
-            return wxString(FileStatusText(*pFile));
+            return RecoverabilityText(*pFile);
     }
     return wxEmptyString;
 }
 
-wxListItemAttr *CDeletedFilesList::OnGetItemAttr(long lItem) const {
+int CDeletedFilesList::OnGetItemImage(long lItem) const {
     const t_FileInfo *pFile = GetFile(lItem);
-    if (pFile && pFile->iRecoverability == RECOVERABILITY_PARTIAL)
-        return &m_attrPartial;
-    if (pFile && pFile->iRecoverability == RECOVERABILITY_OVERWRITTEN)
-        return &m_attrOverwritten;
-    return NULL;
+    return (pFile && m_setChecked.count(pFile)) ? IMAGE_CHECKED : IMAGE_UNCHECKED;
+}
+
+int CDeletedFilesList::OnGetItemColumnImage(long lItem, long lColumn) const {
+    const t_FileInfo *pFile = GetFile(lItem);
+    if (!pFile)
+        return -1;
+    switch (lColumn) {
+        case DELETED_FILES_COLUMN_CHECK:
+            return OnGetItemImage(lItem);
+        case DELETED_FILES_COLUMN_NAME:
+            return IMAGE_FILE_TYPE + FileTypeOf(pFile->sFilename.c_str()) - FILE_TYPE_IMAGE;
+        case DELETED_FILES_COLUMN_RECOVERABILITY:
+            switch (pFile->iRecoverability) {
+                case RECOVERABILITY_GOOD: return IMAGE_DOT_GOOD;
+                case RECOVERABILITY_PARTIAL: return IMAGE_DOT_PARTIAL;
+                case RECOVERABILITY_OVERWRITTEN: return IMAGE_DOT_OVERWRITTEN;
+                default: return IMAGE_DOT_UNKNOWN;
+            }
+    }
+    return -1;
+}
+
+wxItemAttr *CDeletedFilesList::OnGetItemColumnAttr(long lItem, long lColumn) const {
+    const t_FileInfo *pFile = GetFile(lItem);
+    if (!pFile)
+        return NULL;
+    int iChecked = m_setChecked.count(pFile) ? 1 : 0;
+    int iKind = CELL_TEXT;
+    switch (lColumn) {
+        case DELETED_FILES_COLUMN_FOLDER:
+        case DELETED_FILES_COLUMN_MODIFIED:
+            iKind = CELL_SECONDARY;
+            break;
+        case DELETED_FILES_COLUMN_RECOVERABILITY:
+            iKind = pFile->iRecoverability == RECOVERABILITY_GOOD ? CELL_GOOD
+                    : (pFile->iRecoverability == RECOVERABILITY_PARTIAL ? CELL_PARTIAL : CELL_OVERWRITTEN);
+            break;
+        case DELETED_FILES_COLUMN_CONTENTS:
+            switch (pFile->iContent) {
+                case CONTENT_OK: iKind = CELL_GOOD;
+                    break;
+                case CONTENT_DAMAGED:
+                case CONTENT_ZEROS: iKind = CELL_DAMAGED;
+                    break;
+                case CONTENT_NOT_CHECKED: iKind = CELL_UNCHECKED;
+                    break;
+                default: iKind = CELL_OVERWRITTEN;
+            }
+            break;
+    }
+    return &m_aAttr[iKind][iChecked];
 }

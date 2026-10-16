@@ -19,6 +19,11 @@ public:
     };
     virtual const wchar_t * getWXText(int page, int text) = 0;
 
+    // the UI's text by its English wording (Translate.h) - a language without a translation keeps the English
+    virtual const wchar_t *translate(const wchar_t *szEnglish) {
+        return szEnglish;
+    }
+
 };
 
 typedef ILanguage* (__stdcall *CreateLanguageFn)(void); //WIN32 specific, won't compile on any other OS
@@ -76,6 +81,7 @@ public:
         return new Deutsch();
     };
     const wchar_t *getWXText(int page, int text);
+    const wchar_t *translate(const wchar_t *szEnglish) override; // GermanTexts.cpp
 
 };
 #endif	/* ILANGUAGE_H */

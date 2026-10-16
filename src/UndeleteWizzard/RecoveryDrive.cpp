@@ -41,6 +41,7 @@ CRecoveryDrive::CRecoveryDrive() {
     m_bOwnsHandle = false;
     m_pbCancel = 0;
     m_plProgressKB = 0;
+    m_plScanPercent = 0;
 }
 
 CRecoveryDrive::~CRecoveryDrive() {
@@ -54,7 +55,9 @@ void CRecoveryDrive::CloseVolume() {
 }
 
 int CRecoveryDrive::OpenVolume(const wxString &wxsSelectedDrive) {
-    wxString sVolume = wxString("\\\\.\\") + wxsSelectedDrive.Left(2); // "\\.\E:"
+    // "E:" or "E:\" is a drive, anything longer the path of a disk image
+    bool bDrive = wxsSelectedDrive.length() <= 3 && wxsSelectedDrive.length() >= 2 && wxsSelectedDrive[1] == ':';
+    wxString sVolume = bDrive ? wxString("\\\\.\\") + wxsSelectedDrive.Left(2) : wxsSelectedDrive; // "\\.\E:"
 
     CloseVolume(); // the previous scan's drive
 

@@ -1,2 +1,5 @@
 # Build output (build.ps1 builds out-of-source into out/)
 /out/
+
+# Python bytecode (tests/fat-image/make_image.py)
+__pycache__/

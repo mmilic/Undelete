@@ -68,7 +68,7 @@ int CFATDrive::ReadVolume(wxString wxsSelectedDrive) {
 
     nRet = Initialize();
     if (nRet)
-        wxLogMessage("Reading the FAT structures of %s failed (error %d).", wxsSelectedDrive.Left(2), nRet);
+        wxLogMessage("%s: no FAT volume, or unreadable (error %d).", wxsSelectedDrive, nRet);
     return nRet;
 }
 
@@ -795,6 +795,7 @@ int CFATDrive::GetFileList(FileInfoHash *finfohash) {
         return ERROR_INVALID_ACCESS;
 
     std::vector<ST_FATFILE>().swap(m_vFiles);
+    ReportScanProgress(-1); // how many folders there are only shows at the end
     int nRet = LoadFAT();
     if (nRet) {
         wxLogMessage("The FAT can't be read (error %d).", nRet);

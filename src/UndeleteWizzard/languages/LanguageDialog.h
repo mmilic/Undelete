@@ -1,40 +1,27 @@
-/* 
+/*
  * File:   languageDialog.h
  * Author: ezormil
  *
  * Created on 7. Juli 2014, 17:35
+ *
+ * The language of the UI, asked once at the start. German Windows starts with Deutsch preselected.
  */
 
 #ifndef LANGUAGEDIALOG_H
 #define	LANGUAGEDIALOG_H
 
-//#include "../MyWizzard.h"
-
-
-
-
 #include <wx/wx.h>
-#include "../MyWizzard.h"
+#include <string>
 
-class LanguageDialog : public wxDialog
-{
+class LanguageDialog : public wxDialog {
 public:
-  LanguageDialog(const wxString& title,  MyWizard *wizard);
-  void HandleExit(wxCommandEvent &);
-  void setLanguage(wxCommandEvent &);
-  void setEnglishLanguage(); //TODO umesto ovih funkcija, trebalo bi napraviti nesto dinamicki
-  void setGermanLanguage();
-  void setSerbianLanguage();
-  void OnExit(wxCloseEvent&);
-  
-  MyWizard *localWizard;
-  wxButton *closeButton1;
-  wxButton *closeButton;
-  wxButton *OKButton;
-  
-  wxComboBox *LanguageComboBox;
+    LanguageDialog();
+
+    // the LanguageFactory name of the chosen language: "English", "Deutsch"
+    std::string GetLanguage() const;
+
 private:
-    DECLARE_EVENT_TABLE()
+    wxChoice *m_pChoice;
 };
 
 #endif	/* LANGUAGEDIALOG_H */

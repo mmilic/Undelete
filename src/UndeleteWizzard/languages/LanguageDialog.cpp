@@ -1,119 +1,36 @@
 #include "LanguageDialog.h"
 #include <wx/wx.h>
-#include "../CustomButton.h"
+#include <wx/intl.h>
+#include "../Theme.h"
 
-#define CYRILLIC 1
+// the languages offered, by their LanguageFactory name. Srpski is there (Srpski, Srpski_Cyr) but has no
+// translations of the current UI's texts - it would show mostly English.
+static const char *const s_aLanguages[] = {"English", "Deutsch"};
 
-//#include "resources/flag_rs.xpm"
+LanguageDialog::LanguageDialog()
+: wxDialog(NULL, wxID_ANY, "GetMyFilesBack") {
+    SetBackgroundColour(Theme::PanelBg);
+    SetFont(Theme::Body());
 
-//#include "../MyWizzard.h"
-///run for i=1,GetAchievementNumCriteria(7298)do local a,b,c,d,e=GetAchievementCriteriaInfo(7298,i) print(format("%s %d/%d",a,d,e)) end
+    wxStaticText *pLabel = new wxStaticText(this, wxID_ANY, "Language / Sprache");
+    pLabel->SetFont(Theme::Bold(Theme::Body()));
+    m_pChoice = new wxChoice(this, wxID_ANY);
+    for (size_t i = 0; i < WXSIZEOF(s_aLanguages); i++)
+        m_pChoice->Append(s_aLanguages[i]);
+    m_pChoice->SetSelection(wxLocale::GetSystemLanguage() >= wxLANGUAGE_GERMAN && wxLocale::GetSystemLanguage() <= wxLANGUAGE_GERMAN_SWISS ? 1 : 0);
 
-LanguageDialog::LanguageDialog(const wxString & title, MyWizard *wizard)
-: wxDialog(NULL, -1, title) { // sized by its sizer below - a fixed size clips the controls with other fonts/themes/DPI
-
-    this->SetOwnBackgroundColour(wxColour(210, 222, 255));
-    this->SetOwnForegroundColour(wxColour(210, 222, 255));
-    this->SetForegroundColour(wxColour(210, 222, 255));
-    this->SetBackgroundColour(wxColour(210, 222, 255));
-    localWizard = wizard;
-
-    wxBoxSizer *hFlagBox = new wxBoxSizer(wxHORIZONTAL);
-    
-    wxString wxsChoices[] = {
-              wxT("English")
-            , wxT("Deutsch")
-            //, wxT("Srpski")
-    };
-    LanguageComboBox = new wxComboBox(this, -1, wxT("English"),
-            wxDefaultPosition, wxDefaultSize, 2, wxsChoices, wxCB_READONLY);
-
-    OKButton = new wxButton(this, 1, "OK");
-   
-    hFlagBox->Add(LanguageComboBox, 3, wxALIGN_CENTER_VERTICAL | wxALL, 8);
-    hFlagBox->Add(OKButton, 1, wxALIGN_CENTER_VERTICAL | wxTOP | wxBOTTOM | wxRIGHT, 8);
-    hFlagBox->SetMinSize(FromDIP(wxSize(320, -1)));
-
-    LanguageComboBox->Bind(wxEVT_COMBOBOX, &LanguageDialog::setLanguage, this);
-
-    SetSizerAndFit(hFlagBox);
-
+    wxBoxSizer *pInner = new wxBoxSizer(wxVERTICAL);
+    pInner->Add(pLabel, 0);
+    pInner->Add(m_pChoice, 0, wxEXPAND | wxTOP, FromDIP(8));
+    wxBoxSizer *pSizer = new wxBoxSizer(wxVERTICAL);
+    pSizer->Add(pInner, 0, wxEXPAND | wxALL, FromDIP(20));
+    pSizer->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL), 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(20));
+    pSizer->SetMinSize(FromDIP(wxSize(320, -1)));
+    SetSizerAndFit(pSizer);
     Centre();
-
-    ShowModal();
-
-    Destroy();
 }
 
-void LanguageDialog::HandleExit(wxCommandEvent &) {
-    exit(0);
+std::string LanguageDialog::GetLanguage() const {
+    int i = m_pChoice->GetSelection();
+    return (i >= 0 && i < (int) WXSIZEOF(s_aLanguages)) ? s_aLanguages[i] : "English";
 }
-
-void LanguageDialog::setLanguage(wxCommandEvent &evnt) {
-    wxString LanguageChosen = LanguageComboBox->GetValue();
-
-    if (wxT("English") == LanguageChosen)
-        //setEnglishLanguage(); //default
-         EndModal(1);
-    else if (wxT("Deutsch") == LanguageChosen)
-        setGermanLanguage();
-    else if (wxT("Srpski") == LanguageChosen)
-        setSerbianLanguage();
-}
-
-void LanguageDialog::setEnglishLanguage() {
-    localWizard->SetLanguagePack("English");
-    EndModal(1);
-    return;
-}
-
-void LanguageDialog::setSerbianLanguage() {
-
-#if CYRILLIC>0   
-    localWizard->SetLanguagePack("Srpski_Cyr");
-#else     
-    localWizard->SetLanguagePack("Srpski");
-#endif    
-    EndModal(1);
-    return;
-}
-
-void LanguageDialog::setGermanLanguage() {
-    localWizard->SetLanguagePack("Deutsch");
-    EndModal(1);
-    return;
-}
-
-void LanguageDialog::OnExit(wxCloseEvent& event) {
-    exit(0);
-}
-
-wxBEGIN_EVENT_TABLE(LanguageDialog, wxDialog)
-EVT_CLOSE(LanguageDialog::OnExit)
-EVT_BUTTON(1, LanguageDialog::setLanguage)
-wxEND_EVENT_TABLE()
-
-#if 0
-class wxRadioboxPage : public wxWizardPageSimple {
-public: // directions in which we allow the user to proceed from this page 
-
-    enum {
-        Forward, Backward, Both, Neither
-    };
-
-    wxRadioboxPage(wxWizard *parent) : wxWizardPageSimple(parent) { // should correspond to the enum above
-
-    }
-    static wxString choices[] = {wxT("forward"), wxT("backward"), wxT("both"), wxT("neither")};
-    m_radio = new wxRadioBox(this, wxID_ANY, wxT("Allow to proceed:"), wxDefaultPosition, wxDefaultSize, WXSIZEOF(choices), choices, 1, wxRA_SPECIFY_COLS);
-    m_radio->SetSelection(Both);
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(m_radio, 0, // No stretching 
-            wxALL,
-} 5
-// Border
-);
-SetSizer(mainSizer);
-mainSizer->Fit(this);
-}
-#endif

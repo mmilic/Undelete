@@ -44,19 +44,21 @@ if(UNDELETE_BUILD_APP)
     # linked either - FAT drives are read by the engine's own FATDrive.cpp (README.md, "FAT support").
     add_executable(GetMyFilesBack WIN32
         "${SRC}/main.cpp"
-        "${SRC}/MyWizzard.cpp"
-        "${SRC}/MyThreadClass.cpp"
+        "${SRC}/WizardFrame.cpp"
+        "${SRC}/WizardPages.cpp"
+        "${SRC}/Widgets.cpp"
+        "${SRC}/Theme.cpp"
+        "${SRC}/FileDetailsPanel.cpp"
         "${SRC}/DeletedFilesList.cpp"
-        "${SRC}/CustomButton.cpp"
+        "${SRC}/MyThreadClass.cpp"
+        "${SRC}/Volumes.cpp"
+        "${SRC}/AppLog.cpp"
         "${SRC}/IsValidFileName.cpp"
-        "${SRC}/Page_GreetingPage.cpp"
-        "${SRC}/Page_SelectSourceDrivePage.cpp"
-        "${SRC}/Page_SelectDestinationDirPage.cpp"
-        "${SRC}/Page_SelectFilesPage.cpp"
-        "${SRC}/Page_EndPage.cpp"
         "${SRC}/languages/LanguageDialog.cpp"
         "${SRC}/languages/LanguageFactory.cpp"
         "${SRC}/languages/LanguagesImpl.cpp"
+        "${SRC}/languages/GermanTexts.cpp"
+        "${SRC}/languages/Translate.cpp"
         "${SRC}/undelete.rc")
     target_link_libraries(GetMyFilesBack PRIVATE undelete_engine wx::core wx::base)
     # the resource script embeds these - rebuild it when they change

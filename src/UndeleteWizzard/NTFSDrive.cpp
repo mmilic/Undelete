@@ -512,7 +512,7 @@ int CNTFSDrive::ReadVolume(wxString wxsSelectedDir) {
 
     nRet = Initialize();
     if (nRet)
-        wxLogMessage("Reading the NTFS structures of %s failed (error %d).", wxsSelectedDir.Left(2), nRet);
+        wxLogMessage("%s: no NTFS volume, or unreadable (error %d).", wxsSelectedDir, nRet);
     return nRet;
 }
 
@@ -581,10 +581,15 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
     //    for (i = 0; ((unsigned) i < 0xFFFFFFFF); i++) {
     for (i = 30; ((unsigned) i < 0xFFFFFFFF); i++) { //stavio da i krece od +30 da bi izbegao sistemske MFT recorde
 
-        if (!(i & 0xFFF) && IsCancelled()) {
-            wxLogMessage("Scan cancelled at MFT record %d.", i);
-            std::vector<BYTE>().swap(m_vVolumeBitmap);
-            return ERROR_CANCELLED;
+        if (!(i & 0xFFF)) {
+            if (IsCancelled()) {
+                wxLogMessage("Scan cancelled at MFT record %d.", i);
+                std::vector<BYTE>().swap(m_vVolumeBitmap);
+                return ERROR_CANCELLED;
+            }
+            LONGLONG llRecords = m_llMFTSize / m_llMFTRecordSz;
+            if (llRecords > 0)
+                ReportScanProgress((int) wxMin(99LL, (LONGLONG) i * 100 / llRecords));
         }
 
         nRet = this->GetFileDetail(i, stFileInfo); // get the file detail one by one,
