@@ -7,110 +7,181 @@ It builds as one 64-bit exe with everything linked in statically - no DLLs, no i
 on purpose: a recovery tool should run from a USB stick, not be installed onto the drive whose
 deleted files you want back.
 
-## Build
+Contents: [Just use it](#just-use-it) · [1. Install the tools](#1-install-the-tools) ·
+[2. Get the source and build](#2-get-the-source-and-build) · [3. Deploy and run](#3-deploy-and-run) ·
+[4. Tests](#4-tests) · [More about the build](#more-about-the-build) · [Repo layout](#repo-layout) ·
+[FAT support](#fat-support)
 
-### What the machine needs
+## Just use it
 
-| What | Why | Where to get it |
-|---|---|---|
-| Windows 10 or 11, 64-bit | the app and its compiler are Windows-only | - |
-| **Visual Studio 2022** (Community is free) **or Build Tools for Visual Studio 2022** (compiler only, no IDE, ~6-8 GB) | MSVC x64 compiler, Windows SDK, CMake and vcpkg | <https://visualstudio.microsoft.com/downloads/> |
-| ...with the workload **"Desktop development with C++"** | its default components include all four tools above - keep "C++ CMake tools for Windows" and "vcpkg package manager" ticked | Visual Studio Installer |
-| Git | to clone the repo; vcpkg uses it too | <https://git-scm.com/download/win> (Visual Studio also brings one) |
-| Internet access on the first build | vcpkg downloads wxWidgets and its libraries from GitHub | - |
-| ~5 GB free disk space in the clone | the wxWidgets build and its caches in `out\` | - |
+No need to build anything: every push to `master` is built and tested on GitHub's own Windows machines
+(`.github/workflows/build.yml`).
 
-That's all - no MinGW, no separately installed CMake, no wxWidgets download, no admin rights (except to
-run the finished app). Windows PowerShell 5.1, which every Windows 10/11 has, runs the build scripts.
+1. Open the repo on GitHub, go to the **Actions** tab and pick the latest successful **Build** run.
+2. Under **Artifacts**, download **GetMyFilesBack** (you need to be signed in to GitHub). It is a zip with
+   the exe, built from that commit after the image tests passed.
+3. Continue with [3. Deploy and run](#3-deploy-and-run).
 
-**Install everything in one go** (PowerShell; Windows asks for admin rights once per installer):
+## 1. Install the tools
 
-```powershell
-winget install -e --id Git.Git; winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.Vcpkg"
+| What | Why |
+|---|---|
+| Windows 10 or 11, 64-bit | the app and its compiler are Windows-only |
+| **Build Tools for Visual Studio 2022** (compiler only, no IDE) - or Visual Studio 2022 with **"Desktop development with C++"** | MSVC x64 compiler, Windows SDK, CMake and vcpkg |
+| Git | to clone the repo; vcpkg uses it too |
+| Internet access on the first build | vcpkg downloads wxWidgets and its libraries from GitHub |
+| ~10 GB free disk space | ~6-8 GB for the Build Tools, ~5 GB for the wxWidgets build and its caches in `out\` |
+
+That's all - no MinGW, no separately installed CMake, no wxWidgets download, no admin rights for building.
+Windows PowerShell 5.1, which every Windows 10/11 has, runs the build scripts.
+
+Install them with **winget**, in a **Command Prompt (`cmd`)**. Run the commands **one at a time** - `;` is not
+a command separator in cmd, so two commands on one line joined with `;` end up as arguments of the first one.
+Windows asks for admin rights once per installer.
+
+```cmd
+winget install --exact --id Git.Git --accept-package-agreements --accept-source-agreements
 ```
 
-It installs Git, then the Build Tools for Visual Studio 2022 with the C++ workload (`VCTools`; its recommended
-components include the MSVC x64 compiler and the Windows SDK) plus CMake and vcpkg, named explicitly so they're
-there even if the defaults change. The Build Tools installer shows its progress window and takes a while
-(several GB). Open a new PowerShell window afterwards so `git` is on the `PATH`. Already have Visual Studio 2022
-with "Desktop development with C++"? Then you need nothing from this line.
+```cmd
+winget install --exact --id Microsoft.VisualStudio.2022.BuildTools --accept-package-agreements --accept-source-agreements --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.Vcpkg"
+```
+
+The second one installs the Build Tools for Visual Studio 2022 with the C++ workload (`VCTools`; its
+recommended components include the MSVC x64 compiler and the Windows SDK) plus CMake and vcpkg, named
+explicitly so they're there even if the defaults change. Its installer shows a progress window and takes a
+while (several GB). Already have Visual Studio 2022 with "Desktop development with C++"? Then skip it.
+
+**Close the Command Prompt and open a new one** afterwards, so `git` is on the `PATH`.
 
 Things to know:
 - **Visual Studio 2022 specifically.** `CMakePresets.json` uses the "Visual Studio 17 2022" generator; a machine
   with only a newer Visual Studio needs that line changed.
-- **Keep the clone path short**, e.g. `C:\src\Undelete`. vcpkg's build paths inside `out\` are long, and a
-  deeply nested clone can hit Windows' 260-character path limit while building wxWidgets.
-- **The tests need more**: WSL with `ntfs-3g` and `python3` for the NTFS test, Python 3 on Windows for the
-  FAT test - see "Tests" below. Building the app doesn't.
+- **The tests need more** - Python, and WSL for the NTFS test. Building the app doesn't. See [4. Tests](#4-tests).
 
-**Without installing anything:** every push to `master` is built on GitHub's own Windows machines
-(`.github/workflows/build.yml`). Open the repo's **Actions** tab, pick the latest "Build" run and download
-the **GetMyFilesBack** artifact - the exe, built from that commit, after the image tests passed.
+## 2. Get the source and build
 
-### Building
+**Keep the clone path short**, e.g. `C:\src\Undelete`: vcpkg's build paths inside `out\` are long, and a deeply
+nested clone can hit Windows' 260-character path limit while building wxWidgets.
 
-```powershell
-cd Undelete
-powershell -ExecutionPolicy Bypass -File build.ps1          # Release
-powershell -ExecutionPolicy Bypass -File build.ps1 -Debug   # Debug
+```cmd
+git clone https://github.com/mmilic/Undelete.git C:\src\Undelete
 ```
 
-`-ExecutionPolicy Bypass` is needed because Windows' default policy blocks running unsigned local
-`.ps1` scripts; this only applies to this one invocation and doesn't change any system setting.
+```cmd
+cd /d C:\src\Undelete
+```
 
-The result is `out\GetMyFilesBack.exe`. Everything the build generates stays in `out\`:
+```cmd
+powershell -ExecutionPolicy Bypass -File build.ps1
+```
+
+`-ExecutionPolicy Bypass` is needed because Windows' default policy blocks running unsigned local `.ps1`
+scripts; it only applies to this one run and doesn't change any system setting. Add `-Debug` at the end for a
+debug build.
+
+The **first build takes 10-15 minutes**, because vcpkg compiles wxWidgets and its image libraries. After that
+the libraries come from `out\vcpkg-cache` and a build takes about a minute.
+
+The result is **`out\GetMyFilesBack.exe`** - the only file you need to run the app.
+
+## 3. Deploy and run
+
+There is nothing to install: the exe is the whole app.
+
+1. **Copy `GetMyFilesBack.exe` to a USB stick** (or any drive other than the one with the deleted files).
+   Every file written to the drive that held the deleted files can overwrite them - so don't download, copy
+   or install anything there until the recovery is done.
+2. On the computer with the deleted files, **start it from the USB stick**: double-click it in Explorer and
+   confirm the Windows prompt. It needs administrator rights to read the drive directly.
+   - From a Command Prompt, use one opened with "Run as administrator". From a normal one, Windows refuses to
+     start it (error 740) instead of asking.
+3. Pick the language, then **pick the drive** that held the files. Its deleted files appear in the list
+   while it is being scanned - tick the ones you want.
+4. Click **Recover** and choose a folder **on another drive** - the USB stick is a good choice. The app
+   refuses a folder on the drive being scanned. A log file of the recovery is saved in that folder too.
+
+**Disk images:** files named on the command line are offered beside the drives, as disk images - e.g. a copy
+of a failing memory card, so the card itself is read only once:
+
+```cmd
+GetMyFilesBack.exe E:\card.img
+```
+
+Reading an image needs no admin rights. To try the app without them (e.g. with the test images), skip the
+Windows prompt for this one start:
+
+```cmd
+set __COMPAT_LAYER=RunAsInvoker
+```
+
+```cmd
+out\GetMyFilesBack.exe out\fat-test\fat32.img
+```
+
+## 4. Tests
+
+Two end-to-end tests build disk images with deleted files, run the recovery engine against them and check
+every recovered file byte-for-byte. The GitHub build runs both on every push.
+
+**FAT test** (FAT12, FAT16, FAT32) - needs Python 3 on Windows. It installs `pyfatfs` into a venv under
+`out\fat-test` on its own; no WSL. See `tests\fat-image\README.md`.
+
+```cmd
+winget install --exact --id Python.Python.3.13 --accept-package-agreements --accept-source-agreements
+```
+
+Open a new Command Prompt, then:
+
+```cmd
+powershell -ExecutionPolicy Bypass -File tests\fat-image\run.ps1
+```
+
+**NTFS test** - the image is made with `ntfs-3g` in WSL. See `tests\ntfs-image\README.md`. Install WSL with
+Ubuntu (asks for admin rights; restart Windows if it asks, then finish Ubuntu's first start, which asks for a
+user name and password):
+
+```cmd
+wsl --install -d Ubuntu
+```
+
+Then `ntfs-3g` and Python inside it:
+
+```cmd
+wsl -d Ubuntu -u root -e sh -c "apt-get update && apt-get install -y ntfs-3g python3"
+```
+
+```cmd
+powershell -ExecutionPolicy Bypass -File tests\ntfs-image\run.ps1
+```
+
+## More about the build
+
+Everything the build generates stays in `out\`:
 - `out\build\x64\` - the CMake build tree (a Visual Studio solution, `GetMyFilesBack.sln`)
 - `out\vcpkg_installed\` - wxWidgets and its libraries, built from source by vcpkg as static libs
 - `out\vcpkg-downloads\`, `out\vcpkg-cache\` - vcpkg's downloaded sources and built packages
 
-The **first build takes 10-15 minutes**, because vcpkg compiles wxWidgets and its image libraries.
-After that the libraries come from `out\vcpkg-cache` and a build takes about a minute.
-
-Versions are pinned: `vcpkg.json` names the vcpkg registry commit (`builtin-baseline`), which fixes
-the wxWidgets version (3.3.3) and every library it uses. Change that commit to upgrade.
+Versions are pinned: `vcpkg.json` names the vcpkg registry commit (`builtin-baseline`), which fixes the
+wxWidgets version (3.3.3) and every library it uses. Change that commit to upgrade.
 
 The project can also be opened directly in Visual Studio ("Open a local folder" - it reads
-`CMakePresets.json`), or built by hand:
+`CMakePresets.json`), or built by hand from a "Developer Command Prompt for VS 2022":
 
-```powershell
+```cmd
 cmake --preset x64
+```
+
+```cmd
 cmake --build --preset release
 ```
 
 `build.ps1` does the same after finding Visual Studio's CMake and vcpkg (`build-env.ps1`). To use your own
 vcpkg checkout instead of the one that comes with Visual Studio, set `VCPKG_ROOT`.
 
-### Older build
-
-Until October 2026 the repo carried its own 32-bit toolchain in `tools/` (MinGW GCC 4.6.2 and static
-wxWidgets 3.0.1). The tag **`last-gcc462-x86`** marks the last commit built that way - check it out to
+**Older build:** until October 2026 the repo carried its own 32-bit toolchain in `tools/` (MinGW GCC 4.6.2 and
+static wxWidgets 3.0.1). The tag **`last-gcc462-x86`** marks the last commit built that way - check it out to
 rebuild that version.
-
-### Running it
-
-The built exe's manifest requests `requestedExecutionLevel="requireAdministrator"` (it needs raw
-volume access), so:
-- Started from Explorer, Windows shows the UAC prompt (a standard user is asked for admin
-  credentials) - the app never runs without admin rights.
-- Launching it from a non-elevated shell fails outright (`CreateProcess` error 740) rather than
-  prompting for UAC. Launch it from Explorer or an elevated PowerShell/cmd.
-
-**Disk images:** files named on the command line are offered beside the drives, as disk images
-(`GetMyFilesBack.exe E:\usb-stick.img`) - e.g. a copy of a failing card, so it is read only once. Reading an image
-needs no admin rights: `set __COMPAT_LAYER=RunAsInvoker` before starting it skips the UAC prompt, which is how
-the UI can be tried with the test images (`out\fat-test\fat32.img`) without touching a real drive.
-
-## Tests
-
-`tests\ntfs-image\run.ps1` builds an NTFS disk image with deleted files (in WSL, with ntfs-3g), runs the
-recovery engine against it and checks every recovered file byte-for-byte - see
-`tests\ntfs-image\README.md`. Besides the build requirements it needs WSL (`wsl --install`) with
-`sudo apt-get install ntfs-3g python3` inside it.
-
-`tests\fat-image\run.ps1` does the same for FAT12, FAT16 and FAT32 - see `tests\fat-image\README.md`. It
-needs Python 3 on Windows (it installs `pyfatfs` into a venv under `out\fat-test` on its own), no WSL.
-
-The GitHub build runs both tests on every push.
 
 ## Repo layout
 
