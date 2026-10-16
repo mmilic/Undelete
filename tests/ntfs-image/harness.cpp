@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     wxString outDir(argv[2]);
     for (FileInfoHash::iterator it = hash.begin(); it != hash.end(); ++it) {
         t_FileInfo *pInfo = it->second;
-        wxString name(pInfo->szFilename);
+        wxString name(pInfo->sFilename.c_str());
         wxString dest = outDir + "\\" + name;
         nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
         // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result

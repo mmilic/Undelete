@@ -34,11 +34,13 @@ struct DeletedFilesOrder {
                     r = b->iPercentIntact - a->iPercentIntact;
                 break;
             case DELETED_FILES_COLUMN_STATUS:
-                r = strcmp(a->szBuffer, b->szBuffer);
+                r = (int) a->bInRecycleBin - (int) b->bInRecycleBin; // group by status without building its text
+                if (!r)
+                    r = (a->dwAttributes < b->dwAttributes) ? -1 : (a->dwAttributes > b->dwAttributes ? 1 : 0);
                 break;
         }
         if (!r) // ties (and the name column) - by name, so the order is stable and predictable
-            r = _wcsicmp(a->szFilename, b->szFilename);
+            r = _wcsicmp(a->sFilename.c_str(), b->sFilename.c_str());
         if (!r)
             r = a->iRecordId - b->iRecordId;
         return bAscending ? (r < 0) : (r > 0);
@@ -145,7 +147,7 @@ void CDeletedFilesList::Rebuild() {
         m_vVisible = m_vAll;
     else
         for (size_t i = 0; i < m_vAll.size(); i++)
-            if (wxString(m_vAll[i]->szFilename).Upper().Contains(m_sFilterUpper))
+            if (wxString(m_vAll[i]->sFilename.c_str()).Upper().Contains(m_sFilterUpper))
                 m_vVisible.push_back(m_vAll[i]);
 
     DeletedFilesOrder order;
@@ -176,7 +178,7 @@ wxString CDeletedFilesList::OnGetItemText(long lItem, long lColumn) const {
 
     switch (lColumn) {
         case DELETED_FILES_COLUMN_NAME:
-            return wxString(pFile->szFilename);
+            return wxString(pFile->sFilename.c_str());
         case DELETED_FILES_COLUMN_SIZE:
             return FormatSize(pFile->n64RealSize);
         case DELETED_FILES_COLUMN_RECOVERABILITY:
@@ -184,7 +186,7 @@ wxString CDeletedFilesList::OnGetItemText(long lItem, long lColumn) const {
                 return wxString::Format("%s (%d%% intact)", RecoverabilityLabel(pFile->iRecoverability), pFile->iPercentIntact);
             return wxString(RecoverabilityLabel(pFile->iRecoverability));
         case DELETED_FILES_COLUMN_STATUS:
-            return wxString(pFile->szBuffer);
+            return wxString(FileStatusText(*pFile));
     }
     return wxEmptyString;
 }

@@ -36,6 +36,7 @@ CMFTRecord::CMFTRecord() {
     m_dwCurPos = 0;
     m_dwBytesPerCluster = 0;
     m_n64StartPos = 0;
+    m_pbCancel = 0;
 
     m_puchFileData = 0; // collected file data buffer
     m_llFileDataSz = 0; // file data size , ie. m_pchFileData buffer length
@@ -433,6 +434,12 @@ int CMFTRecord::ExtractData(const BYTE *puchAttr, const NTFS_ATTRIBUTE &ntfsAttr
         LONGLONG llRunPos = 0;
 
         while (llRunPos < llRunBytes && llRemaining > 0) {
+            if (m_pbCancel && *m_pbCancel) {
+                delete[] puchData;
+                puchData = 0;
+                return ERROR_CANCELLED;
+            }
+
             DWORD dwChunk = (llRunBytes - llRunPos < dwChunkSize) ? (DWORD) (llRunBytes - llRunPos) : dwChunkSize;
             // the last chunk of the file only needs part of its last cluster
             DWORD dwUseful = (llRemaining < dwChunk) ? (DWORD) llRemaining : dwChunk;

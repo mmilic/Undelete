@@ -60,7 +60,10 @@ real/virtual drive and check the recovered files.
   events (`wxEVT_SHOW_NOTIFICATION`, `wxEVT_ENABLE_GUI_FIELDS`) back to the main thread, guarded by the
   wizard's mutex/critical section when touching shared state. Threads must not touch wx controls: the scan
   thread only fills the `FileInfoHash`, the page fills the list afterwards; the copy thread gets a
-  `std::vector<t_FileInfo*>` collected by the page.
+  `std::vector<t_FileInfo*>` collected by the page. Threads are joinable: the page `Wait()`s for them (also
+  after Cancel, which they notice via a flag the engine checks) and reads the outcome from `m_iResult` - no
+  `wxLogFatalError`/message boxes from threads or the engine; errors are returned and shown by the page.
+  Free scan results with `DeleteFileInfoHash()`, never `clear()` alone.
 - `DeletedFilesList.{h,cpp}` — `CDeletedFilesList`, the virtual (`wxLC_VIRTUAL`) list of deleted files. It
   holds only pointers and draws visible rows on demand, because a big drive yields hundreds of thousands of
   files. Search, sorting and type filters work on its pointer vector.

@@ -59,7 +59,8 @@ public:
     wxWindow *m_parent; //treba mi da bi ovaj thread mogao da baca evente
     int *m_iptrNumberOfCopiedFiles;
     HANDLE hFileLog;
-    bool m_CancelProgresControl; //when set to true - the Thread processing will stop
+    volatile bool m_CancelProgresControl; //when set to true - the Thread processing will stop (set by the GUI thread)
+    int m_iResult; // outcome of the thread's work, read by the GUI thread after Wait()
 
     void Init();
     void SetCancelProgresControl(bool CancelProgresControl);

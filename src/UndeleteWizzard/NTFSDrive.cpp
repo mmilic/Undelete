@@ -38,6 +38,39 @@ CNTFSDrive::CNTFSDrive() {
     m_dwMFTCacheLen = 0;
 
     m_llStartSector = 0;
+    m_pbCancel = 0;
+    m_bOwnsHandle = false;
+}
+
+void CNTFSDrive::SetCancelFlag(volatile bool *pbCancel) {
+    m_pbCancel = pbCancel;
+}
+
+void DeleteFileInfoHash(FileInfoHash *finfohash) {
+    for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
+        delete it->second;
+    finfohash->clear();
+}
+
+std::string FileStatusText(const t_FileInfo &stFileInfo) {
+    std::string sStatus;
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_READONLY)
+        sStatus += "Read Only, ";
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_ENCRYPTED)
+        sStatus += "Encrypted, ";
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_COMPRESSED)
+        sStatus += "Compressed, ";
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
+        sStatus += "Sparse, ";
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+        sStatus += "Reparse Point, ";
+    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_OFFLINE)
+        sStatus += "Offline, ";
+    if (stFileInfo.bInRecycleBin)
+        sStatus += "Deleted in Recycle Bin";
+    else if (stFileInfo.bDeleted)
+        sStatus += "Deleted";
+    return sStatus;
 }
 
 bool CNTFSDrive::IsInitialised() {
@@ -45,6 +78,9 @@ bool CNTFSDrive::IsInitialised() {
 }
 
 CNTFSDrive::~CNTFSDrive() {
+    if (m_bOwnsHandle && m_hDrive && m_hDrive != INVALID_HANDLE_VALUE)
+        CloseHandle(m_hDrive);
+
     delete[] m_puchMFTRecord;
     m_puchMFTRecord = 0;
 }
@@ -83,9 +119,10 @@ int CNTFSDrive::Initialize() {
 
     // point the starting NTFS volume sector in the physical drive
     dwCur = SetFilePointer(m_hDrive, n84StartPos.LowPart, &n84StartPos.HighPart, FILE_BEGIN);
-    if (INVALID_SET_FILE_POINTER == dwCur) {
-        wxLogFatalError("Unable to Set File Pointer - check disk access rights");
-        return GetLastError(); // heheh - dovde nece doci nikad :) wxLogFatalError prekida izvrsavanje programa
+    if (INVALID_SET_FILE_POINTER == dwCur && GetLastError() != NO_ERROR) {
+        DWORD dwErrorCode = GetLastError();
+        wxLogMessage("Unable to Set File Pointer (error %u) - check disk access rights", (unsigned) dwErrorCode);
+        return dwErrorCode;
     }
 
     // Read the boot sector for the MFT infomation
@@ -150,9 +187,10 @@ int CNTFSDrive::LoadMFT(LONGLONG nStartCluster) {
 
     //  set the pointer to the MFT start
     dwRet = SetFilePointer(m_hDrive, n64Pos.LowPart, &n64Pos.HighPart, FILE_BEGIN);
-    if (dwRet == INVALID_SET_FILE_POINTER) {
-        wxLogFatalError("Unable to Set File Pointer - check disk access rights");
-        return GetLastError(); // heheh - dovde nece doci nikad :) wxLogFatalError prekida izvrsavanje programa
+    if (dwRet == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
+        DWORD dwErrorCode = GetLastError();
+        wxLogMessage("Unable to Set File Pointer (error %u) - check disk access rights", (unsigned) dwErrorCode);
+        return dwErrorCode;
     }
 
     /// reading the first record in the NTFS table.
@@ -436,92 +474,35 @@ int CNTFSDrive::Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileData
     return ERROR_SUCCESS;
 }
 
+// open a drive letter ("E:" or "E:\") as a raw volume and load its NTFS structures.
+// Runs in the scan thread - no message boxes here, the caller shows the error.
+
 int CNTFSDrive::ReadVolume(wxString wxsSelectedDir) {
+    wxString sVolume = wxString("\\\\.\\") + wxsSelectedDir.Left(2); // "\\.\E:"
 
-    NTFS_PART_BOOT_SEC ntfsBS;
-    DWORD dwBytes;
-    LARGE_INTEGER n84StartPos;
+    if (m_bOwnsHandle && m_hDrive && m_hDrive != INVALID_HANDLE_VALUE)
+        CloseHandle(m_hDrive); // the previous scan's drive
+    m_bOwnsHandle = false;
+    m_bInitialized = false;
 
-    char tempDrive[10];
-    memset(tempDrive, '\0', 10 * sizeof (char));
-    strncpy(tempDrive, "\\\\.\\", 7);
-    strncat(tempDrive, wxsSelectedDir.mb_str(), 2);
-
-    wchar_t rDrive[10];
-    memset(rDrive, '\0', 10 * sizeof (wchar_t));
-
-    mbstowcs(rDrive, tempDrive, 9);
-
-
-    memset(&n84StartPos, '\0', sizeof (n84StartPos));
-    memset(&ntfsBS, '\0', sizeof (ntfsBS));
-    DWORD lpSectorsPerCluster, lpBytesPerSector, lpNumberOfFreeClusters, lpTotalNumberOfClusters;
-
-    m_hDrive = CreateFile(rDrive, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+    m_hDrive = CreateFileW(sVolume.wc_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
     if (m_hDrive == INVALID_HANDLE_VALUE) {
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                wxT("Error loading file\nCheck Access rights!"), wxT("Error"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-        return (-2);
-    }
-
-
-    // ovaj korak je ovde malo cudan - al ajd - nek bude tu dok ne vidim kako cemo
-    //    this->SetDriveHandle(hDrive);
-
-    //    GetDiskFreeSpace(wxsSelectedDir.mb_str(), &lpSectorsPerCluster, &lpBytesPerSector, &lpNumberOfFreeClusters, &lpTotalNumberOfClusters);
-    GetDiskFreeSpace(rDrive, &lpSectorsPerCluster, &lpBytesPerSector, &lpNumberOfFreeClusters, &lpTotalNumberOfClusters);
-
-    m_dwBytesPerCluster = lpSectorsPerCluster*lpBytesPerSector;
-    m_dwBytesPerSector = lpBytesPerSector;
-
-    // opet nezgodno reseno, m_hDrive je postavljen funkcijom SetDriveHanle par redova iznad
-    DWORD dwRet;
-    dwRet = SetFilePointer(m_hDrive, 0, 0, FILE_BEGIN);
-    if (INVALID_SET_FILE_POINTER == dwRet) {
-        wxLogMessage("Unable to Set File Pointer - check disk access rights");
-        return GetLastError(); // heheh - dovde nece doci nikad :) wxLogFatalError prekida izvrsavanje programa
-    }
-
-    int nRet = ReadFile(m_hDrive, &ntfsBS, sizeof (NTFS_PART_BOOT_SEC), &dwBytes, NULL);
-    if (!nRet) {
         DWORD dwErrorCode = GetLastError();
-        wxLogError("ReadRaw returned error code %d .", dwErrorCode); //sranje - ovde treba provera mesta na hardu i neko lepo preskakanje
-        return (dwErrorCode);
+        wxLogMessage("Cannot open %s (error %u).", sVolume, (unsigned) dwErrorCode);
+        m_hDrive = 0;
+        return dwErrorCode ? (int) dwErrorCode : ERROR_ACCESS_DENIED;
     }
+    m_bOwnsHandle = true;
 
-    printf("ntfsBS.chOemID: '%4.4s'", ntfsBS.chOemID);
+    // the volume starts at byte 0 of its own handle, so the sector size only matters for multiplying with 0
+    DWORD dwSectorsPerCluster, dwBytesPerSector = 512, dwFreeClusters, dwTotalClusters;
+    GetDiskFreeSpaceW((wxsSelectedDir.Left(2) + "\\").wc_str(), &dwSectorsPerCluster, &dwBytesPerSector, &dwFreeClusters, &dwTotalClusters);
+    SetStartSector(0, dwBytesPerSector);
 
-    if (memcmp(ntfsBS.chOemID, "NTFS", 4)) { // check whether it is realy ntfs
-        wxLogMessage("Not realy a NTFS drive");
-        return ERROR_INVALID_DRIVE;
-    }
-
-    /// Cluster is the logical entity
-    /// which is made up of several sectors (a physical entity)
-    m_dwBytesPerCluster = ntfsBS.bpb.uchSecPerClust * ntfsBS.bpb.wBytesPerSec;
-
-    delete[] m_puchMFTRecord;
-    m_puchMFTRecord = 0;
-
-    m_llMFTRecordSz = MFTRecordSizeFromBootSector((signed char) ntfsBS.bpb.nClustPerMFTRecord, m_dwBytesPerCluster);
-    if (m_llMFTRecordSz < 256 || m_llMFTRecordSz > 65536) {
-        wxLogMessage("Invalid MFT record size in the boot sector.");
-        return ERROR_INVALID_DRIVE;
-    }
-    m_puchMFTRecord = new BYTE[m_llMFTRecordSz];
-
-    m_bInitialized = true;
-
-    // MFTRecord of MFT is available in the MFTRecord variable
-    //   load the entire MFT using it
-    nRet = LoadMFT(ntfsBS.bpb.n64MFTLogicalClustNum);
-    if (nRet) {
-        wxLogFatalError("Loading of MFT failed");
-        m_bInitialized = false;
-        return nRet;
-    }
-    return ERROR_SUCCESS;
+    int nRet = Initialize();
+    if (nRet)
+        wxLogMessage("Reading the NTFS structures of %s failed (error %d).", sVolume, nRet);
+    return nRet;
 }
 
 int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
@@ -547,9 +528,9 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
         return (nRet);
     }
     // set the struct and pass the struct of file detail
-    memset(&stFileInfo, 0, sizeof (t_FileInfo));
+    stFileInfo = t_FileInfo();
     // keep the name as UTF-16 - converting it to char loses every character outside the ANSI code page
-    wcsncpy(stFileInfo.szFilename, (const wchar_t*) cFile.m_attrFilename.wFilename, _MAX_PATH - 1);
+    stFileInfo.sFilename.assign((const wchar_t*) cFile.m_attrFilename.wFilename);
 
     stFileInfo.dwAttributes = cFile.m_attrFilename.dwFlags;
 
@@ -558,10 +539,6 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     stFileInfo.n64Access = cFile.m_attrStandard.n64Access;
     stFileInfo.n64Modfil = cFile.m_attrStandard.n64Modfil;
 
-    stFileInfo.n64Size = cFile.m_attrFilename.n64Allocated;
-    stFileInfo.n64Size /= m_dwBytesPerCluster;
-    stFileInfo.n64Size = (!stFileInfo.n64Size) ? 1 : stFileInfo.n64Size;
-    
     stFileInfo.n64SizeOnDisk = cFile.m_attrFilename.n64Allocated; // Size of the file
     stFileInfo.n64RealSize = cFile.m_llDataSize;
 
@@ -572,9 +549,11 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     return (ERROR_SUCCESS);
 }
 
+// scan the whole MFT and put every deleted (non-system) file into the map.
+// Returns ERROR_CANCELLED if the cancel flag was set - the map then holds what was found so far.
+
 int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
-    //    t_FileInfo stFInfo;
-    t_FileInfo *pFileInfo;
+    t_FileInfo stFileInfo;
     int nRet, i;
 
     // which clusters are in use right now - to tell which deleted files are probably still intact
@@ -584,92 +563,32 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
     //    for (i = 0; ((unsigned) i < 0xFFFFFFFF); i++) {
     for (i = 30; ((unsigned) i < 0xFFFFFFFF); i++) { //stavio da i krece od +30 da bi izbegao sistemske MFT recorde
 
-        pFileInfo = new t_FileInfo;
-        memset(pFileInfo->szBuffer, '\0', 255);
+        if (!(i & 0xFFF) && IsCancelled()) {
+            wxLogMessage("Scan cancelled at MFT record %d.", i);
+            std::vector<BYTE>().swap(m_vVolumeBitmap);
+            return ERROR_CANCELLED;
+        }
 
-        nRet = this->GetFileDetail(i, *pFileInfo); // get the file detail one by one, 
+        nRet = this->GetFileDetail(i, stFileInfo); // get the file detail one by one,
         if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS)) {
-            delete pFileInfo;
             wxLogMessage("No more files to add to the list");
             std::vector<BYTE>().swap(m_vVolumeBitmap); // only needed during the scan
             ResolveRecycleBinNames(m_FileInfoHash);
             return (0); // ovde smisli sta ces - ne moze ovako da ostane :)
         }
-        if (nRet) { // unused or damaged record - skip it, keep scanning the rest of the MFT
-            delete pFileInfo;
+        if (nRet) // unused or damaged record - skip it, keep scanning the rest of the MFT
             continue;
-        }
 
-        strcpy(pFileInfo->szBuffer, "");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_READONLY)
-            strcat(pFileInfo->szBuffer, "Read Only-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_HIDDEN)
-            strcat(pFileInfo->szBuffer, "Hidden-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_SYSTEM)
-            strcat(pFileInfo->szBuffer, "System File-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
-            strcat(pFileInfo->szBuffer, "Directory-");
-
-//        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_ARCHIVE)
-//            strcat(pFileInfo->szBuffer, "Archive-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_ENCRYPTED)
-            strcat(pFileInfo->szBuffer, "Encrypted-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_NORMAL)
-            strcat(pFileInfo->szBuffer, "Normal-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
-            strcat(pFileInfo->szBuffer, "Sparse File-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
-            strcat(pFileInfo->szBuffer, "Reparse Point-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_COMPRESSED)
-            strcat(pFileInfo->szBuffer, "Compressed-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_OFFLINE)
-            strcat(pFileInfo->szBuffer, "Offline-");
-
-        if (pFileInfo->dwAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)
-            strcat(pFileInfo->szBuffer, "Indexed-");
-
-        if (pFileInfo->dwAttributes & 0x4000)
-            strcat(pFileInfo->szBuffer, "Encrypted-"); // if it is encrypted
-
-        if (pFileInfo->dwAttributes & 0x10000000)
-            strcat(pFileInfo->szBuffer, "Directory-"); // if it is directory
-
-        if (pFileInfo->dwAttributes & 0x10000000)
-            strcat(pFileInfo->szBuffer, "Indexed-"); // if it is indexed
-
-        if (pFileInfo->bDeleted)
-            strcat(pFileInfo->szBuffer, "Deleted");
-        //                // strcpy(szBuffer,"");
-        //                if (1 /*!stFInfo.bDeleted */) {
-        //                    //dwDeleted++;
-        //                    printf("stFInfo.szFilename %s: szBuffer: %s\n", stFInfo.szFilename, szBuffer);
-        //        
-        //                }
-        //                                                             
-        if (pFileInfo->bDeleted
-                && wcslen(pFileInfo->szFilename)//obrisan i ima ime fajla
-                && !(pFileInfo->dwAttributes & 0x10000000) //Check if it is a DIR - don-t put DIRs
-                && !(pFileInfo->dwAttributes & FILE_ATTRIBUTE_SYSTEM)
-                && !(pFileInfo->dwAttributes & FILE_ATTRIBUTE_HIDDEN)
-                && !(pFileInfo->dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        if (stFileInfo.bDeleted
+                && !stFileInfo.sFilename.empty() //obrisan i ima ime fajla
+                && !(stFileInfo.dwAttributes & 0x10000000) //Check if it is a DIR - don-t put DIRs
+                && !(stFileInfo.dwAttributes & FILE_ATTRIBUTE_SYSTEM)
+                && !(stFileInfo.dwAttributes & FILE_ATTRIBUTE_HIDDEN)
+                && !(stFileInfo.dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 ) {
-            pFileInfo->iRecordId = i;
-            (*m_FileInfoHash)[i] = pFileInfo;
-            pFileInfo = NULL;
-        } else {
-            delete pFileInfo;
+            stFileInfo.iRecordId = i;
+            (*m_FileInfoHash)[i] = new t_FileInfo(stFileInfo);
         }
-        //        printf("i = %d\n", i);
     }
     return (ERROR_SUCCESS);
 }
@@ -720,17 +639,17 @@ void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
 
     std::map<std::wstring, int> mapInfoFiles; // "$I...." name -> MFT record
     for (it = finfohash->begin(); it != finfohash->end(); ++it)
-        if (!wcsncmp(it->second->szFilename, L"$I", 2))
-            mapInfoFiles[it->second->szFilename] = it->second->iRecordId;
+        if (!it->second->sFilename.compare(0, 2, L"$I"))
+            mapInfoFiles[it->second->sFilename] = it->second->iRecordId;
 
     for (it = finfohash->begin(); it != finfohash->end(); ++it) {
         t_FileInfo *pFileInfo = it->second;
-        if (wcsncmp(pFileInfo->szFilename, L"$R", 2) || wcslen(pFileInfo->szFilename) < 8)
+        if (pFileInfo->sFilename.compare(0, 2, L"$R") || pFileInfo->sFilename.length() < 8)
             continue;
 
-        wxLogMessage("A file deleted from Recycle Bin is found: %s", wxString(pFileInfo->szFilename));
+        wxLogMessage("A file deleted from Recycle Bin is found: %s", wxString(pFileInfo->sFilename.c_str()));
 
-        std::wstring wsInfoName = std::wstring(L"$I") + (pFileInfo->szFilename + 2);
+        std::wstring wsInfoName = L"$I" + pFileInfo->sFilename.substr(2);
         std::map<std::wstring, int>::iterator itInfo = mapInfoFiles.find(wsInfoName);
         if (itInfo == mapInfoFiles.end()) {
             wxLogMessage("No %s found - the original name is lost.", wxString(wsInfoName.c_str()));
@@ -757,10 +676,9 @@ void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
         if (wsName.empty())
             continue;
 
-        wcsncpy(pFileInfo->szFilename, wsName.c_str(), _MAX_PATH - 1);
-        pFileInfo->szFilename[_MAX_PATH - 1] = 0;
-        strcpy(pFileInfo->szBuffer, "Deleted in Recycle Bin");
-        wxLogMessage("A file name retrieved from Recycle Bin: %s", wxString(pFileInfo->szFilename));
+        pFileInfo->sFilename = wsName;
+        pFileInfo->bInRecycleBin = true;
+        wxLogMessage("A file name retrieved from Recycle Bin: %s", wxString(pFileInfo->sFilename.c_str()));
     }
 }
 
@@ -795,18 +713,21 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *w
             NULL); // no attr. template
 
     if (hFile == INVALID_HANDLE_VALUE) {
-        wxLogFatalError("Unable to open file \"%s\" for write.", sDestintationFileName);
+        // one file that can't be created must not stop the others - the copy thread logs it and goes on
         DWORD dwErrorCode = GetLastError();
-        wxLogError("MapViewOfFile returned error code %d . Possibly not enough drive space", dwErrorCode); //sranje - ovde treba provera mesta na hardu i neko lepo preskakanje
-        return (dwErrorCode);
+        wxLogMessage("Unable to create file \"%s\" (error %u).", sDestintationFileName, (unsigned) dwErrorCode);
+        return dwErrorCode ? (int) dwErrorCode : ERROR_CANNOT_MAKE;
     }
 
     wxLogMessage("Extracting file \'%s\'.", sDestintationFileName);
 
+    cFile.SetCancelFlag(m_pbCancel);
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, false, hFile);
     if (nRet) {
-        wxLogMessage("Extracting file \'%s\' FAILED!!!", sDestintationFileName);
+        wxLogMessage("Extracting file \'%s\' FAILED (error %d)!!!", sDestintationFileName, nRet);
         CloseHandle(hFile);
+        if (nRet == ERROR_CANCELLED)
+            DeleteFileW(wszDestinationFileName); // a cut-off file would look like a recovered one
         return (nRet);
     }
 

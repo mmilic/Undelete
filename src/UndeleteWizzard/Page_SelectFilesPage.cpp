@@ -137,6 +137,13 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         *ptrNumberOfSelectedFiles = (int) vFilesToCopy.size();
         //        (*this->m_NumberOfSelectedFiles) = ;//sto je ovo glupo resenje - katastrofa - ne treba mu jos jedna referenca na isti pointer
 
+        if (vFilesToCopy.empty()) {
+            wxMessageDialog dial(NULL, wxT("Please select the files you want to retrieve."), wxT("Info"), wxOK | wxICON_INFORMATION);
+            dial.ShowModal();
+            event.Veto();
+            return;
+        }
+
         wxProgressDialog dialog("Scanning the selected source drive.",
                 // "Reserve" enough space for the multiline
                 // messages below, we'll change it anyhow
@@ -165,21 +172,26 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         thCopyFiles->SetIptrNumberOfCopiedFiles(((MyWizard *) GetParent())->GetIptrNumberOfCopiedFiles());
 
         if (thCopyFiles->Create() != wxTHREAD_NO_ERROR) {
-            wxLogError(languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR));
-            exit(-1);
+            delete thCopyFiles;
+            wxMessageDialog dial(NULL, languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR),
+                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
+            return;
         }
+
+        SetDialogString("Copying deleted files...");
+        this->m_NumberOfFileBeingCopied = 0;
+        this->mw_bRunDialog = true;
 
         thCopyFiles->Run();
 
-        bool cont = true; // ovaj se koristi ako je stisnut cancel - to moram da vidim gde sta treba da implementiram... 
-        // moguce da cu na ovoj strani da stavim cancel a na sledecoj oba, i skip i cancel hmmm...         
-        this->mw_bRunDialog = true;
-        this->mw_sDialogString = "Copying deleted files...";
-        this->m_NumberOfFileBeingCopied = 0;
+        bool cont = true; // ovaj se koristi ako je stisnut cancel - to moram da vidim gde sta treba da implementiram...
+        // moguce da cu na ovoj strani da stavim cancel a na sledecoj oba, i skip i cancel hmmm...
         while (this->mw_bRunDialog) {
             // will be set to true if "Skip" button was clicked
             bool skip = false;
-            cont = dialog.Update(this->m_NumberOfFileBeingCopied, this->mw_sDialogString, &skip);
+            cont = dialog.Update(this->m_NumberOfFileBeingCopied, GetDialogString(), &skip);
 
             // each skip will move progress about quarter forward
             if (skip) // ovo se ne koristi
@@ -200,6 +212,14 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
             wxMilliSleep(100);
         }
 
+        // a cancelled copy stops within 1 MB of the current file - wait for it, so nothing else reads the drive meanwhile
+        {
+            wxBusyCursor busy;
+            thCopyFiles->Wait();
+        }
+        delete thCopyFiles;
+        wxLog::FlushActive(); // the thread's log lines
+
         if (!cont) {
             wxLogStatus(languagePack->getWXText(GENERAL, PROGRESS_DIALOG_ABORTED));
         } else {
@@ -213,10 +233,22 @@ void wxSelectFilesPage::OnStopDialogEvent(wxCommandEvent & event) {
     this->mw_bRunDialog = false;
 }
 
+// runs in the copy thread (the event is sent with ProcessEvent) - the text is shared with the GUI thread
+
 void wxSelectFilesPage::OnPulseDialogEvent(wxCommandEvent & event) {
     int *ptrNumberOfSelectedFiles = ((MyWizard *) GetParent())->GetMw_ptriNumberOfSelectedFiles();
-    this->mw_sDialogString.Printf("Copying %d/%d\nFilename: %s", event.GetInt(), *ptrNumberOfSelectedFiles, event.GetString());
+    SetDialogString(wxString::Format("Copying %d/%d\nFilename: %s", event.GetInt(), *ptrNumberOfSelectedFiles, event.GetString()));
     this->m_NumberOfFileBeingCopied = event.GetInt();
+}
+
+void wxSelectFilesPage::SetDialogString(const wxString &sText) {
+    wxCriticalSectionLocker lock(m_csDialogString);
+    this->mw_sDialogString = wxString(sText.wc_str()); // deep copy - no buffer shared between the threads
+}
+
+wxString wxSelectFilesPage::GetDialogString() {
+    wxCriticalSectionLocker lock(m_csDialogString);
+    return wxString(this->mw_sDialogString.wc_str());
 }
 
 void wxSelectFilesPage::OnSelectAllClick(wxCommandEvent & event) {
@@ -264,7 +296,7 @@ static bool _isMusic(const wchar_t *szFilename) {
 void wxSelectFilesPage::SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect) {
     long lCount = m_lcFilesInSelectedDrive->GetFileCount();
     for (long lItem = 0; lItem < lCount; lItem++)
-        if (isOfType(m_lcFilesInSelectedDrive->GetFile(lItem)->szFilename))
+        if (isOfType(m_lcFilesInSelectedDrive->GetFile(lItem)->sFilename.c_str()))
             m_lcFilesInSelectedDrive->SelectItem(lItem, bSelect);
 }
 

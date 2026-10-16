@@ -42,9 +42,11 @@ public:
 
     CDeletedFilesList *m_lcFilesInSelectedDrive;
     //    int m_NumberOfSelectedFiles;
-    int m_NumberOfFileBeingCopied;
-    bool mw_bRunDialog;
-    wxString mw_sDialogString;
+    volatile int m_NumberOfFileBeingCopied; // written by the copy thread
+    volatile bool mw_bRunDialog; // cleared by the copy thread (stop event)
+
+    void SetDialogString(const wxString &sText);
+    wxString GetDialogString();
     wxStaticText *wxSelectFilesMessage;
     wxSearchCtrl *m_wxSearchCtrlSearchList;
 
@@ -52,5 +54,8 @@ public:
     wxToggleButton *wxFilterVideo;
     wxToggleButton *wxFilterMusic;
 private:
+    wxString mw_sDialogString; // only through Set/GetDialogString - shared with the copy thread
+    wxCriticalSection m_csDialogString;
+
     DECLARE_EVENT_TABLE()
 };

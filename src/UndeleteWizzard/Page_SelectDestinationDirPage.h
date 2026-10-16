@@ -33,9 +33,14 @@ public:
     wxButton *m_buttonBrowseDestinationDir;
 
     wxProgressDialog *mwPtr_Dialog;
-    bool mw_bRunDialog;
-    wxString mw_sDialogString;
+    volatile bool mw_bRunDialog; // cleared by the scan thread (stop event)
+
+    void SetDialogString(const wxString &sText);
+    wxString GetDialogString();
 
 private:
+    wxString mw_sDialogString; // only through Set/GetDialogString - shared with the scan thread
+    wxCriticalSection m_csDialogString;
+
     DECLARE_EVENT_TABLE()
 };

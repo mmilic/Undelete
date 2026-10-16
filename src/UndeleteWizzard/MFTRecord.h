@@ -152,6 +152,7 @@ protected:
     DWORD m_dwCurPos;
     DWORD m_dwBytesPerCluster;
     LONGLONG m_n64StartPos;
+    volatile bool *m_pbCancel;
 
     int ApplyFixups(BYTE *puchRecord, DWORD dwRecSize);
     int ParseDataRuns(const BYTE *puchRuns, DWORD dwRunsLen, std::vector<NTFS_DATA_RUN> &vRuns);
@@ -177,6 +178,7 @@ public:
 public:
     int SetRecordInfo(LONGLONG n64StartPos, DWORD dwRecSize, DWORD dwBytesPerCluster);
     void SetDriveHandle(HANDLE hDrive);
+    void SetCancelFlag(volatile bool *pbCancel) { m_pbCancel = pbCancel; } // data extraction stops with ERROR_CANCELLED
 
     int ExtractFile(BYTE *puchMFTBuffer, LONGLONG dwLen, bool bExcludeData = false, HANDLE hFile = NULL);
 

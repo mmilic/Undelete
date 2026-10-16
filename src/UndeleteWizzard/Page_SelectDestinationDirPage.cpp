@@ -204,25 +204,31 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
         thLoadFiles->SetMutexLockPtr(((MyWizard *) GetParent())->GetPtrListMutex()); // ovo nicemu ne sluzi        
 
         if (thLoadFiles->Create() != wxTHREAD_NO_ERROR) {
-            wxLogFatalError(languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR));
+            delete thLoadFiles;
+            wxMessageDialog dial(NULL, languagePack->getWXText(SELECT_DESTINATION_PAGE, CANT_CREATE_THREADS_ERROR),
+                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
+            return;
         }
         wxLogMessage("LoadFiles Thread created.");
+
+        SetDialogString("Looking for deleted files...");
+        this->mw_bRunDialog = true;
 
         thLoadFiles->Run(); // krenuo thread, sad ce da ode u Entry() fju. !!! ovo vraca fajlove! zoran
         wxLogMessage("LoadFiles Thread started");
 
-        bool cont = true; // ovaj se koristi ako je stisnut cancel - to moram da vidim gde sta treba da implementiram... 
-        // moguce da cu na ovoj strani da stavim cancel a na sledecoj oba, i skip i cancel hmmm...         
-        this->mw_bRunDialog = true;
-        this->mw_sDialogString = "Looking for deleted files...";
+        bool cont = true; // ovaj se koristi ako je stisnut cancel - to moram da vidim gde sta treba da implementiram...
+        // moguce da cu na ovoj strani da stavim cancel a na sledecoj oba, i skip i cancel hmmm...
 
         // progres dialog se vriti a u drugom threadu se citaju disk i pune liste
         // kad se promeni stanje, opale se eventi koji menjaju this->mw_bRunDialog i this->mw_sDialogString
         wxLogMessage("Entering progressDialog dialog loop.");
         while (this->mw_bRunDialog) {
-            // will be set to true if "Skip" button was clicked           
+            // will be set to true if "Skip" button was clicked
             bool skip = false;
-            cont = dialog.Pulse(this->mw_sDialogString, &skip);
+            cont = dialog.Pulse(GetDialogString(), &skip);
 
             // each skip will move progress about quarter forward
             if (skip) // ovo se ne koristi
@@ -233,7 +239,6 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
                         languagePack->getWXText(GENERAL, PROGRESS_DIALOG_QUESTION), // caption
                         wxYES_NO | wxICON_QUESTION) == wxYES) {
                     thLoadFiles->SetCancelProgresControl(true);
-                    event.Veto();
                     break;
                 } else {
                     cont = true;
@@ -243,9 +248,35 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
             wxMilliSleep(200);
         }
 
+        // the scan thread checks the cancel flag every few thousand records - wait until it has really stopped,
+        // so a new scan can't run over the same drive object and hash map at the same time
+        {
+            wxBusyCursor busy;
+            thLoadFiles->Wait();
+        }
+        int iScanResult = thLoadFiles->m_iResult;
+        delete thLoadFiles;
+        wxLog::FlushActive(); // the thread's log lines
+
         // objavimo da smo prekinuli citanje
         if (!cont) {
             wxLogStatus(wxT("Progress dialog aborted!"));
+            event.Veto();
+            return;
+        }
+
+        if (iScanResult) {
+            wxString sReason;
+            if (iScanResult == ERROR_ACCESS_DENIED)
+                sReason = "Access to the drive was denied.\nPlease run the program as administrator.";
+            else if (iScanResult == ERROR_INVALID_DRIVE || iScanResult == ERROR_BAD_DEVICE)
+                sReason = "This drive does not look like an NTFS drive.";
+            else
+                sReason.Printf("The drive could not be read (error %d).", iScanResult);
+            wxMessageDialog dial(NULL, sReason + "\n\nDetails are in the log file in the destination folder.",
+                    languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
             return;
         }
 
@@ -302,8 +333,20 @@ bool wxSelectDestinationDirPage::InitLogFile(wxString wxDestinationDir) {
     return true;
 }
 
+// the progress text is written by the scan thread (this handler runs in it) and read by the GUI thread
+
+void wxSelectDestinationDirPage::SetDialogString(const wxString &sText) {
+    wxCriticalSectionLocker lock(m_csDialogString);
+    this->mw_sDialogString = wxString(sText.wc_str()); // deep copy - no buffer shared between the threads
+}
+
+wxString wxSelectDestinationDirPage::GetDialogString() {
+    wxCriticalSectionLocker lock(m_csDialogString);
+    return wxString(this->mw_sDialogString.wc_str());
+}
+
 void wxSelectDestinationDirPage::OnPulseDialogEvent(wxCommandEvent & event) {
-    this->mw_sDialogString = event.GetString();
+    SetDialogString(event.GetString());
 }
 
 void wxSelectDestinationDirPage::OnStopDialogEvent(wxCommandEvent & event) {
