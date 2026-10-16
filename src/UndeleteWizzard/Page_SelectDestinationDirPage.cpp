@@ -247,6 +247,25 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
     }
 }
 
+// writes the log as UTF-8. wxLogStderr converts to the ANSI code page and silently drops
+// every line that mentions a file name it can't convert (Cyrillic, most accented letters...)
+
+class wxLogUtf8File : public wxLog {
+public:
+    wxLogUtf8File(FILE *fp) : m_fp(fp) {
+    }
+
+protected:
+    virtual void DoLogText(const wxString& msg) {
+        fputs(msg.utf8_str(), m_fp);
+        fputs("\n", m_fp);
+        fflush(m_fp);
+    }
+
+private:
+    FILE *m_fp;
+};
+
 bool wxSelectDestinationDirPage::InitLogFile(wxString wxDestinationDir) {
     wxString wxsCompleteLogFileName;
     wxString wxsLogFileName;
@@ -257,12 +276,13 @@ bool wxSelectDestinationDirPage::InitLogFile(wxString wxDestinationDir) {
     wxsLogFileName.Printf("UndeleteLogFile_%d.%d.%d@%dh%dm%ds.log", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond);
     wxsCompleteLogFileName = wxDestinationDir + wxsLogFileName;
 
-    //TODO: napravi log fajl
-    FILE *logfile = fopen(wxsCompleteLogFileName.mb_str(), "w");
+    // _wfopen - the destination folder name may contain characters outside the ANSI code page
+    FILE *logfile = _wfopen(wxsCompleteLogFileName.wc_str(), L"wb");
     if (!logfile)
         return false;
+    fputs("\xEF\xBB\xBF", logfile); // UTF-8 BOM, so Notepad shows the file names correctly
 
-    wxLog *logger = new wxLogStderr(logfile);
+    wxLog *logger = new wxLogUtf8File(logfile);
     wxLog::SetActiveTarget(logger);
 
     return true;

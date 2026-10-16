@@ -18,6 +18,8 @@
 
 //#include <windows.h>
 //#include <wx/wx.h>
+#include <vector>
+#include "MFTRecord.h"
 //#include <wx/hashmap.h>
 
 #if !defined(AFX_NTFSDRIVE_H__078B2392_2978_4C23_97FD_166C4B234BF3__INCLUDED_)
@@ -69,7 +71,7 @@ struct NTFS_PART_BOOT_SEC {
 
 typedef struct ST_FILEINFO // this struct is to retrieve the file detail from this class
 {
-    char szFilename[_MAX_PATH]; // file name
+    wchar_t szFilename[_MAX_PATH]; // file name - UTF-16, exactly as stored in the MFT
     LONGLONG n64Create; // Creation time
     LONGLONG n64Modify; // Last Modify time
     LONGLONG n64Modfil; // Last modify of record
@@ -98,8 +100,16 @@ protected:
     int LoadMFT(LONGLONG nStartCluster);
 
     /////////////////// the MFT info /////////////////
-    BYTE *m_puchMFT; /// the var to hold the loaded entire MFT
-    DWORD m_dwMFTLen; // size of MFT
+    // The MFT is not loaded into memory as a whole - on a big volume it is gigabytes, more than this
+    // 32-bit process can hold. Only its location is kept, and records are read through a small cache.
+    std::vector<NTFS_DATA_RUN> m_vMFTRuns; // where the MFT is on the volume
+    LONGLONG m_llMFTSize; // bytes of the MFT that can be read (multiple of the record size)
+    std::vector<BYTE> m_vMFTCache; // a window of the MFT
+    LONGLONG m_llMFTCacheStart; // MFT byte offset of m_vMFTCache[0]
+    DWORD m_dwMFTCacheLen; // valid bytes in m_vMFTCache, 0 = empty
+
+    int ReadMFTBytes(LONGLONG llOffset, BYTE *puchOut, DWORD dwLen);
+    int LoadMFTRecord(DWORD nFileSeq);
 
     BYTE *m_puchMFTRecord; // 1K, or the cluster size, whichever is larger
     LONGLONG m_llMFTRecordSz; // MFT record size
@@ -115,7 +125,8 @@ public:
     bool IsInitialised();
     int ReadVolume(wxString wxsSelectedDrive);
     int GetFileList(FileInfoHash *finfohash);
-    int RetreiveAndWriteFileToDestination(int iFileRecordId, char *fnDestintationFileName);
+    void ResolveRecycleBinNames(FileInfoHash *finfohash);
+    int RetreiveAndWriteFileToDestination(int iFileRecordId, const wchar_t *wszDestinationFileName);
 
     int Initialize();
     CNTFSDrive();

@@ -226,7 +226,11 @@ int IsValidFileName(char *pFileName, bool bFixIt) {
     return 0;
 }
 
-int IsValidFileName(const wchar_t *pFileName) {
+// bFixIt replaces every invalid character with a space instead of returning it.
+// wchar_t is unsigned, so non-ASCII letters (č, ш, ü...) are valid - unlike the char version,
+// where they are negative and get "fixed" into spaces.
+
+int IsValidFileName(wchar_t *pFileName, bool bFixIt) {
     if (!pFileName || !*pFileName)
         return ISVALID_FILENAME_ERROR;
 
@@ -246,8 +250,12 @@ int IsValidFileName(const wchar_t *pFileName) {
         // it saves memory to do the check this way with little performance
         // cost.
         if (pFileName[len] >= '@') {
-            if (pFileName[len] == '\\' || pFileName[len] == '|')
-                return pFileName[len];
+            if (pFileName[len] == '\\' || pFileName[len] == '|') {
+                if (bFixIt)
+                    pFileName[len] = L' ';
+                else
+                    return pFileName[len];
+            }
 
             continue;
         }
@@ -267,7 +275,10 @@ int IsValidFileName(const wchar_t *pFileName) {
             if (isCharValid[pFileName[len] - 32])
                 continue;
         }
-        return pFileName[len];
+        if (bFixIt)
+            pFileName[len] = L' ';
+        else
+            return pFileName[len];
     }
 
     if (len == 256)

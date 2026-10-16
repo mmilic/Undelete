@@ -7,6 +7,8 @@
 #include <windows.h>
 #include <wx/wx.h>
 #include <wx/hashmap.h>
+#include <map>
+#include <string>
 #include "NTFSDrive.h"
 #include "MFTRecord.h"
 
@@ -30,8 +32,9 @@ CNTFSDrive::CNTFSDrive() {
     m_puchMFTRecord = 0;
     m_llMFTRecordSz = 0;
 
-    m_puchMFT = 0;
-    m_dwMFTLen = 0;
+    m_llMFTSize = 0;
+    m_llMFTCacheStart = 0;
+    m_dwMFTCacheLen = 0;
 
     m_llStartSector = 0;
 }
@@ -41,10 +44,6 @@ bool CNTFSDrive::IsInitialised() {
 }
 
 CNTFSDrive::~CNTFSDrive() {
-    delete[] m_puchMFT;
-    m_puchMFT = 0;
-    m_dwMFTLen = 0;
-
     delete[] m_puchMFTRecord;
     m_puchMFTRecord = 0;
 }
@@ -164,27 +163,121 @@ int CNTFSDrive::LoadMFT(LONGLONG nStartCluster) {
         return (dwErrorCode);
     }
 
-    // now extract the MFT record just like the other MFT table records
+    // now extract the MFT record just like the other MFT table records - only where its data is, not the data
     cMFTRec.SetDriveHandle(m_hDrive);
     cMFTRec.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
-    nRet = cMFTRec.ExtractFile(m_puchMFTRecord, dwBytes);
+    nRet = cMFTRec.ExtractFile(m_puchMFTRecord, dwBytes, true);
     if (nRet)
         return nRet;
 
     if (memcmp(cMFTRec.m_attrFilename.wFilename, uszMFTName, 8))
         return ERROR_BAD_DEVICE; // no MFT file available
 
-    delete[] m_puchMFT;
-    m_puchMFT = 0;
-    m_dwMFTLen = 0;
+    if (cMFTRec.m_vDataRuns.empty()) {
+        wxLogMessage("The $MFT record has no readable data runs.");
+        return ERROR_BAD_DEVICE;
+    }
 
-    // this data(m_puchFileData) is special since it is the data of entire MFT file
-    m_puchMFT = new BYTE[cMFTRec.m_llFileDataSz];
-    m_dwMFTLen = cMFTRec.m_llFileDataSz;
+    m_vMFTRuns = cMFTRec.m_vDataRuns;
+    m_llMFTSize = cMFTRec.m_llDataSize;
 
-    // store this file to read other files
-    memcpy(m_puchMFT, cMFTRec.m_puchFileData, m_dwMFTLen);
+    LONGLONG llCovered = 0;
+    for (size_t i = 0; i < m_vMFTRuns.size(); i++)
+        llCovered += m_vMFTRuns[i].llClusters * m_dwBytesPerCluster;
 
+    if (m_llMFTSize > llCovered) {
+        // the rest of the run list is in another MFT record (attribute list) - scan what can be found
+        wxLogMessage("The MFT continues in another record - only the first %" wxLongLongFmtSpec "d of %"
+                wxLongLongFmtSpec "d bytes can be scanned.", llCovered, m_llMFTSize);
+        m_llMFTSize = llCovered;
+    }
+    m_llMFTSize -= m_llMFTSize % m_llMFTRecordSz;
+
+    // cache window: 1 MB, a whole number of clusters (and so of sectors and records)
+    DWORD dwCacheSize = (1024 * 1024 / m_dwBytesPerCluster) * m_dwBytesPerCluster;
+    if (dwCacheSize < m_dwBytesPerCluster)
+        dwCacheSize = m_dwBytesPerCluster;
+    if (dwCacheSize < m_llMFTRecordSz)
+        dwCacheSize = (DWORD) m_llMFTRecordSz;
+    m_vMFTCache.resize(dwCacheSize);
+    m_dwMFTCacheLen = 0;
+
+    wxLogMessage("MFT: %" wxLongLongFmtSpec "d bytes in %u fragments, %" wxLongLongFmtSpec "d records.",
+            m_llMFTSize, (unsigned) m_vMFTRuns.size(), m_llMFTSize / m_llMFTRecordSz);
+    return ERROR_SUCCESS;
+}
+
+// read dwLen bytes of the MFT, starting at MFT byte llOffset (a whole number of clusters), following its fragments
+
+int CNTFSDrive::ReadMFTBytes(LONGLONG llOffset, BYTE *puchOut, DWORD dwLen) {
+    LONGLONG llRunStart = 0; // MFT byte offset where the current run starts
+
+    for (size_t i = 0; i < m_vMFTRuns.size() && dwLen; i++) {
+        const NTFS_DATA_RUN &run = m_vMFTRuns[i];
+        LONGLONG llRunBytes = run.llClusters * m_dwBytesPerCluster;
+
+        if (llOffset < llRunStart + llRunBytes) {
+            LONGLONG llInRun = llOffset - llRunStart;
+            DWORD dwPiece = (llRunBytes - llInRun < dwLen) ? (DWORD) (llRunBytes - llInRun) : dwLen;
+
+            if (run.bSparse) {
+                memset(puchOut, 0, dwPiece);
+            } else {
+                LARGE_INTEGER pos;
+                pos.QuadPart = m_llStartSector * m_dwBytesPerSector + run.llLCN * m_dwBytesPerCluster + llInRun;
+                if (!SetFilePointerEx(m_hDrive, pos, NULL, FILE_BEGIN))
+                    return GetLastError();
+
+                DWORD dwDone = 0;
+                while (dwDone < dwPiece) {
+                    DWORD dwBytes = 0;
+                    if (!ReadFile(m_hDrive, puchOut + dwDone, dwPiece - dwDone, &dwBytes, NULL))
+                        return GetLastError();
+                    if (!dwBytes)
+                        return ERROR_HANDLE_EOF;
+                    dwDone += dwBytes;
+                }
+            }
+
+            puchOut += dwPiece;
+            llOffset += dwPiece;
+            dwLen -= dwPiece;
+        }
+        llRunStart += llRunBytes;
+    }
+
+    return dwLen ? ERROR_HANDLE_EOF : ERROR_SUCCESS;
+}
+
+// copy MFT record nFileSeq into m_puchMFTRecord, reading the MFT through the cache window
+
+int CNTFSDrive::LoadMFTRecord(DWORD nFileSeq) {
+    LONGLONG llOffset = (LONGLONG) nFileSeq * m_llMFTRecordSz;
+    if (llOffset + m_llMFTRecordSz > m_llMFTSize)
+        return ERROR_NO_MORE_FILES;
+
+    if (!m_dwMFTCacheLen || llOffset < m_llMFTCacheStart || llOffset + m_llMFTRecordSz > m_llMFTCacheStart + m_dwMFTCacheLen) {
+        DWORD dwCacheSize = (DWORD) m_vMFTCache.size();
+        m_llMFTCacheStart = llOffset - llOffset % dwCacheSize;
+
+        // the last window may be shorter - round it up to whole clusters, the MFT's clusters are all allocated
+        LONGLONG llLeft = m_llMFTSize - m_llMFTCacheStart;
+        DWORD dwRead = (llLeft < dwCacheSize) ? (DWORD) llLeft : dwCacheSize;
+        dwRead = ((dwRead + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster) * m_dwBytesPerCluster;
+        if (dwRead > dwCacheSize)
+            dwRead = dwCacheSize;
+
+        int nRet = ReadMFTBytes(m_llMFTCacheStart, &m_vMFTCache[0], dwRead);
+        if (nRet) {
+            // unreadable part of the MFT (bad sectors?) - its records read as empty and are skipped
+            wxLogMessage("Cannot read the MFT at offset %" wxLongLongFmtSpec "d (error %d) - %u records skipped.",
+                    m_llMFTCacheStart, nRet, (unsigned) (dwRead / m_llMFTRecordSz));
+            memset(&m_vMFTCache[0], 0, dwRead);
+        }
+        m_dwMFTCacheLen = dwRead;
+    }
+
+    memcpy(m_puchMFTRecord, &m_vMFTCache[(size_t) (llOffset - m_llMFTCacheStart)], m_llMFTRecordSz);
     return ERROR_SUCCESS;
 }
 
@@ -200,13 +293,12 @@ int CNTFSDrive::Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileData
         return ERROR_INVALID_ACCESS;
     }
 
-    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen)
-        return (ERROR_NO_MORE_FILES);
+    // point the record of the file in the MFT table
+    nRet = LoadMFTRecord(nFileSeq);
+    if (nRet)
+        return nRet;
 
     CMFTRecord cFile;
-
-    // point the record of the file in the MFT table
-    memcpy(m_puchMFTRecord, &m_puchMFT[nFileSeq * m_llMFTRecordSz], m_llMFTRecordSz);
 
     // Then extract that file from the drive
     cFile.SetDriveHandle(m_hDrive);
@@ -320,12 +412,12 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     if (!m_bInitialized)
         return (ERROR_INVALID_ACCESS);
 
-    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen)
-        return (ERROR_NO_MORE_FILES);
+    // point the record of the file in the MFT table
+    nRet = LoadMFTRecord(nFileSeq);
+    if (nRet)
+        return nRet;
 
     CMFTRecord cFile;
-    // point the record of the file in the MFT table
-    memcpy(m_puchMFTRecord, &m_puchMFT[nFileSeq * m_llMFTRecordSz], m_llMFTRecordSz);
 
     // read the only file detail not the file data
     cFile.SetDriveHandle(m_hDrive);
@@ -338,7 +430,8 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     }
     // set the struct and pass the struct of file detail
     memset(&stFileInfo, 0, sizeof (t_FileInfo));
-    wcstombs(stFileInfo.szFilename, (const wchar_t*)cFile.m_attrFilename.wFilename, _MAX_PATH);
+    // keep the name as UTF-16 - converting it to char loses every character outside the ANSI code page
+    wcsncpy(stFileInfo.szFilename, (const wchar_t*) cFile.m_attrFilename.wFilename, _MAX_PATH - 1);
 
     stFileInfo.dwAttributes = cFile.m_attrFilename.dwFlags;
 
@@ -373,6 +466,7 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
         if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS)) {
             delete pFileInfo;
             wxLogMessage("No more files to add to the list");
+            ResolveRecycleBinNames(m_FileInfoHash);
             return (0); // ovde smisli sta ces - ne moze ovako da ostane :)
         }
         if (nRet) { // unused or damaged record - skip it, keep scanning the rest of the MFT
@@ -437,7 +531,7 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
         //                }
         //                                                             
         if (pFileInfo->bDeleted
-                && strlen(pFileInfo->szFilename)//obrisan i ima ime fajla
+                && wcslen(pFileInfo->szFilename)//obrisan i ima ime fajla
                 && !(pFileInfo->dwAttributes & 0x10000000) //Check if it is a DIR - don-t put DIRs
                 && !(pFileInfo->dwAttributes & FILE_ATTRIBUTE_SYSTEM)
                 && !(pFileInfo->dwAttributes & FILE_ATTRIBUTE_HIDDEN)
@@ -454,31 +548,118 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
     return (ERROR_SUCCESS);
 }
 
-int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, char* sDestintationFileName) {
+// Recycle Bin (Vista and later): a deleted file is renamed to $R<6 random chars><original extension>
+// and a small companion file $I<same 6 chars><extension> holds its original full path:
+//   version 1 (Vista - 8.1): 8 bytes version, 8 file size, 8 deletion time, path as 260 WCHARs
+//   version 2 (Windows 10+): 8 bytes version, 8 file size, 8 deletion time, 4 path length in WCHARs, path
+
+static bool GetOriginalPathFromRecycleBinInfo(const BYTE *puchData, DWORD dwLen, std::wstring &wsPath) {
+    if (dwLen < 24)
+        return false;
+
+    LONGLONG llVersion;
+    memcpy(&llVersion, puchData, sizeof (llVersion));
+
+    const wchar_t *pwPath;
+    DWORD dwMaxChars;
+    if (llVersion == 1) {
+        pwPath = (const wchar_t *) (puchData + 24);
+        dwMaxChars = (dwLen - 24) / sizeof (wchar_t);
+        if (dwMaxChars > MAX_PATH)
+            dwMaxChars = MAX_PATH;
+    } else if (llVersion == 2) {
+        if (dwLen < 28)
+            return false;
+        memcpy(&dwMaxChars, puchData + 24, sizeof (DWORD));
+        if (dwMaxChars > (dwLen - 28) / sizeof (wchar_t))
+            return false;
+        pwPath = (const wchar_t *) (puchData + 28);
+    } else
+        return false;
+
+    DWORD dwChars = 0;
+    while (dwChars < dwMaxChars && pwPath[dwChars])
+        dwChars++;
+    if (!dwChars)
+        return false;
+
+    wsPath.assign(pwPath, dwChars);
+    return true;
+}
+
+// replace "$R...." names with the original file names stored in the matching "$I...." files
+
+void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
+    FileInfoHash::iterator it;
+
+    std::map<std::wstring, int> mapInfoFiles; // "$I...." name -> MFT record
+    for (it = finfohash->begin(); it != finfohash->end(); ++it)
+        if (!wcsncmp(it->second->szFilename, L"$I", 2))
+            mapInfoFiles[it->second->szFilename] = it->second->iRecordId;
+
+    for (it = finfohash->begin(); it != finfohash->end(); ++it) {
+        t_FileInfo *pFileInfo = it->second;
+        if (wcsncmp(pFileInfo->szFilename, L"$R", 2) || wcslen(pFileInfo->szFilename) < 8)
+            continue;
+
+        wxLogMessage("A file deleted from Recycle Bin is found: %s", wxString(pFileInfo->szFilename));
+
+        std::wstring wsInfoName = std::wstring(L"$I") + (pFileInfo->szFilename + 2);
+        std::map<std::wstring, int>::iterator itInfo = mapInfoFiles.find(wsInfoName);
+        if (itInfo == mapInfoFiles.end()) {
+            wxLogMessage("No %s found - the original name is lost.", wxString(wsInfoName.c_str()));
+            continue;
+        }
+
+        BYTE *puchData = 0;
+        DWORD dwLen = 0;
+        if (Read_File(itInfo->second, puchData, dwLen)) {
+            wxLogMessage("Error when trying to retrieve contents of %s", wxString(wsInfoName.c_str()));
+            continue;
+        }
+
+        std::wstring wsPath;
+        bool bFound = GetOriginalPathFromRecycleBinInfo(puchData, dwLen, wsPath);
+        delete[] puchData;
+        if (!bFound) {
+            wxLogMessage("%s has an unknown format.", wxString(wsInfoName.c_str()));
+            continue;
+        }
+
+        size_t nSlash = wsPath.find_last_of(L'\\');
+        std::wstring wsName = (nSlash == std::wstring::npos) ? wsPath : wsPath.substr(nSlash + 1);
+        if (wsName.empty())
+            continue;
+
+        wcsncpy(pFileInfo->szFilename, wsName.c_str(), _MAX_PATH - 1);
+        pFileInfo->szFilename[_MAX_PATH - 1] = 0;
+        strcpy(pFileInfo->szBuffer, "Deleted in Recycle Bin");
+        wxLogMessage("A file name retrieved from Recycle Bin: %s", wxString(pFileInfo->szFilename));
+    }
+}
+
+int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *wszDestinationFileName) {
+    wxString sDestintationFileName(wszDestinationFileName); // for logging
 
     if (!m_bInitialized) {
         wxLogMessage("Invalid Access during retrieving \'%s\'", sDestintationFileName);
         return (ERROR_INVALID_ACCESS);
     }
 
-    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen) {
+    // point the record of the file in the MFT table
+    int nRet = LoadMFTRecord(nFileSeq);
+    if (nRet) {
         wxLogMessage("No more files");
-        return (ERROR_NO_MORE_FILES);
+        return (nRet);
     }
 
     CMFTRecord cFile;
-    // point the record of the file in the MFT table
-    memcpy(m_puchMFTRecord, &m_puchMFT[nFileSeq * m_llMFTRecordSz], m_llMFTRecordSz);
 
     // read the only file detail not the file data
     cFile.SetDriveHandle(m_hDrive);
     cFile.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
 
-    wchar_t wDestintationFileName[512];
-    memset(wDestintationFileName, '\0', 512 * sizeof (wchar_t));
-    mbstowcs(wDestintationFileName, sDestintationFileName, strlen(sDestintationFileName));
-
-    HANDLE hFile = CreateFile(wDestintationFileName, // name of the write
+    HANDLE hFile = CreateFileW(wszDestinationFileName, // name of the write
             GENERIC_WRITE | GENERIC_READ, // open for writing and reading
             //            0, // do not share
             FILE_SHARE_READ,
@@ -496,7 +677,6 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, char* sDestintat
 
     wxLogMessage("Extracting file \'%s\'.", sDestintationFileName);
 
-    int nRet;
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, false, hFile);
     if (nRet) {
         wxLogMessage("Extracting file \'%s\' FAILED!!!", sDestintationFileName);

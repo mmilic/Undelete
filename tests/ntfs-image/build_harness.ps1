@@ -11,16 +11,20 @@ $Wx = Join-Path $Root "tools\wxWidgets-3.0.1_static"
 $env:PATH = "$MinGW\bin;$env:PATH"
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-$variants = @(@{Name = "new"; Src = (Join-Path $Root "src\UndeleteWizzard")})
+$variants = @(@{Name = "new"; Src = (Join-Path $Root "src\UndeleteWizzard"); Harness = (Join-Path $Here "harness.cpp")})
 
 if ($WithOld) {
-    # old engine sources straight from the last commit
+    # old engine sources and the matching harness straight from the last commit (the engine API may have changed)
     $Old = Join-Path $OutDir "old-src"
     New-Item -ItemType Directory -Force -Path $Old | Out-Null
-    foreach ($f in "NTFSDrive.cpp", "NTFSDrive.h", "MFTRecord.cpp", "MFTRecord.h") {
-        git -C $Root show "HEAD:src/UndeleteWizzard/$f" | Set-Content -Encoding ASCII (Join-Path $Old $f)
+    $files = @{"NTFSDrive.cpp" = "src/UndeleteWizzard"; "NTFSDrive.h" = "src/UndeleteWizzard"; "MFTRecord.cpp" = "src/UndeleteWizzard";
+        "MFTRecord.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
+    foreach ($f in $files.Keys) {
+        # cmd redirection keeps the bytes as they are (a PowerShell 5.1 pipe would re-encode them)
+        cmd /c "git -C `"$Root`" show HEAD:$($files[$f])/$f > `"$(Join-Path $Old $f)`""
+        if ($LASTEXITCODE -ne 0) { throw "git show HEAD:$($files[$f])/$f failed" }
     }
-    $variants += @{Name = "old"; Src = $Old}
+    $variants += @{Name = "old"; Src = $Old; Harness = (Join-Path $Old "harness.cpp")}
 }
 
 $common = @("-D", "UNICODE", "-DwxDEBUG_LEVEL=0", "-D__WXMSW__", "-mthreads",
@@ -31,7 +35,7 @@ $libs = @("-mthreads", "-L", "$Wx\lib", "-static",
 
 foreach ($variant in $variants) {
     $exe = Join-Path $OutDir ("harness-" + $variant.Name + ".exe")
-    $sources = @((Join-Path $Here "harness.cpp"), (Join-Path $variant.Src "NTFSDrive.cpp"), (Join-Path $variant.Src "MFTRecord.cpp"))
+    $sources = @($variant.Harness,(Join-Path $variant.Src "NTFSDrive.cpp"), (Join-Path $variant.Src "MFTRecord.cpp"))
     & g++ @sources @common "-I" $variant.Src @libs -o $exe
     if ($LASTEXITCODE -ne 0) { throw "build of $exe failed" }
     Write-Host "Built $exe"

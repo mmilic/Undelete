@@ -18,8 +18,12 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
      the MFT record, so the fixups have to be applied correctly.
    - `sparse.bin`: has a hole that isn't stored on disk
    - `tiny_resident.bin`: 300 bytes, stored inside the MFT record itself
+   - `Čačak ćevapi.txt`, `фотографија.jpg`, `Grüße.txt`: names outside ASCII
+   - three Recycle Bin pairs, `$R…` (the data) plus `$I…` (the original path), written by
+     `make_recycle_info.py`. One uses the Vista–8.1 `$I` format with a Cyrillic path, one the Windows 10+ format,
+     and one has no file extension. Each must come back under its original name.
 2. `build_harness.ps1` compiles `harness.cpp` with the engine sources from `src\`. With `-WithOld` it also
-   builds the engine from git `HEAD`, so you can compare before and after a change.
+   builds the engine and the harness from git `HEAD`, so you can compare before and after a change.
 3. The harness opens `test.img` as if it were a raw volume (`\\.\X:`), scans the MFT and recovers every deleted
    file. `run.ps1` then checks the test files against their original checksums.
 
@@ -28,6 +32,6 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
 The image is created and the files are deleted by Linux's `ntfs-3g`, not by Windows. Windows-specific
 behaviour still needs a manual test on a real (or virtual) drive formatted by Windows:
 - what Windows leaves behind in a deleted file's MFT record
-- `$I`/`$R` names in the Recycle Bin
+- real `$I`/`$R` files created by Windows (the test writes its own, following the documented format)
 - compressed files
 - files with an attribute list

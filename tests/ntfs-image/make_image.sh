@@ -43,7 +43,24 @@ head -c 300 /dev/urandom > "$MNT/tiny_resident.bin"
 head -c 6000 /dev/urandom > "$MNT/sparse.bin"
 dd if=/dev/urandom of="$MNT/sparse.bin" bs=1 count=5000 seek=200000 conv=notrunc status=none
 
-(cd "$MNT" && sha256sum fragmented.bin "$LONG" tiny_resident.bin sparse.bin) > "$D/expected.sha256"
+# names outside ASCII - Serbian Latin/Cyrillic and German
+head -c 3000 /dev/urandom > "$MNT/Čačak ćevapi.txt"
+head -c 3000 /dev/urandom > "$MNT/фотографија.jpg"
+head -c 3000 /dev/urandom > "$MNT/Grüße.txt"
+
+(cd "$MNT" && sha256sum fragmented.bin "$LONG" tiny_resident.bin sparse.bin \
+  "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt") > "$D/expected.sha256"
+
+# Recycle Bin: the deleted file is $R<6 chars><ext>, its original path is in the matching $I file.
+# The engine should recover each $R file under its original name.
+recycled() { # <$R name> <$I name> <$I version> <original path>
+  head -c 5000 /dev/urandom > "$MNT/$1"
+  python3 "$(dirname "$0")/make_recycle_info.py" "$3" "$4" 5000 "$MNT/$2"
+  echo "$(sha256sum < "$MNT/$1" | cut -d' ' -f1)  ${4##*\\}" >> "$D/expected.sha256"
+}
+recycled '$RA1B2C3.jpg' '$IA1B2C3.jpg' 1 'C:\Users\test\Pictures\Летовање 2014.jpg'
+recycled '$RX9Y8Z7.docx' '$IX9Y8Z7.docx' 2 'C:\Users\test\Documents\Izveštaj.docx'
+recycled '$RQ1W2E3' '$IQ1W2E3' 2 'C:\Users\test\Desktop\README'
 umount "$MNT"
 
 echo "--- data runs before deletion ---"
@@ -53,6 +70,8 @@ for f in fragmented.bin "$LONG" sparse.bin; do
 done
 
 ntfs-3g "$IMG" "$MNT"
-rm "$MNT/fragmented.bin" "$MNT/$LONG" "$MNT/tiny_resident.bin" "$MNT/sparse.bin"
+rm "$MNT/fragmented.bin" "$MNT/$LONG" "$MNT/tiny_resident.bin" "$MNT/sparse.bin" \
+  "$MNT/Čačak ćevapi.txt" "$MNT/фотографија.jpg" "$MNT/Grüße.txt" \
+  "$MNT"/'$R'* "$MNT"/'$I'*
 umount "$MNT"
 echo "image ready: $IMG"

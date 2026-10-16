@@ -34,7 +34,7 @@ enum
 const TCHAR *GetIsValidFileNameErrStr(int err);
 
 int IsValidFileName(char *pFileName, bool bFixIt = false);
-int IsValidFileName(const wchar_t *pFileName);
+int IsValidFileName(wchar_t *pFileName, bool bFixIt = false);
 
 /**************************************************************************
   Copyright 2002 Joseph Woodbury.

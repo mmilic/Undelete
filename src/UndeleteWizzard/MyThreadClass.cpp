@@ -223,68 +223,7 @@ void MyThreadLoadFilesFromDiskNTFS::FillListControlFromHashMap() {
     for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
         pTempFinfo = it->second;
 
-        //        buf.Printf("%d", pTempFinfo->iRecordId);
-        //        long lIndex = m_ListControl->InsertItem(listCounter, buf, 0);
-
-
-        //nesto me jebalo sa regex-ima pa cu preci na glupi strncmp
-        //obzirom da se sve operacije za regex nalaze u std::tr1 namespace-u - malo je ruzno ovako al jbg
-        //        std::tr1::regex regPattern("[$][R][A-Z0-9](6)");
-        //        
-        //        if(std::tr1::regex_match(pTempFinfo->szFilename, regPattern))
-        //            printf("radi");
-
-        char tmp[2] = "."; //glupo resenje
-        if (!strncmp(pTempFinfo->szFilename, "$R", 2) && (pTempFinfo->szFilename)[8] == tmp[0]) {
-            wxLogMessage("A file deleted from Recycle Bin is found.");
-
-            //Nadji da li postoji fajl koji se zove isto kao ovaj, ali da pocinje na $I umesto na $R
-            char nameFile[12 + 1];
-            memset(nameFile, '\0', 13 * sizeof (char));
-
-            strncpy(nameFile, "$I", 2);
-            strncat(nameFile, pTempFinfo->szFilename + 2, 10);
-
-            // ime ovoga koji trazimo je u nameFile, sad ludujemo kroz hash tabelu
-
-            FileInfoHash::iterator innerIterator;
-            t_FileInfo *pInnerTempFinfo = NULL;
-            BYTE *resultBuffer;
-            DWORD dwStringSize;
-            char tempCharBuffer[MAX_PATH];
-            char *ptrCurrentToken;
-            char *ptrPreviousToken;
-
-            int nRet;
-            wxLogMessage("Trying to find a file name for this file.");
-            for (innerIterator = m_finfohash->begin(); innerIterator != m_finfohash->end(); ++innerIterator) {
-                pInnerTempFinfo = innerIterator->second;
-                if (!strncmp(pInnerTempFinfo->szFilename, nameFile, 12)) {
-                    nRet = m_pUsedNTFSDrive->Read_File(pInnerTempFinfo->iRecordId, resultBuffer, dwStringSize);
-                    if (nRet) {
-                        wxLogMessage("Error when trying to retrieve contents of %s", nameFile);
-                        break;
-                    }
-                    memset(pTempFinfo->szFilename, '\0', MAX_PATH * sizeof (char));
-                    memset(tempCharBuffer, '\0', MAX_PATH * sizeof (char));
-                    wcstombs(tempCharBuffer, (wchar_t*)(resultBuffer + 24), MAX_PATH);
-
-                    ptrCurrentToken = strtok(tempCharBuffer, "\\");
-                    ptrPreviousToken = ptrCurrentToken;
-                    while (ptrCurrentToken != NULL) {
-                        ptrPreviousToken = ptrCurrentToken;
-                        ptrCurrentToken = strtok(NULL, "\\");
-                    }
-
-                    strncpy(pTempFinfo->szFilename, ptrPreviousToken, strlen(ptrPreviousToken));
-                    strcpy(pTempFinfo->szBuffer, "Deleted in Recycle Bin");
-                    wxLogMessage("A file name retrieved from Recycle Bin.");
-                    break;
-                }
-                //                else
-                //                    wxLogMessage("A file name was not retrieved.");
-            }
-        }
+        // Recycle Bin names ($R...) are already replaced with the original names in CNTFSDrive::GetFileList
 //ovde ubaci u neku listu - neku jednostavniju globalnu strukturu
         //i onda popunjavaj u zavisnosti od searcha 
         long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
@@ -394,7 +333,7 @@ void *MyThreadCopyFiles::Entry() {
         pTempFInfo = (t_FileInfo *) m_ListControl->GetItemData(item);
 
         // this item is selected - do whatever is needed with it
-        wxLogMessage("Item %s is selected.", pTempFInfo->szFilename);
+        wxLogMessage("Item %s is selected.", wxString(pTempFInfo->szFilename));
 
         // Prepare destination and file name
 
@@ -402,12 +341,10 @@ void *MyThreadCopyFiles::Entry() {
         //Ovo bi moglo pedantnije da se uradi, da da novi broj samo ako postoji fajl sa tim imenom
         //Zbog toga u ovom prvom postavljanju imena fajla nema iCount variable - prvo ime je originalno a uvek posle se vrsi dodavanje broja.
 
-        wxDestinationFileName.SetFullName(pTempFInfo->szFilename);
-
-        //ovde proveravamo da li je dobro ime i odmah ga menjamo        
-        char pFullName[1024];
-        memset(pFullName, '\0', 1024 * sizeof (char));
-        strncpy(pFullName, wxDestinationFileName.GetFullName().mb_str(), wxDestinationFileName.GetFullName().Len());
+        //ovde proveravamo da li je dobro ime i odmah ga menjamo - names stay UTF-16 (wchar_t) all the way
+        wchar_t pFullName[_MAX_PATH];
+        wcsncpy(pFullName, pTempFInfo->szFilename, _MAX_PATH - 1);
+        pFullName[_MAX_PATH - 1] = 0;
         //ovde se bas vrsi provera i menjanje imena fajla (i extenzije - path se ne menja)
         IsValidFileName(pFullName, true);
         wxDestinationFileName.SetFullName(wxString(pFullName));
@@ -422,28 +359,25 @@ void *MyThreadCopyFiles::Entry() {
 
         wxDestinationFileName.Normalize(); //skidamo duple // simbole i slicno
 
-        //ovo uvodjenje promenljive sCompleteFileName je zato sto me mrzi da razmotavam kako da koristim nesto drugo umesto toga (consta char* -> char*)
-        char sCompleteFileName[512];
-        memset(sCompleteFileName, '\0', 512 * sizeof (char));
-        strncpy(sCompleteFileName, wxDestinationFileName.GetFullPath().mb_str(), 512);
+        wxString wxsDestinationPath = wxDestinationFileName.GetFullPath();
 
         ThrowSelectFilesDialogPulseEvent(wxsCompleteFileName, ++iFileNo);
-        wxLogMessage("Started Retrieving of %s .", pTempFInfo->szFilename);
-        wxLogMessage("Will be moved to: %s", sCompleteFileName);
+        wxLogMessage("Started Retrieving of %s .", wxString(pTempFInfo->szFilename));
+        wxLogMessage("Will be moved to: %s", wxsDestinationPath);
         if (IsCancelProgresControl()) return (NULL); //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
 
-        int iRet = m_pUsedNTFSDrive->RetreiveAndWriteFileToDestination(pTempFInfo->iRecordId, sCompleteFileName);
+        int iRet = m_pUsedNTFSDrive->RetreiveAndWriteFileToDestination(pTempFInfo->iRecordId, wxsDestinationPath.wc_str());
         if (iRet)
-            wxLogMessage("Undeleting of %s FAILED.", sCompleteFileName);
+            wxLogMessage("Undeleting of %s FAILED.", wxsDestinationPath);
         else {
             (*m_iptrNumberOfCopiedFiles)++;
-            wxLogMessage("Undeleting of %s SUCCESSFULL.", sCompleteFileName);
+            wxLogMessage("Undeleting of %s SUCCESSFULL.", wxsDestinationPath);
         }
         iCount++;
     }
 
     ThrowSelectFilesDialogStopEvent();
-    wxLogMessage("FINISHED!\nCheck %s", wxDestinationFileName.GetPath().mb_str());
+    wxLogMessage("FINISHED!\nCheck %s", wxDestinationFileName.GetPath());
 
     return (NULL);
 }
@@ -521,68 +455,7 @@ void MyThreadLoadFilesFromDiskFAT::FillListControlFromHashMap() {
     for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
         pTempFinfo = it->second;
 
-        //        buf.Printf("%d", pTempFinfo->iRecordId);
-        //        long lIndex = m_ListControl->InsertItem(listCounter, buf, 0);
-
-
-        //nesto me jebalo sa regex-ima pa cu preci na glupi strncmp
-        //obzirom da se sve operacije za regex nalaze u std::tr1 namespace-u - malo je ruzno ovako al jbg
-        //        std::tr1::regex regPattern("[$][R][A-Z0-9](6)");
-        //        
-        //        if(std::tr1::regex_match(pTempFinfo->szFilename, regPattern))
-        //            printf("radi");
-
-        char tmp[2] = "."; //glupo resenje
-        if (!strncmp(pTempFinfo->szFilename, "$R", 2) && (pTempFinfo->szFilename)[8] == tmp[0]) {
-            wxLogMessage("A file deleted from Recycle Bin is found.");
-
-            //Nadji da li postoji fajl koji se zove isto kao ovaj, ali da pocinje na $I umesto na $R
-            char nameFile[12 + 1];
-            memset(nameFile, '\0', 13 * sizeof (char));
-
-            strncpy(nameFile, "$I", 2);
-            strncat(nameFile, pTempFinfo->szFilename + 2, 10);
-
-            // ime ovoga koji trazimo je u nameFile, sad ludujemo kroz hash tabelu
-
-            FileInfoHash::iterator innerIterator;
-            t_FileInfo *pInnerTempFinfo = NULL;
-            BYTE *resultBuffer;
-            DWORD dwStringSize;
-            char tempCharBuffer[MAX_PATH];
-            char *ptrCurrentToken;
-            char *ptrPreviousToken;
-
-            int nRet;
-            wxLogMessage("Trying to find a file name for this file.");
-            for (innerIterator = m_finfohash->begin(); innerIterator != m_finfohash->end(); ++innerIterator) {
-                pInnerTempFinfo = innerIterator->second;
-                if (!strncmp(pInnerTempFinfo->szFilename, nameFile, 12)) {
-                    nRet = m_pUsedNTFSDrive->Read_File(pInnerTempFinfo->iRecordId, resultBuffer, dwStringSize);
-                    if (nRet) {
-                        wxLogMessage("Error when trying to retrieve contents of %s", nameFile);
-                        break;
-                    }
-                    memset(pTempFinfo->szFilename, '\0', MAX_PATH * sizeof (char));
-                    memset(tempCharBuffer, '\0', MAX_PATH * sizeof (char));
-                    wcstombs(tempCharBuffer, (wchar_t*)(resultBuffer + 24), MAX_PATH);
-
-                    ptrCurrentToken = strtok(tempCharBuffer, "\\");
-                    ptrPreviousToken = ptrCurrentToken;
-                    while (ptrCurrentToken != NULL) {
-                        ptrPreviousToken = ptrCurrentToken;
-                        ptrCurrentToken = strtok(NULL, "\\");
-                    }
-
-                    strncpy(pTempFinfo->szFilename, ptrPreviousToken, strlen(ptrPreviousToken));
-                    strcpy(pTempFinfo->szBuffer, "Deleted in Recycle Bin");
-                    wxLogMessage("A file name retrieved from Recycle Bin.");
-                    break;
-                }
-                //                else
-                //                    wxLogMessage("A file name was not retrieved.");
-            }
-        }
+        // Recycle Bin names ($R...) are already replaced with the original names in CNTFSDrive::GetFileList
 //ovde ubaci u neku listu - neku jednostavniju globalnu strukturu
         //i onda popunjavaj u zavisnosti od searcha 
         long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);

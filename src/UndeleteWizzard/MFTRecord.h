@@ -166,6 +166,10 @@ public:
     BYTE *m_puchFileData; // collected file data buffer
     LONGLONG m_llFileDataSz; // file data size , ie. m_pchFileData buffer length
 
+    // where the main data stream is on the volume - filled even when the data itself is not extracted
+    std::vector<NTFS_DATA_RUN> m_vDataRuns; // empty if the data is resident or the run list is damaged
+    LONGLONG m_llDataSize; // real size of the main data stream
+
     bool m_bInUse;
 
 public:

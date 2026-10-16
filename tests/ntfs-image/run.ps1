@@ -24,7 +24,7 @@ Write-Host "Recovering deleted files from the image..."
 if ($LASTEXITCODE -ne 0) { throw "harness failed - see $OutDir\run.log" }
 
 $failed = 0
-foreach ($line in Get-Content (Join-Path $OutDir "expected.sha256")) {
+foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "expected.sha256")) {
     $hash, $name = $line -split '\s+', 2
     $file = Join-Path $RecDir $name
     $shortName = if ($name.Length -gt 40) { $name.Substring(0, 40) + "..." } else { $name }

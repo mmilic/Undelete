@@ -8,13 +8,21 @@
 #include <stdio.h>
 #include "NTFSDrive.h"
 
+// like the app's log file: UTF-8, so non-ANSI file names show up (wxLogStderr drops those lines)
+class wxLogUtf8Stdout : public wxLog {
+protected:
+    virtual void DoLogText(const wxString& msg) {
+        printf("%s\n", (const char *) msg.utf8_str());
+    }
+};
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         fprintf(stderr, "usage: harness <image> <output dir>\n");
         return 2;
     }
     wxInitializer init;
-    wxLog::SetActiveTarget(new wxLogStderr);
+    wxLog::SetActiveTarget(new wxLogUtf8Stdout);
     wxLog::SetTimestamp("");
 
     HANDLE hImage = CreateFileA(argv[1], GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
@@ -36,12 +44,13 @@ int main(int argc, char **argv) {
     drive.GetFileList(&hash);
     printf("deleted files found: %u\n", (unsigned) hash.size());
 
+    wxString outDir(argv[2]);
     for (FileInfoHash::iterator it = hash.begin(); it != hash.end(); ++it) {
         t_FileInfo *pInfo = it->second;
-        char szDest[1024];
-        snprintf(szDest, sizeof (szDest), "%s\\%s", argv[2], pInfo->szFilename);
-        nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, szDest);
-        printf("record %4d  %-40.40s  %s\n", pInfo->iRecordId, pInfo->szFilename, nRet ? "FAILED" : "ok");
+        wxString name(pInfo->szFilename);
+        wxString dest = outDir + "\\" + name;
+        nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
+        printf("record %4d  %s  %s\n", pInfo->iRecordId, (const char *) name.Left(40).utf8_str(), nRet ? "FAILED" : "ok");
     }
     return 0;
 }

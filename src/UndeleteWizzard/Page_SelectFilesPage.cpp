@@ -513,7 +513,7 @@ MyCompareFunctionColumn0Ascending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNU
     pTempItem1 = (t_FileInfo *) item1;
     pTempItem2 = (t_FileInfo *) item2;
 
-    return (strcmp(pTempItem1->szFilename, pTempItem2->szFilename));
+    return (wcscmp(pTempItem1->szFilename, pTempItem2->szFilename));
 }
 
 int wxCALLBACK
@@ -540,7 +540,7 @@ MyCompareFunctionColumn0Descending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUN
     pTempItem1 = (t_FileInfo *) item1;
     pTempItem2 = (t_FileInfo *) item2;
 
-    return (strcmp(pTempItem2->szFilename, pTempItem1->szFilename));
+    return (wcscmp(pTempItem2->szFilename, pTempItem1->szFilename));
 }
 
 int wxCALLBACK

@@ -39,6 +39,7 @@ CMFTRecord::CMFTRecord() {
 
     m_puchFileData = 0; // collected file data buffer
     m_llFileDataSz = 0; // file data size , ie. m_pchFileData buffer length
+    m_llDataSize = 0;
 
     memset(&m_attrStandard, 0, sizeof (ATTR_STANDARD));
     memset(&m_attrFilename, 0, sizeof (ATTR_FILENAME));
@@ -132,6 +133,8 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
     delete[] m_puchFileData;
     m_puchFileData = 0;
     m_llFileDataSz = 0;
+    m_vDataRuns.clear();
+    m_llDataSize = 0;
     memset(&m_attrStandard, 0, sizeof (ATTR_STANDARD));
     memset(&m_attrFilename, 0, sizeof (ATTR_FILENAME));
     bool bHaveFilename = false;
@@ -220,9 +223,23 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
 
             case 0x80: //DATA
                 // only the unnamed (main) data stream - named streams are alternate data streams
-                if (!bDataProcessed && !ntfsAttr.uchNameLength && (hFile || !bExcludeData)) {
+                if (!bDataProcessed && !ntfsAttr.uchNameLength) {
                     //this marks that there was allready one data stream and that if another should follow - do not process it
                     bDataProcessed = true;
+
+                    // remember where the data is, without reading it (used to read the $MFT itself in pieces)
+                    if (!ntfsAttr.uchNonResFlag) {
+                        m_llDataSize = ntfsAttr.Attr.Resident.dwLength;
+                    } else if (dwFullLength >= 64 && ntfsAttr.Attr.NonResident.n64StartVCN == 0
+                            && ntfsAttr.Attr.NonResident.wDatarunOffset < dwFullLength) {
+                        m_llDataSize = ntfsAttr.Attr.NonResident.n64RealSize;
+                        DWORD dwRunsOffset = ntfsAttr.Attr.NonResident.wDatarunOffset;
+                        if (ParseDataRuns(puchAttr + dwRunsOffset, dwFullLength - dwRunsOffset, m_vDataRuns))
+                            m_vDataRuns.clear();
+                    }
+
+                    if (!hFile && bExcludeData)
+                        break;
 
                     BYTE *puchData = 0;
                     LONGLONG llDataLen = 0;
