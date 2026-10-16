@@ -50,7 +50,9 @@ int main(int argc, char **argv) {
         wxString name(pInfo->szFilename);
         wxString dest = outDir + "\\" + name;
         nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
-        printf("record %4d  %s  %s\n", pInfo->iRecordId, (const char *) name.Left(40).utf8_str(), nRet ? "FAILED" : "ok");
+        // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result
+        printf("FILE\t%d\t%s\t%s\t%d\t%s\n", pInfo->iRecordId, (const char *) name.utf8_str(),
+                RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok");
     }
     return 0;
 }

@@ -191,10 +191,13 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         // napravi thread, dodeli mu sve sto mu treba i pokreni ga
         wxLogMessage("Setting up thread variables.");
+        // the list still points into the hash map the scan is about to refill
+        CDeletedFilesList *pFilesList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
+        pFilesList->Clear();
+
         MyThreadLoadFilesFromDiskNTFS *thLoadFiles = new MyThreadLoadFilesFromDiskNTFS(this);
         thLoadFiles->SetNTFSDrivePtr(((MyWizard *) GetParent())->GetPtrCNTFSDrive());
         thLoadFiles->SetFinfoHashPtr(((MyWizard *) GetParent())->GetPtrFileInfoHash());
-        thLoadFiles->SetListControlPtr(((MyWizard *) GetParent())->GetPtrSelectedFiles());
         thLoadFiles->SetDestinationDirPtr(ptrDestinationDir);
         thLoadFiles->SetCancelProgresControl(false);
         thLoadFiles->SetSourceDrive(((MyWizard *) GetParent())->GetMwPtr_strSourceDrive());
@@ -243,6 +246,17 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
         // objavimo da smo prekinuli citanje
         if (!cont) {
             wxLogStatus(wxT("Progress dialog aborted!"));
+            return;
+        }
+
+        // the scan is done - fill the list here, in the GUI thread
+        FileInfoHash *pFileInfoHash = ((MyWizard *) GetParent())->GetPtrFileInfoHash();
+        wxLogMessage("Filling the file list with %u files.", (unsigned) pFileInfoHash->size());
+        pFilesList->SetFiles(pFileInfoHash);
+
+        if (pFileInfoHash->empty()) {
+            wxMessageDialog dial(NULL, wxT("There were no deleted files found on this drive."), wxT("Info"), wxOK | wxICON_INFORMATION);
+            dial.ShowModal();
         }
     }
 }

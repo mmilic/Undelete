@@ -222,12 +222,12 @@ wxString *MyWizard::GetMw_ptrDestinationDir() {
     return mwPtr_DestinationDir;
 }
 
-void MyWizard::SetPtrSelectedFiles(wxListCtrl* PtrSelectedFiles) {
+void MyWizard::SetPtrSelectedFiles(CDeletedFilesList* PtrSelectedFiles) {
 
     this->mwPtr_SelectedFiles = PtrSelectedFiles;
 }
 
-wxListCtrl* MyWizard::GetPtrSelectedFiles() const {
+CDeletedFilesList* MyWizard::GetPtrSelectedFiles() const {
 
     return mwPtr_SelectedFiles;
 }

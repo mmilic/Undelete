@@ -169,6 +169,8 @@ public:
     // where the main data stream is on the volume - filled even when the data itself is not extracted
     std::vector<NTFS_DATA_RUN> m_vDataRuns; // empty if the data is resident or the run list is damaged
     LONGLONG m_llDataSize; // real size of the main data stream
+    bool m_bDataResident; // the data is stored inside the MFT record itself
+    WORD m_wDataFlags; // attribute flags of the main data stream (0x0001 = compressed)
 
     bool m_bInUse;
 

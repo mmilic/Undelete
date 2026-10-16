@@ -8,6 +8,7 @@
 #include <wx/wx.h>
 #include <wx/hashmap.h>
 #include <map>
+#include <new>
 #include <string>
 #include "NTFSDrive.h"
 #include "MFTRecord.h"
@@ -207,13 +208,14 @@ int CNTFSDrive::LoadMFT(LONGLONG nStartCluster) {
     return ERROR_SUCCESS;
 }
 
-// read dwLen bytes of the MFT, starting at MFT byte llOffset (a whole number of clusters), following its fragments
+// read dwLen bytes of a non-resident stream (the MFT, $Bitmap...), starting at stream byte llOffset
+// (a whole number of clusters), following its fragments
 
-int CNTFSDrive::ReadMFTBytes(LONGLONG llOffset, BYTE *puchOut, DWORD dwLen) {
-    LONGLONG llRunStart = 0; // MFT byte offset where the current run starts
+int CNTFSDrive::ReadRunsBytes(const std::vector<NTFS_DATA_RUN> &vRuns, LONGLONG llOffset, BYTE *puchOut, DWORD dwLen) {
+    LONGLONG llRunStart = 0; // stream byte offset where the current run starts
 
-    for (size_t i = 0; i < m_vMFTRuns.size() && dwLen; i++) {
-        const NTFS_DATA_RUN &run = m_vMFTRuns[i];
+    for (size_t i = 0; i < vRuns.size() && dwLen; i++) {
+        const NTFS_DATA_RUN &run = vRuns[i];
         LONGLONG llRunBytes = run.llClusters * m_dwBytesPerCluster;
 
         if (llOffset < llRunStart + llRunBytes) {
@@ -267,7 +269,7 @@ int CNTFSDrive::LoadMFTRecord(DWORD nFileSeq) {
         if (dwRead > dwCacheSize)
             dwRead = dwCacheSize;
 
-        int nRet = ReadMFTBytes(m_llMFTCacheStart, &m_vMFTCache[0], dwRead);
+        int nRet = ReadRunsBytes(m_vMFTRuns, m_llMFTCacheStart, &m_vMFTCache[0], dwRead);
         if (nRet) {
             // unreadable part of the MFT (bad sectors?) - its records read as empty and are skipped
             wxLogMessage("Cannot read the MFT at offset %" wxLongLongFmtSpec "d (error %d) - %u records skipped.",
@@ -279,6 +281,122 @@ int CNTFSDrive::LoadMFTRecord(DWORD nFileSeq) {
 
     memcpy(m_puchMFTRecord, &m_vMFTCache[(size_t) (llOffset - m_llMFTCacheStart)], m_llMFTRecordSz);
     return ERROR_SUCCESS;
+}
+
+// $Bitmap is MFT record 6: one bit per cluster of the volume, set = cluster in use.
+// About 32 MB per TB with 4 KB clusters - read once, sequentially, at the start of a scan.
+
+#define MAX_VOLUME_BITMAP_SIZE (512 * 1024 * 1024)
+
+int CNTFSDrive::LoadVolumeBitmap() {
+    std::vector<BYTE>().swap(m_vVolumeBitmap); // free the previous scan's bitmap
+
+    int nRet = LoadMFTRecord(6);
+    if (nRet)
+        return nRet;
+
+    CMFTRecord cBitmap;
+    cBitmap.SetDriveHandle(m_hDrive);
+    cBitmap.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
+    nRet = cBitmap.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, true);
+    if (nRet)
+        return nRet;
+    if (cBitmap.m_vDataRuns.empty() || cBitmap.m_llDataSize <= 0)
+        return ERROR_FILE_CORRUPT;
+
+    if (cBitmap.m_llDataSize > MAX_VOLUME_BITMAP_SIZE) {
+        wxLogMessage("The volume bitmap is too large to load (%" wxLongLongFmtSpec "d bytes) - recoverability will be unknown.",
+                cBitmap.m_llDataSize);
+        return ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    // whole clusters - the volume can only be read in whole sectors
+    DWORD dwRead = (DWORD) (((cBitmap.m_llDataSize + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster) * m_dwBytesPerCluster);
+    try {
+        m_vVolumeBitmap.resize(dwRead);
+    } catch (std::bad_alloc &) {
+        wxLogMessage("Not enough memory for the volume bitmap - recoverability will be unknown.");
+        return ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    nRet = ReadRunsBytes(cBitmap.m_vDataRuns, 0, &m_vVolumeBitmap[0], dwRead);
+    if (nRet) {
+        wxLogMessage("Cannot read the volume bitmap (error %d) - recoverability will be unknown.", nRet);
+        std::vector<BYTE>().swap(m_vVolumeBitmap);
+        return nRet;
+    }
+    m_vVolumeBitmap.resize((size_t) cBitmap.m_llDataSize);
+
+    wxLogMessage("Volume bitmap loaded: %u bytes.", (unsigned) m_vVolumeBitmap.size());
+    return ERROR_SUCCESS;
+}
+
+// judge whether a deleted file's clusters have been reused by other files since it was deleted
+
+void CNTFSDrive::CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFileInfo) {
+    stFileInfo.iRecoverability = RECOVERABILITY_UNKNOWN;
+    stFileInfo.iPercentIntact = 0;
+
+    if (cFile.m_bDataResident || cFile.m_llDataSize == 0) {
+        // the data lives in the MFT record itself, which is still there (or there is no data at all)
+        stFileInfo.iRecoverability = RECOVERABILITY_GOOD;
+        stFileInfo.iPercentIntact = 100;
+        return;
+    }
+    if (m_vVolumeBitmap.empty() || cFile.m_vDataRuns.empty() || (cFile.m_wDataFlags & 0x0001))
+        return; // no bitmap, damaged run list, or compressed (recovery would fail anyway)
+
+    LONGLONG llBitmapClusters = (LONGLONG) m_vVolumeBitmap.size() * 8;
+    LONGLONG llNeeded = (cFile.m_llDataSize + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster;
+    LONGLONG llTotal = 0, llFree = 0;
+    const BYTE *puchBitmap = &m_vVolumeBitmap[0];
+
+    for (size_t i = 0; i < cFile.m_vDataRuns.size() && llNeeded > 0; i++) {
+        const NTFS_DATA_RUN &run = cFile.m_vDataRuns[i];
+        LONGLONG llCount = (run.llClusters < llNeeded) ? run.llClusters : llNeeded;
+        llNeeded -= llCount;
+        if (run.bSparse)
+            continue; // no clusters on disk - nothing to overwrite
+
+        LONGLONG c = run.llLCN, llEnd = run.llLCN + llCount;
+        llTotal += llCount;
+        while (c < llEnd) {
+            if (c >= llBitmapClusters) { // beyond the volume - can't be right, count as lost
+                c = llEnd;
+                break;
+            }
+            if (!(c & 7) && llEnd - c >= 8) { // a whole bitmap byte at once
+                BYTE b = puchBitmap[c >> 3];
+                if (b == 0)
+                    llFree += 8;
+                else if (b != 0xFF)
+                    for (int bit = 0; bit < 8; bit++)
+                        if (!(b & (1 << bit)))
+                            llFree++;
+                c += 8;
+            } else {
+                if (!(puchBitmap[c >> 3] & (1 << (c & 7))))
+                    llFree++;
+                c++;
+            }
+        }
+    }
+
+    if (!llTotal) { // entirely sparse
+        stFileInfo.iRecoverability = RECOVERABILITY_GOOD;
+        stFileInfo.iPercentIntact = 100;
+        return;
+    }
+
+    stFileInfo.iPercentIntact = (int) (llFree * 100 / llTotal);
+    if (llFree && llFree < llTotal) // never show a partial file as 0% or 100%
+        stFileInfo.iPercentIntact = (stFileInfo.iPercentIntact < 1) ? 1 : (stFileInfo.iPercentIntact > 99 ? 99 : stFileInfo.iPercentIntact);
+    if (llFree == llTotal)
+        stFileInfo.iRecoverability = RECOVERABILITY_GOOD;
+    else if (llFree == 0)
+        stFileInfo.iRecoverability = RECOVERABILITY_OVERWRITTEN;
+    else
+        stFileInfo.iRecoverability = RECOVERABILITY_PARTIAL;
 }
 
 
@@ -445,8 +563,11 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     stFileInfo.n64Size = (!stFileInfo.n64Size) ? 1 : stFileInfo.n64Size;
     
     stFileInfo.n64SizeOnDisk = cFile.m_attrFilename.n64Allocated; // Size of the file
+    stFileInfo.n64RealSize = cFile.m_llDataSize;
 
     stFileInfo.bDeleted = !cFile.m_bInUse;
+    if (stFileInfo.bDeleted)
+        CheckRecoverability(cFile, stFileInfo);
 
     return (ERROR_SUCCESS);
 }
@@ -455,6 +576,10 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
     //    t_FileInfo stFInfo;
     t_FileInfo *pFileInfo;
     int nRet, i;
+
+    // which clusters are in use right now - to tell which deleted files are probably still intact
+    if (LoadVolumeBitmap())
+        wxLogMessage("Volume bitmap not available - recoverability of the files will be unknown.");
 
     //    for (i = 0; ((unsigned) i < 0xFFFFFFFF); i++) {
     for (i = 30; ((unsigned) i < 0xFFFFFFFF); i++) { //stavio da i krece od +30 da bi izbegao sistemske MFT recorde
@@ -466,6 +591,7 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
         if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS)) {
             delete pFileInfo;
             wxLogMessage("No more files to add to the list");
+            std::vector<BYTE>().swap(m_vVolumeBitmap); // only needed during the scan
             ResolveRecycleBinNames(m_FileInfoHash);
             return (0); // ovde smisli sta ces - ne moze ovako da ostane :)
         }

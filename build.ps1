@@ -30,7 +30,7 @@ Write-Host "Compiling resource file..."
 if ($LASTEXITCODE -ne 0) { throw "windres failed" }
 
 $cppFiles = @(
-    "main.cpp", "MyWizzard.cpp", "NTFSDrive.cpp", "MFTRecord.cpp", "MyThreadClass.cpp",
+    "main.cpp", "MyWizzard.cpp", "NTFSDrive.cpp", "MFTRecord.cpp", "MyThreadClass.cpp", "DeletedFilesList.cpp",
     "CustomButton.cpp", "IsValidFileName.cpp", "Page_GreetingPage.cpp",
     "Page_SelectSourceDrivePage.cpp", "Page_SelectDestinationDirPage.cpp",
     "Page_SelectFilesPage.cpp", "Page_EndPage.cpp",

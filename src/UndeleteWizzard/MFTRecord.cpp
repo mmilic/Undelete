@@ -40,6 +40,8 @@ CMFTRecord::CMFTRecord() {
     m_puchFileData = 0; // collected file data buffer
     m_llFileDataSz = 0; // file data size , ie. m_pchFileData buffer length
     m_llDataSize = 0;
+    m_bDataResident = false;
+    m_wDataFlags = 0;
 
     memset(&m_attrStandard, 0, sizeof (ATTR_STANDARD));
     memset(&m_attrFilename, 0, sizeof (ATTR_FILENAME));
@@ -135,6 +137,8 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
     m_llFileDataSz = 0;
     m_vDataRuns.clear();
     m_llDataSize = 0;
+    m_bDataResident = false;
+    m_wDataFlags = 0;
     memset(&m_attrStandard, 0, sizeof (ATTR_STANDARD));
     memset(&m_attrFilename, 0, sizeof (ATTR_FILENAME));
     bool bHaveFilename = false;
@@ -228,7 +232,9 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
                     bDataProcessed = true;
 
                     // remember where the data is, without reading it (used to read the $MFT itself in pieces)
+                    m_wDataFlags = ntfsAttr.wFlags;
                     if (!ntfsAttr.uchNonResFlag) {
+                        m_bDataResident = true;
                         m_llDataSize = ntfsAttr.Attr.Resident.dwLength;
                     } else if (dwFullLength >= 64 && ntfsAttr.Attr.NonResident.n64StartVCN == 0
                             && ntfsAttr.Attr.NonResident.wDatarunOffset < dwFullLength) {

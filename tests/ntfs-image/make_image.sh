@@ -61,6 +61,10 @@ recycled() { # <$R name> <$I name> <$I version> <original path>
 recycled '$RA1B2C3.jpg' '$IA1B2C3.jpg' 1 'C:\Users\test\Pictures\Летовање 2014.jpg'
 recycled '$RX9Y8Z7.docx' '$IX9Y8Z7.docx' 2 'C:\Users\test\Documents\Izveštaj.docx'
 recycled '$RQ1W2E3' '$IQ1W2E3' 2 'C:\Users\test\Desktop\README'
+
+# a file that stays: it takes the rest of the freed filler clusters, so those deleted fillers are really
+# overwritten (clusters in use) - the engine must not call them "Good"
+head -c 100000000 /dev/urandom > "$MNT/keeper.bin" 2>/dev/null || true
 umount "$MNT"
 
 echo "--- data runs before deletion ---"

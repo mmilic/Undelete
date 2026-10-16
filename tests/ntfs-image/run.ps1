@@ -23,6 +23,13 @@ Write-Host "Recovering deleted files from the image..."
 & (Join-Path $OutDir "harness-new.exe") (Join-Path $OutDir "test.img") $RecDir | Out-File -Encoding utf8 (Join-Path $OutDir "run.log")
 if ($LASTEXITCODE -ne 0) { throw "harness failed - see $OutDir\run.log" }
 
+# recoverability the engine reported for each file (from the harness's tab separated FILE lines)
+$recoverability = @{}
+foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "run.log")) {
+    $f = $line -split "`t"
+    if ($f[0] -eq "FILE") { $recoverability[$f[2]] = $f[3] }
+}
+
 $failed = 0
 foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "expected.sha256")) {
     $hash, $name = $line -split '\s+', 2
@@ -32,8 +39,18 @@ foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "expected.sha256
         Write-Host "MISSING  $shortName"; $failed++; continue
     }
     $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash.ToLower()
-    if ($actual -eq $hash) { Write-Host "OK       $shortName" } else { Write-Host "MISMATCH $shortName"; $failed++ }
+    # nothing was written to the volume after these files were deleted, so their clusters must all be free
+    $recov = $recoverability[$name]
+    if ($actual -ne $hash) { Write-Host "MISMATCH $shortName"; $failed++ }
+    elseif ($recov -ne "Good") { Write-Host "OK, but recoverability '$recov' instead of 'Good': $shortName"; $failed++ }
+    else { Write-Host "OK       $shortName  (Good)" }
 }
 
-if ($failed) { throw "$failed test file(s) not recovered correctly" }
-Write-Host "All test files recovered byte-for-byte."
+# the 64 KB filler files freed before the test files were written - their clusters were reused by the test files
+$fillers = $recoverability.Keys | Where-Object { $_ -like "fill_*" }
+$overwritten = @($fillers | Where-Object { $recoverability[$_] -ne "Good" }).Count
+Write-Host "Deleted filler files whose clusters were reused: $overwritten of $(@($fillers).Count) flagged as not Good"
+if ($overwritten -eq 0) { Write-Host "Expected some overwritten filler files"; $failed++ }
+
+if ($failed) { throw "$failed check(s) failed" }
+Write-Host "All test files recovered byte-for-byte and flagged Good; reused files flagged."

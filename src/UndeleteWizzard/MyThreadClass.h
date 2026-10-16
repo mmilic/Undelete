@@ -32,7 +32,6 @@ public:
 
     void SetNTFSDrivePtr(CNTFSDrive *ptr);
     void SetFinfoHashPtr(FileInfoHash *ptr);
-    void SetListControlPtr(wxListCtrl *ptr);
     void SetDestinationDirPtr(wxString *ptr);
     void SetSourceDrive(wxString *ptr);
     void SetMutexLockPtr(wxMutex *ptr);
@@ -54,7 +53,6 @@ public:
     unsigned m_count;
     CNTFSDrive *m_pUsedNTFSDrive;
     FileInfoHash *m_finfohash;
-    wxListCtrl *m_ListControl;
     wxString *m_wxpDestinationDir;
     wxString *m_wxpSourceDrive;
     wxMutex *m_LockPtr;
@@ -67,6 +65,9 @@ public:
     void SetCancelProgresControl(bool CancelProgresControl);
     bool IsCancelProgresControl() const;
 
+protected:
+    void *ScanVolume(); // reads the volume and fills m_finfohash - shared by the load threads
+
 private:
 
 };
@@ -76,7 +77,6 @@ class MyThreadLoadFilesFromDiskFAT : public MyThreadClass {
 public:
     MyThreadLoadFilesFromDiskFAT();
     MyThreadLoadFilesFromDiskFAT(wxWindow *);
-    void FillListControlFromHashMap();
     void *Entry();
 };
 
@@ -84,7 +84,6 @@ class MyThreadLoadFilesFromDiskNTFS : public MyThreadClass {
 public:
     MyThreadLoadFilesFromDiskNTFS();
     MyThreadLoadFilesFromDiskNTFS(wxWindow *);
-    void FillListControlFromHashMap();
     void *Entry();
 };
 
@@ -96,15 +95,9 @@ public:
     void SetDestTextBox(wxTextCtrl *);
     void SetMwPtr_strSelectedDir(wxString* mwPtr_strSelectedDir);
     wxString* GetMwPtr_strSelectedDir() const;
+    void SetFilesToCopy(const std::vector<t_FileInfo *> &vFiles);
 
     wxTextCtrl * m_DestTextBox; // ovo ce moci da se brise verovatno
     wxString *mwPtr_strSelectedDir;
-};
-
-class MyThreadSearchAction : public MyThreadClass {
-public:
-    MyThreadSearchAction();
-    MyThreadSearchAction(wxWindow *);
-    void FillListControlFromHashMap();
-    void *Entry();
+    std::vector<t_FileInfo *> m_vFilesToCopy;
 };

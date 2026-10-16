@@ -82,10 +82,6 @@ void MyThreadClass::SetFinfoHashPtr(FileInfoHash *ptr) {
     m_finfohash = ptr;
 }
 
-void MyThreadClass::SetListControlPtr(wxListCtrl *ptr) {
-    m_ListControl = ptr;
-}
-
 void MyThreadClass::SetDestinationDirPtr(wxString *ptr) {
     m_wxpDestinationDir = ptr;
 }
@@ -193,63 +189,11 @@ void MyThreadClass::ThrowSearchActionEvent() {
         wxLogFatalError("Unable to send event: wxEVT_SELECT_FILES_PAGE_STOP_DIALOG");
 }
 
-void MyThreadLoadFilesFromDiskNTFS::FillListControlFromHashMap() {
-    if (m_finfohash->empty()) {
-        wxString myErrorMessage;
-        myErrorMessage.Printf("There were no deleted files  found on this drive.");
+// The scan only fills the hash map. The list control belongs to the GUI thread - wxWidgets controls must
+// not be touched from worker threads - so the page fills it (wxSelectDestinationDirPage::OnWizardPageChanging)
+// after this thread signals the end with ThrowSelectDestinationDriveStopEvent.
 
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                myErrorMessage, wxT("Info"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-    }
-    wxLogMessage("Found %d deleted files.", m_finfohash->size());
-
-    int listCounter = 30; // zato sto sam stavio da od toliko krene da skenira fajlove - sad ajd - pamti napamet dok neko ne stavi macro
-    m_ListControl->ClearAll();
-
-    //    m_ListControl->InsertColumn(0, wxT("MFT Record ID"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(0, wxT("File Name"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(1, wxT("File Size"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(2, wxT("File Status"), wxLIST_FORMAT_LEFT, -1);
-
-    // to speed up inserting we hide the control temporarily
-    m_ListControl->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu
-    wxLogMessage("Populating file list.");
-    wxString buf;
-    FileInfoHash::iterator it;
-    t_FileInfo *pTempFinfo = NULL;
-    for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
-        pTempFinfo = it->second;
-
-        // Recycle Bin names ($R...) are already replaced with the original names in CNTFSDrive::GetFileList
-//ovde ubaci u neku listu - neku jednostavniju globalnu strukturu
-        //i onda popunjavaj u zavisnosti od searcha 
-        long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
-        m_ListControl->SetItemPtrData(lIndex, (wxUIntPtr) pTempFinfo);
-        double llSizeInMB = pTempFinfo->n64SizeOnDisk;
-        llSizeInMB /= (1024 * 1024);  //in MB
-        char sSize[64] = {};
-        sprintf(sSize, "%.2f MB", llSizeInMB);        
-        m_ListControl->SetItem(lIndex, 1, wxString(sSize));
-        m_ListControl->SetItem(lIndex, 2, pTempFinfo->szBuffer);
-        listCounter++;
-
-    }
-    wxLogMessage("Populating file list completed.");
-
-    m_ListControl->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    m_ListControl->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //    m_ListControl->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER); // bilo je wxLIST_AUTOSIZE
-    m_ListControl->RefreshItem(0);
-    m_ListControl->Show();
-}
-
-void *MyThreadLoadFilesFromDiskNTFS::Entry() { //ovde pocinje izvrsavanje threada 
-
-    // ovo nicemu ne sluzi - verovatno ce sve da se brise   
-    // wxMutexLocker lock(*m_LockPtr); 
+void *MyThreadClass::ScanVolume() {
     int iRet;
 
     wxLogMessage("LoadFiles Thread started executing.");
@@ -266,25 +210,18 @@ void *MyThreadLoadFilesFromDiskNTFS::Entry() { //ovde pocinje izvrsavanje thread
     ThrowSelectDestinationDrivePulseEvent("Creating deleted files list.\nThis can take several minutes...");
 
     wxLogMessage("Creating deleted files list...");
-    m_finfohash->clear(); //ocisti hash za svaki slucaj :)    
+    m_finfohash->clear(); //ocisti hash za svaki slucaj :)
     m_pUsedNTFSDrive->GetFileList(m_finfohash);
-    wxLogMessage("Completed creating deleted files list.\nThis can take several minutes...");
-
-    ThrowSelectDestinationDrivePulseEvent("Loading deleted files list.\nThis can take several minutes...");
-    if (IsCancelProgresControl()) return (NULL); //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
-
-    wxLogMessage("Filling list control from Hash map");
-    FillListControlFromHashMap();
-    wxLogMessage("Completed filling list control from Hash map");
+    wxLogMessage("Completed creating deleted files list: %u deleted files found.", (unsigned) m_finfohash->size());
 
     ThrowSelectDestinationDriveStopEvent();
 
     return (0);
 }
-//
-//MyThreadLoadFilesFromDiskNTFS::~MyThreadLoadFilesFromDiskNTFS() {
-//
-//}
+
+void *MyThreadLoadFilesFromDiskNTFS::Entry() { //ovde pocinje izvrsavanje threada
+    return ScanVolume();
+}
 
 void *MyThreadClass::Entry() {
     return (NULL);
@@ -308,32 +245,29 @@ wxString * MyThreadCopyFiles::GetMwPtr_strSelectedDir() const {
     return mwPtr_strSelectedDir;
 }
 
+// the files to copy are collected by the GUI thread before this thread starts - the thread must not read the list control
+
+void MyThreadCopyFiles::SetFilesToCopy(const std::vector<t_FileInfo *> &vFiles) {
+    m_vFilesToCopy = vFiles;
+}
+
 void *MyThreadCopyFiles::Entry() {
     wxLogMessage("Started execution of ThreadCopyFiles");
 
     wxFileName wxDestinationFileName;
     wxDestinationFileName.AssignDir(*m_wxpDestinationDir);
 
-    long item = -1;
     t_FileInfo *pTempFInfo;
     int iCount = 0;
     int iFileNo = 0;
 
     *m_iptrNumberOfCopiedFiles = 0;
 
-    for (;;) {
-        item = m_ListControl->GetNextItem(item,
-                wxLIST_NEXT_ALL,
-                wxLIST_STATE_SELECTED);
-        if (item == -1) {
-            wxLogMessage("No more selected items.");
-            break;
-        }
-
-        pTempFInfo = (t_FileInfo *) m_ListControl->GetItemData(item);
+    for (size_t iFile = 0; iFile < m_vFilesToCopy.size(); iFile++) {
+        pTempFInfo = m_vFilesToCopy[iFile];
 
         // this item is selected - do whatever is needed with it
-        wxLogMessage("Item %s is selected.", wxString(pTempFInfo->szFilename));
+        wxLogMessage("Item %s is selected (%s).", wxString(pTempFInfo->szFilename), RecoverabilityLabel(pTempFInfo->iRecoverability));
 
         // Prepare destination and file name
 
@@ -349,7 +283,7 @@ void *MyThreadCopyFiles::Entry() {
         IsValidFileName(pFullName, true);
         wxDestinationFileName.SetFullName(wxString(pFullName));
 
-        //sta ce mi ovaj wxsCompleteFileName - nemam pojma - al reko lakse je 'vako  
+        //sta ce mi ovaj wxsCompleteFileName - nemam pojma - al reko lakse je 'vako
         wxString wxsCompleteFileName;
         while (wxDestinationFileName.FileExists(wxDestinationFileName.GetFullPath())) {
             iCount++;
@@ -382,141 +316,13 @@ void *MyThreadCopyFiles::Entry() {
     return (NULL);
 }
 
-void MyThreadSearchAction::FillListControlFromHashMap() {
-    if (m_finfohash->empty()) {
-        wxString myErrorMessage;
-        myErrorMessage.Printf("There were no deleted files  found on this drive.");
-
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                myErrorMessage, wxT("Info"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-    }
-    wxLogMessage("Started Searching with \'%s\'", m_finfohash->size());
-    
-    m_ListControl->ClearAll();   
-    m_ListControl->InsertColumn(0, wxT("File name"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(1, wxT("Status"), wxLIST_FORMAT_LEFT, -1);
-    // to speed up inserting we hide the control temporarily
-    m_ListControl->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu
-    wxLogMessage("Populating file list with search results.");
-    int listCounter = 30;
-    FileInfoHash::iterator it;
-    t_FileInfo *pTempFinfo = NULL;
-    for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
-        pTempFinfo = it->second;
-        long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
-        m_ListControl->SetItemPtrData(lIndex, (wxUIntPtr) pTempFinfo);
-        m_ListControl->SetItem(lIndex, 1, pTempFinfo->szBuffer);
-        listCounter++;
-
-    }
-    wxLogMessage("Populating file list completed.");
-
-    m_ListControl->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    m_ListControl->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //    m_ListControl->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER); // bilo je wxLIST_AUTOSIZE
-    m_ListControl->RefreshItem(0);
-    m_ListControl->Show();
-}
-
 MyThreadLoadFilesFromDiskFAT::MyThreadLoadFilesFromDiskFAT(wxWindow *parent)
 : MyThreadClass(parent) {
 }
 
-void MyThreadLoadFilesFromDiskFAT::FillListControlFromHashMap() {
-    if (m_finfohash->empty()) {
-        wxString myErrorMessage;
-        myErrorMessage.Printf("There were no deleted files  found on this drive.");
-
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                myErrorMessage, wxT("Info"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-    }
-    wxLogMessage("Found %d deleted files.", m_finfohash->size());
-
-    int listCounter = 30; // zato sto sam stavio da od toliko krene da skenira fajlove - sad ajd - pamti napamet dok neko ne stavi macro
-    m_ListControl->ClearAll();
-
-    //    m_ListControl->InsertColumn(0, wxT("MFT Record ID"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(0, wxT("File Name"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(1, wxT("File Size"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(2, wxT("File Status"), wxLIST_FORMAT_LEFT, -1);
-
-    // to speed up inserting we hide the control temporarily
-    m_ListControl->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu
-    wxLogMessage("Populating file list.");
-    wxString buf;
-    FileInfoHash::iterator it;
-    t_FileInfo *pTempFinfo = NULL;
-    for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
-        pTempFinfo = it->second;
-
-        // Recycle Bin names ($R...) are already replaced with the original names in CNTFSDrive::GetFileList
-//ovde ubaci u neku listu - neku jednostavniju globalnu strukturu
-        //i onda popunjavaj u zavisnosti od searcha 
-        long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
-        m_ListControl->SetItemPtrData(lIndex, (wxUIntPtr) pTempFinfo);
-        double llSizeInMB = pTempFinfo->n64SizeOnDisk;
-        llSizeInMB /= (1024 * 1024);  //in MB
-        char sSize[64] = {};
-        sprintf(sSize, "%.2f MB", llSizeInMB);        
-        m_ListControl->SetItem(lIndex, 1, wxString(sSize));
-        m_ListControl->SetItem(lIndex, 2, pTempFinfo->szBuffer);
-        listCounter++;
-
-    }
-    wxLogMessage("Populating file list completed.");
-
-    m_ListControl->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    m_ListControl->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //    m_ListControl->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER); // bilo je wxLIST_AUTOSIZE
-    m_ListControl->RefreshItem(0);
-    m_ListControl->Show();
+void *MyThreadLoadFilesFromDiskFAT::Entry() { //ovde pocinje izvrsavanje threada
+    return ScanVolume();
 }
 
-void *MyThreadLoadFilesFromDiskFAT::Entry() { //ovde pocinje izvrsavanje threada 
-
-    // ovo nicemu ne sluzi - verovatno ce sve da se brise   
-    // wxMutexLocker lock(*m_LockPtr); 
-    int iRet;
-
-    wxLogMessage("LoadFiles Thread started executing.");
-    ThrowSelectDestinationDrivePulseEvent("Reading Volume.\nThis can take several minutes..."); // update progress bar message ;)
-
-    wxLogMessage("Started reading volume %s", m_wxpSourceDrive->mb_str());
-    iRet = m_pUsedNTFSDrive->ReadVolume(*m_wxpSourceDrive);
-    if (iRet) {
-        wxLogFatalError("ReadVolume failed. Please check access rights and restart the program");
-    }
-    wxLogMessage("Completed reading volume %s", m_wxpSourceDrive->mb_str());
-
-    if (IsCancelProgresControl()) return (NULL); //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
-    ThrowSelectDestinationDrivePulseEvent("Creating deleted files list.\nThis can take several minutes...");
-
-    wxLogMessage("Creating deleted files list...");
-    m_finfohash->clear(); //ocisti hash za svaki slucaj :)    
-    m_pUsedNTFSDrive->GetFileList(m_finfohash);
-    wxLogMessage("Completed creating deleted files list.\nThis can take several minutes...");
-
-    ThrowSelectDestinationDrivePulseEvent("Loading deleted files list.\nThis can take several minutes...");
-    if (IsCancelProgresControl()) return (NULL); //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
-
-    wxLogMessage("Filling list control from Hash map");
-    FillListControlFromHashMap();
-    wxLogMessage("Completed filling list control from Hash map");
-
-    ThrowSelectDestinationDriveStopEvent();
-
-    return (0);
-}
-
-//
-//MyThreadLoadFilesFromDiskFAT::~MyThreadLoadFilesFromDiskFAT() {
-//
-//}
 //TODO popravi mesta gde pise sranje
 //TODO razvoji thread akcije u razlicite fajlove

@@ -58,7 +58,15 @@ real/virtual drive and check the recovered files.
   This is the real, finished, working feature.
 - `MyThreadClass.{h,cpp}` — background-thread scanning/copying so the GUI stays responsive; posts custom
   events (`wxEVT_SHOW_NOTIFICATION`, `wxEVT_ENABLE_GUI_FIELDS`) back to the main thread, guarded by the
-  wizard's mutex/critical section when touching shared state.
+  wizard's mutex/critical section when touching shared state. Threads must not touch wx controls: the scan
+  thread only fills the `FileInfoHash`, the page fills the list afterwards; the copy thread gets a
+  `std::vector<t_FileInfo*>` collected by the page.
+- `DeletedFilesList.{h,cpp}` — `CDeletedFilesList`, the virtual (`wxLC_VIRTUAL`) list of deleted files. It
+  holds only pointers and draws visible rows on demand, because a big drive yields hundreds of thousands of
+  files. Search, sorting and type filters work on its pointer vector.
+- Recoverability: `CNTFSDrive` loads `$Bitmap` at the start of a scan and marks each deleted file Good /
+  Partly overwritten / Overwritten by whether its clusters are in use now. "Good" can't tell whether a since-deleted file
+  used the clusters in between.
 - `languages/` — plugin-style i18n: `ILanguage` interface (`getWXText(page, text)`), concrete packs
   (`English`, `Srpski`, `Srpski_Cyr`, `Deutsch`) via `LanguageFactory`/`LanguageDialog`.
 - `FAT/` — vendored TestDisk/PhotoRec source (~357 files), kept in full but **not linked into the build**.

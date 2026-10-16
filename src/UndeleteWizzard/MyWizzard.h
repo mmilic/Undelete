@@ -16,6 +16,7 @@
 #include <wx/hashmap.h>
 #include <wx/listctrl.h>
 #include "NTFSDrive.h"
+#include "DeletedFilesList.h"
 #include "languages/LanguageFactory.h"
 
 
@@ -81,8 +82,8 @@ public:
     void SetMw_ptrDestinationDir(wxString *PtrSelectedDir);
     wxString *GetMw_ptrDestinationDir();
 
-    void SetPtrSelectedFiles(wxListCtrl* PtrSelectedFiles);
-    wxListCtrl* GetPtrSelectedFiles() const;
+    void SetPtrSelectedFiles(CDeletedFilesList* PtrSelectedFiles);
+    CDeletedFilesList* GetPtrSelectedFiles() const;
     void SetMwPtr_strSourceDrive(wxString* mwPtr_strSourceDrive);
     wxString* GetMwPtr_strSourceDrive() const;
     void SetIptrNumberOfCopiedFiles(int iptrNumberOfCopiedFiles);
@@ -101,7 +102,7 @@ private:
     wxString *mwPtr_DestinationDir;
     FileInfoHash *mwPtr_FileInfoHash;
     wxCriticalSection *mwPtr_critsect; //Critical section mutex for control of hash map update :) :) sounds nice ;)
-    wxListCtrl *mwPtr_SelectedFiles;
+    CDeletedFilesList *mwPtr_SelectedFiles;
     int mw_iNumberOfCopiedFiles;
     int mw_iNumberOfSelectedFiles;
     wxMutex *mwPtr_ListMutex;

@@ -68,50 +68,9 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
 
     wxSelectFilesMessage->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
 
-    m_lcFilesInSelectedDrive = new wxListCtrl(this, LIST_CTRL_DELETED_FILES, wxPoint(-1, -1),
-            wxSize(600, 400), wxLC_REPORT | wxBORDER_THEME | wxLC_HRULES | wxLC_VRULES);
+    // virtual list - filled by wxSelectDestinationDirPage when the scan is done
+    m_lcFilesInSelectedDrive = new CDeletedFilesList(this, LIST_CTRL_DELETED_FILES, wxPoint(-1, -1), wxSize(600, 400));
     ((MyWizard *) GetParent())->SetPtrSelectedFiles(m_lcFilesInSelectedDrive);
-
-    wxString filename;
-    //    wxString path = m_gdirChooseSourceDrive->GetPath();
-    wxString path;
-    path.Printf("C:\\"); // sta ako nema d disk?! cemu sluzi ovaj d disk? Da li sme na C disk????
-    // ovde bi trebalo proveriti da li postoji D disk i tek onda ga uzeti kao odrediste.
-
-    wxDir dir(path);
-
-    bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
-
-    int i = 0;
-
-    m_lcFilesInSelectedDrive->ClearAll();
-
-    wxListItem itemCol;
-    itemCol.SetText(languagePack->getWXText(SELECT_FILES_PAGE, SELECT_ALL_BUTTON_LABEL));
-    itemCol.SetImage(-1);
-    itemCol.SetWidth(50);
-    m_lcFilesInSelectedDrive->InsertColumn(0, itemCol);
-
-    // to speed up inserting we hide the control temporarily
-    m_lcFilesInSelectedDrive->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu
-    while (cont) {
-
-        long lIndex = m_lcFilesInSelectedDrive->InsertItem(i, filename, 0);
-        m_lcFilesInSelectedDrive->SetItemData(lIndex, i);
-
-        filename.Printf(wxT(""));
-
-        cont = dir.GetNext(&filename);
-        i += 1;
-    }
-
-    m_lcFilesInSelectedDrive->Show();
-
-    m_lcFilesInSelectedDrive->SetColumnWidth(0, wxLIST_AUTOSIZE);
-    m_lcFilesInSelectedDrive->SetColumnWidth(1, wxLIST_AUTOSIZE);
-    m_lcFilesInSelectedDrive->SetColumnWidth(2, wxLIST_AUTOSIZE);
 
 
     sizerHoldingButtonsAndSearchAndTheList->Add(sizerHoldingButtonsAboveTheList, 0, wxEXPAND, 0);
@@ -172,7 +131,10 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
         ILanguage *languagePack = ((MyWizard *) GetParent())->GetLanguagePack();
         int *ptrNumberOfSelectedFiles = ((MyWizard *) GetParent())->GetMw_ptriNumberOfSelectedFiles();
 
-        *ptrNumberOfSelectedFiles = m_lcFilesInSelectedDrive->GetSelectedItemCount();
+        // collect the selection here, in the GUI thread - the copy thread gets the list of files, not the control
+        std::vector<t_FileInfo *> vFilesToCopy;
+        m_lcFilesInSelectedDrive->GetSelectedFiles(vFilesToCopy);
+        *ptrNumberOfSelectedFiles = (int) vFilesToCopy.size();
         //        (*this->m_NumberOfSelectedFiles) = ;//sto je ovo glupo resenje - katastrofa - ne treba mu jos jedna referenca na isti pointer
 
         wxProgressDialog dialog("Scanning the selected source drive.",
@@ -195,7 +157,7 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         thCopyFiles->SetNTFSDrivePtr(((MyWizard *) GetParent())->GetPtrCNTFSDrive());
         thCopyFiles->SetFinfoHashPtr(((MyWizard *) GetParent())->GetPtrFileInfoHash());
-        thCopyFiles->SetListControlPtr(((MyWizard *) GetParent())->GetPtrSelectedFiles());
+        thCopyFiles->SetFilesToCopy(vFilesToCopy);
         thCopyFiles->SetDestinationDirPtr(((MyWizard *) GetParent())->GetMw_ptrDestinationDir());
         thCopyFiles->SetMutexLockPtr(((MyWizard *) GetParent())->GetPtrListMutex()); // ovo nicemu ne sluzi
         thCopyFiles->SetCancelProgresControl(false);
@@ -258,349 +220,93 @@ void wxSelectFilesPage::OnPulseDialogEvent(wxCommandEvent & event) {
 }
 
 void wxSelectFilesPage::OnSelectAllClick(wxCommandEvent & event) {
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
+    m_lcFilesInSelectedDrive->SelectAll(true);
 
-    int itemNumber = tmpFileList->GetItemCount();
-
-    for (int item = 0; item < itemNumber; item++) {
-        tmpFileList->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-        //tmpFileList->SetItemState(item, wxLIST_STATE_FOCUSED, wxLIST_STATE_SELECTED);
-
-    }
     wxFilterImages->SetValue(true);
     wxFilterVideo->SetValue(true);
     wxFilterMusic->SetValue(true);
-
 }
 
 void wxSelectFilesPage::OnUnselectAllClick(wxCommandEvent & event) {
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-
-    int itemNumber = tmpFileList->GetItemCount();
-
-    for (int item = 0; item < itemNumber; item++) {
-        tmpFileList->SetItemState(item, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
-    }
+    m_lcFilesInSelectedDrive->SelectAll(false);
 
     wxFilterImages->SetValue(false);
     wxFilterVideo->SetValue(false);
     wxFilterMusic->SetValue(false);
 }
 
-bool _isImage(wxString *cell_contents_string) {
-    char ImageExtensions[][4] = {"jpg", "gif", "png", "bmp"}; //sta raditi sa ekstenzijom jpeg? 
-    int size = sizeof (ImageExtensions) / sizeof (ImageExtensions[0]);
-
-    cell_contents_string->MakeLower(); // -> mala slova
-    for (int i = 0; i < size; i++) {
-        if (cell_contents_string->EndsWith(wxString::FromAscii(ImageExtensions[i]), NULL))
+static bool _hasExtension(const wchar_t *szFilename, const char *const *extensions, int count) {
+    wxString name(szFilename);
+    name.MakeLower(); // -> mala slova
+    for (int i = 0; i < count; i++)
+        if (name.EndsWith(wxString(".") + extensions[i]))
             return true;
-    }
-
     return false;
+}
+
+static bool _isImage(const wchar_t *szFilename) {
+    static const char *const ImageExtensions[] = {"jpg", "jpeg", "gif", "png", "bmp", "tif", "tiff", "heic"};
+    return _hasExtension(szFilename, ImageExtensions, sizeof (ImageExtensions) / sizeof (ImageExtensions[0]));
+}
+
+static bool _isVideo(const wchar_t *szFilename) {
+    static const char *const VideoExtensions[] = {"avi", "mov", "wmv", "mp4", "mkv", "m4v", "mpg", "mpeg"};
+    return _hasExtension(szFilename, VideoExtensions, sizeof (VideoExtensions) / sizeof (VideoExtensions[0]));
+}
+
+static bool _isMusic(const wchar_t *szFilename) {
+    static const char *const MusicExtensions[] = {"mp3", "wma", "wav", "flac", "m4a", "ogg"};
+    return _hasExtension(szFilename, MusicExtensions, sizeof (MusicExtensions) / sizeof (MusicExtensions[0]));
+}
+
+// select (or unselect) every listed file of one type, e.g. all images
+
+void wxSelectFilesPage::SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect) {
+    long lCount = m_lcFilesInSelectedDrive->GetFileCount();
+    for (long lItem = 0; lItem < lCount; lItem++)
+        if (isOfType(m_lcFilesInSelectedDrive->GetFile(lItem)->szFilename))
+            m_lcFilesInSelectedDrive->SelectItem(lItem, bSelect);
 }
 
 void wxSelectFilesPage::OnFilterImagesClick(wxCommandEvent & event) {
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-    wxListItem row_info;
-    wxString cell_contents_string;
-    int itemNumber = tmpFileList->GetItemCount();
-    int column = FILE_NAME_COLUMN;
-
-    for (int item = 0; item < itemNumber; item++) {
-        // Set what row it is (m_itemId is a member of the regular wxListCtrl class)
-        row_info.m_itemId = item;
-        // Set what column of that row we want to query for information.
-        row_info.m_col = column;
-        // Set text mask
-        row_info.m_mask = wxLIST_MASK_TEXT;
-        // Get the info and store it in row_info variable.   
-        tmpFileList->GetItem(row_info);
-        // Extract the text out that cell
-        cell_contents_string = row_info.m_text;
-
-        if (_isImage(&cell_contents_string)) {
-            if (wxFilterImages->GetValue())// da li je dugme uklj. ili isklj.?
-                tmpFileList->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-            else
-                tmpFileList->SetItemState(item, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
-        }
-    }
-}
-
-bool _isVideo(wxString *cell_contents_string) {
-
-    char VideoExtensions[][4] = {"avi", "mov", "wmv", "mp4", "mkv"}; //ovo bi mozda trebalo da ide u header file, da bi se lakse konfigurisalo. 
-    int size = sizeof (VideoExtensions) / sizeof (VideoExtensions[0]);
-
-    cell_contents_string->MakeLower();
-    for (int i = 0; i < size; i++) {
-        if (cell_contents_string->EndsWith(wxString::FromAscii(VideoExtensions[i]), NULL))
-            return true;
-    }
-
-    return false;
+    SelectFilesOfType(_isImage, wxFilterImages->GetValue());
 }
 
 void wxSelectFilesPage::OnFilterVideosClick(wxCommandEvent & event) {
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-    wxListItem row_info;
-    wxString cell_contents_string;
-    int itemNumber = tmpFileList->GetItemCount();
-    int column = FILE_NAME_COLUMN; //TODO ovo ne sme da bude static kompajlirano, ovo je kolona u kojoj je tekst
-
-    for (int item = 0; item < itemNumber; item++) {
-        // Set what row it is (m_itemId is a member of the regular wxListCtrl class)
-        row_info.m_itemId = item;
-        // Set what column of that row we want to query for information.
-        row_info.m_col = column;
-        // Set text mask
-        row_info.m_mask = wxLIST_MASK_TEXT;
-        // Get the info and store it in row_info variable.   
-        tmpFileList->GetItem(row_info);
-        // Extract the text out that cell
-        cell_contents_string = row_info.m_text;
-
-        if (_isVideo(&cell_contents_string)) {
-            if (wxFilterVideo->GetValue())// da li je dugme stisnuto? vidi kako se ovo tacno radi
-                tmpFileList->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-            else
-                tmpFileList->SetItemState(item, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
-        }
-    }
-
-}
-
-bool _isMusic(wxString *cell_contents_string) {
-
-    char MusicExtensions[][4] = {"mp3", "wma"}; //ovo bi mozda trebalo da ide u header file, da bi se lakse konfigurisalo. 
-    int size = sizeof (MusicExtensions) / sizeof (MusicExtensions[0]);
-
-    cell_contents_string->MakeLower();
-    for (int i = 0; i < size; i++) {
-        if (cell_contents_string->EndsWith(wxString::FromAscii(MusicExtensions[i]), NULL))
-            return true;
-    }
-
-    return false;
+    SelectFilesOfType(_isVideo, wxFilterVideo->GetValue());
 }
 
 void wxSelectFilesPage::OnFilterMusicClick(wxCommandEvent & event) {
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-    wxListItem row_info;
-    wxString cell_contents_string;
-    int itemNumber = tmpFileList->GetItemCount();
-    int column = FILE_NAME_COLUMN;
-
-    for (int item = 0; item < itemNumber; item++) {
-        // Set what row it is (m_itemId is a member of the regular wxListCtrl class)
-        row_info.m_itemId = item;
-        // Set what column of that row we want to query for information.
-        row_info.m_col = column;
-        // Set text mask
-        row_info.m_mask = wxLIST_MASK_TEXT;
-        // Get the info and store it in row_info variable.   
-        tmpFileList->GetItem(row_info);
-        // Extract the text out that cell
-        cell_contents_string = row_info.m_text;
-
-        if (_isMusic(&cell_contents_string)) {
-            if (wxFilterVideo->GetValue())// da li je dugme stisnuto? vidi kako se ovo tacno radi
-                tmpFileList->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-            else
-                tmpFileList->SetItemState(item, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
-        }
-    }
-
+    SelectFilesOfType(_isMusic, wxFilterMusic->GetValue());
 }
 
 void wxSelectFilesPage::OnSearchAction(wxCommandEvent & event) {
-
-    FileInfoHash *m_finfohash = ((MyWizard *) GetParent())->GetPtrFileInfoHash();
-    wxListCtrl *m_ListControl = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-    wxString search_item = event.GetString();
-
-    if (m_finfohash->empty()) {
-        wxString myErrorMessage;
-        myErrorMessage.Printf("There were no deleted files  found on this drive.");
-
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                myErrorMessage, wxT("Info"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-    }
-
-    //    strcpy(sCompareString, m_wxSearchCtrlSearchList->GetLabelText();
-
-    m_ListControl->ClearAll();
-    m_ListControl->InsertColumn(0, wxT("File name"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(1, wxT("Status"), wxLIST_FORMAT_LEFT, -1);
-    // to speed up inserting we hide the control temporarily
-    //    m_ListControl->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu
-    int listCounter = 30;
-    FileInfoHash::iterator it;
-    t_FileInfo *pTempFinfo = NULL;
-    for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
-        pTempFinfo = it->second;
-        //ovde se vrsi compare, za prazan string ubaci sve elemente hash tabele
-        if (search_item.IsEmpty() || wxString(pTempFinfo->szFilename).Upper().Contains(search_item.Upper())) {
-            long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
-            m_ListControl->SetItemPtrData(lIndex, (wxUIntPtr) pTempFinfo);
-            m_ListControl->SetItem(lIndex, 1, pTempFinfo->szBuffer);
-            listCounter++;
-        }
-
-    }
-
-    m_ListControl->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    m_ListControl->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //    m_ListControl->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER); // bilo je wxLIST_AUTOSIZE
-    m_ListControl->RefreshItem(0);
-    m_ListControl->Show();
-    //process the event?
+    // for an empty string the list shows all files again
+    m_lcFilesInSelectedDrive->SetNameFilter(event.GetString());
+    UpdateFoundFilesLabel();
 }
 
 void wxSelectFilesPage::OnSearchCancel(wxCommandEvent & event) {
-    FileInfoHash *m_finfohash = ((MyWizard *) GetParent())->GetPtrFileInfoHash();
-    wxListCtrl *m_ListControl = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-
-    if (m_finfohash->empty()) {
-        wxString myErrorMessage;
-        myErrorMessage.Printf("There were no deleted files  found on this drive.");
-
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
-                myErrorMessage, wxT("Info"), wxOK | wxICON_ERROR);
-        dial->ShowModal();
-    }
-
-    m_ListControl->ClearAll();
-    m_ListControl->InsertColumn(0, wxT("File name"), wxLIST_FORMAT_LEFT, -1);
-    m_ListControl->InsertColumn(1, wxT("Status"), wxLIST_FORMAT_LEFT, -1);
-    // to speed up inserting we hide the control temporarily
-    m_ListControl->Hide();
-
-    // ovde sad ide ona funkcija koja trpa u listu bez pitanja
-    int listCounter = 30;
-    FileInfoHash::iterator it;
-    t_FileInfo *pTempFinfo = NULL;
-    for (it = m_finfohash->begin(); it != m_finfohash->end(); ++it) {
-        pTempFinfo = it->second;
-        long lIndex = m_ListControl->InsertItem(listCounter, pTempFinfo->szFilename, 0);
-        m_ListControl->SetItemPtrData(lIndex, (wxUIntPtr) pTempFinfo);
-        m_ListControl->SetItem(lIndex, 1, pTempFinfo->szBuffer);
-        listCounter++;
-    }
-
-    m_ListControl->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-    m_ListControl->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-    //    m_ListControl->SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER); // bilo je wxLIST_AUTOSIZE
-    m_ListControl->RefreshItem(0);
-    m_ListControl->Show();
-
+    m_wxSearchCtrlSearchList->Clear();
+    m_lcFilesInSelectedDrive->SetNameFilter(wxEmptyString);
+    UpdateFoundFilesLabel();
 }
 
 void wxSelectFilesPage::OnFilesListClick(wxCommandEvent & event) {
     wxFilterImages->SetValue(false);
     wxFilterVideo->SetValue(false);
     wxFilterMusic->SetValue(false);
-    m_lcFilesInSelectedDrive->SetItemState(1, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn0Ascending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return (wcscmp(pTempItem1->szFilename, pTempItem2->szFilename));
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn1Ascending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return pTempItem1->n64SizeOnDisk - pTempItem2->n64SizeOnDisk;
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn2Ascending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return (strcmp(pTempItem1->szBuffer, pTempItem2->szBuffer));
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn0Descending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return (wcscmp(pTempItem2->szFilename, pTempItem1->szFilename));
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn1Descending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return pTempItem2->n64SizeOnDisk - pTempItem1->n64SizeOnDisk;
-}
-
-int wxCALLBACK
-MyCompareFunctionColumn2Descending(wxIntPtr item1, wxIntPtr item2, wxIntPtr WXUNUSED(sortData)) {
-    t_FileInfo *pTempItem1, *pTempItem2;
-    pTempItem1 = (t_FileInfo *) item1;
-    pTempItem2 = (t_FileInfo *) item2;
-
-    return (strcmp(pTempItem2->szBuffer, pTempItem1->szBuffer));
 }
 
 void wxSelectFilesPage::OnListColumnClick(wxCommandEvent & event) {
-    static bool bColumn0NextSortIsAscending = true; // sa ovim postizemo da kad klikces na column header on okrece sort iz ASC u DESC
-    static bool bColumn1NextSortIsAscending = true; // sa ovim postizemo da kad klikces na column header on okrece sort iz ASC u DESC
-    static bool bColumn2NextSortIsAscending = true; // sa ovim postizemo da kad klikces na column header on okrece sort iz ASC u DESC
-    
-    int col = ((wxListEvent *) & event)->m_col;
-    switch (col) {
-        case 0:
-            if (bColumn0NextSortIsAscending) {
-                bColumn0NextSortIsAscending = false;
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn0Ascending, 0);
-            } else {
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn0Descending, 0);
-                bColumn0NextSortIsAscending = true;
-            }
-            break;
-        
-        case 1:
-            if (bColumn1NextSortIsAscending) {
-                bColumn1NextSortIsAscending = false;
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn1Ascending, 0);
-            } else {
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn1Descending, 0);
-                bColumn1NextSortIsAscending = true;
-            }
-            break;
+    // the same column again reverses the order
+    m_lcFilesInSelectedDrive->SortByColumn(((wxListEvent *) & event)->GetColumn());
+}
 
-
-        case 2:
-            if (bColumn2NextSortIsAscending) {
-                bColumn2NextSortIsAscending = false;
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn2Ascending, 0);
-            } else {
-                m_lcFilesInSelectedDrive->SortItems(MyCompareFunctionColumn2Descending, 0);
-                bColumn2NextSortIsAscending = true;
-            }
-            break;
-    }
-
-    return;
+void wxSelectFilesPage::UpdateFoundFilesLabel() {
+    ILanguage *languagePackLocal = ((MyWizard *) GetParent())->GetLanguagePack();
+    int itemNumber = (int) m_lcFilesInSelectedDrive->GetFileCount();
+    wxSelectFilesMessage->SetLabel(wxString::Format(languagePackLocal->getWXText(SELECT_FILES_PAGE, SELECT_FILES_OTHER), itemNumber));
 }
 
 void wxSelectFilesPage::OnPageShown(wxWizardEvent& event) {
@@ -609,17 +315,7 @@ void wxSelectFilesPage::OnPageShown(wxWizardEvent& event) {
     wxWindow* NextButton = FindWindowById(wxID_FORWARD, GetParent());
     NextButton->SetLabel(languagePackLocal->getWXText(GENERAL, RETRIEVE_BUTTON_LABEL));
 
-    wxListCtrl *tmpFileList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
-    int itemNumber = tmpFileList->GetItemCount();
-
-    wxString wxsLabel; //zoran SELECT_FILES_OTHER
-    wxsLabel.Printf("Found %d files.\n"
-            "Select the files you want to try to retrieve and click \'Retrieve\'\n\n"
-            "To select multiple files, hold Ctrl.", itemNumber
-            );
-
-    //m_wxEndPageText = new wxStaticText(this, -1,              wxString::Format(languagePackLocal->getWXText(SELECT_FILES_PAGE, SELECT_FILES_OTHER),itemNumber));
-    wxSelectFilesMessage->SetLabel(wxString::Format(languagePackLocal->getWXText(SELECT_FILES_PAGE, SELECT_FILES_OTHER), itemNumber));
+    UpdateFoundFilesLabel();
 
     //set the next button label
 

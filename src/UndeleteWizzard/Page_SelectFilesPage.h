@@ -15,6 +15,7 @@
 #define FILE_NAME_COLUMN 0
 
 #include <wx/srchctrl.h>
+#include "DeletedFilesList.h"
 
 class wxSelectFilesPage : public wxWizardPageSimple {
 public:
@@ -36,7 +37,10 @@ public:
     void OnListColumnClick(wxCommandEvent & event);
     void OnPageShown(wxWizardEvent& event);
 
-    wxListCtrl *m_lcFilesInSelectedDrive;
+    void SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect);
+    void UpdateFoundFilesLabel();
+
+    CDeletedFilesList *m_lcFilesInSelectedDrive;
     //    int m_NumberOfSelectedFiles;
     int m_NumberOfFileBeingCopied;
     bool mw_bRunDialog;

@@ -82,7 +82,28 @@ typedef struct ST_FILEINFO // this struct is to retrieve the file detail from th
     char szBuffer[255];
     int iRecordId;
     LONGLONG n64SizeOnDisk;
+    LONGLONG n64RealSize; // real size of the data, from the DATA attribute (FILE_NAME sizes are often stale)
+    int iRecoverability; // RECOVERABILITY_*
+    int iPercentIntact; // share of the file's clusters that are still free (not reused), 0..100
 } t_FileInfo;
+
+// can the deleted file's data still be there? Judged by whether its clusters have been reused since -
+// a free cluster may still hold the old data, a cluster in use by another file certainly doesn't.
+enum {
+    RECOVERABILITY_UNKNOWN = 0, // no cluster information (damaged/compressed record, bitmap not loaded)
+    RECOVERABILITY_GOOD, // none of its clusters is in use - most likely intact
+    RECOVERABILITY_PARTIAL, // some of its clusters are in use by other files
+    RECOVERABILITY_OVERWRITTEN // all of its clusters are in use by other files
+};
+
+inline const char *RecoverabilityLabel(int iRecoverability) {
+    switch (iRecoverability) {
+        case RECOVERABILITY_GOOD: return "Good";
+        case RECOVERABILITY_PARTIAL: return "Partly overwritten";
+        case RECOVERABILITY_OVERWRITTEN: return "Overwritten";
+        default: return "Unknown";
+    }
+}
 
 //ovde je key tipa int - treba razmisliti da li je bolje da je key tipa string
 WX_DECLARE_HASH_MAP(int, t_FileInfo*, wxIntegerHash, wxIntegerEqual, FileInfoHash);
@@ -108,8 +129,13 @@ protected:
     LONGLONG m_llMFTCacheStart; // MFT byte offset of m_vMFTCache[0]
     DWORD m_dwMFTCacheLen; // valid bytes in m_vMFTCache, 0 = empty
 
-    int ReadMFTBytes(LONGLONG llOffset, BYTE *puchOut, DWORD dwLen);
+    int ReadRunsBytes(const std::vector<NTFS_DATA_RUN> &vRuns, LONGLONG llOffset, BYTE *puchOut, DWORD dwLen);
     int LoadMFTRecord(DWORD nFileSeq);
+
+    // $Bitmap - one bit per cluster, set = in use. Loaded once per scan to judge recoverability.
+    std::vector<BYTE> m_vVolumeBitmap;
+    int LoadVolumeBitmap();
+    void CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFileInfo);
 
     BYTE *m_puchMFTRecord; // 1K, or the cluster size, whichever is larger
     LONGLONG m_llMFTRecordSz; // MFT record size
