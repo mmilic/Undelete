@@ -71,7 +71,15 @@ real/virtual drive and check the recovered files.
   types come from one extension table, `FileTypeOf()` — the type buttons, the filter and the preview all use it.
 - Recoverability: `CNTFSDrive` loads `$Bitmap` at the start of a scan and marks each deleted file Good /
   Partly overwritten / Overwritten by whether its clusters are in use now. "Good" can't tell whether a since-deleted file
-  used the clusters in between.
+  used the clusters in between - that is what the content check is for.
+- Folders: the scan also keeps every folder record (in use and deleted) and, at the end, builds each file's
+  folder path from the parent references (`CFolderPaths` in `NTFSDrive.cpp`). A reference only counts if the
+  folder record's sequence number still matches (or is one higher and the folder is deleted) - otherwise the
+  record was reused and that part of the path is "?". Recycle Bin files take their folder from the `$I` path.
+- `FileContents.{h,cpp}` — the content check: compares the first 4 KB of a file with the signature of its type
+  (by extension) or checks text files for binary data. Done on demand (`CNTFSDrive::CheckFileContents`: the
+  "Check contents" button and the focused file), not during the scan - one read per file would make the scan of
+  a big hard disk take far too long. Files whose first cluster is reused aren't read ("Start overwritten").
 - `languages/` — plugin-style i18n: `ILanguage` interface (`getWXText(page, text)`), concrete packs
   (`English`, `Srpski`, `Srpski_Cyr`, `Deutsch`) via `LanguageFactory`/`LanguageDialog`.
 - `FAT/` — vendored TestDisk/PhotoRec source (~357 files), kept in full but **not linked into the build**.

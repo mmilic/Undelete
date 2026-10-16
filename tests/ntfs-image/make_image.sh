@@ -51,8 +51,17 @@ head -c 3000 /dev/urandom > "$MNT/Grüße.txt"
 # a real image (the preview must decode it) - "фотографија.jpg" above is random bytes (the preview must not)
 python3 "$(dirname "$0")/make_png.py" 120 80 "$MNT/preview.png"
 
+# folders: a file deleted from a folder that stays, a folder deleted with its file, and a PDF whose start
+# (not resident - 20 KB) must pass the content check
+mkdir -p "$MNT/Photos/2014" "$MNT/Old Stuff"
+python3 "$(dirname "$0")/make_png.py" 64 48 "$MNT/Photos/2014/holiday.png"
+printf 'Shopping list\r\n- milk\r\n- bread\r\nCall Ana about the trip.\r\n' > "$MNT/Old Stuff/notes.txt"
+{ printf '%%PDF-1.4\n'; head -c 20000 /dev/urandom; } > "$MNT/letter.pdf"
+
 (cd "$MNT" && sha256sum fragmented.bin "$LONG" tiny_resident.bin sparse.bin \
-  "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt" preview.png) > "$D/expected.sha256"
+  "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt" preview.png letter.pdf) > "$D/expected.sha256"
+(cd "$MNT/Photos/2014" && sha256sum holiday.png) >> "$D/expected.sha256"
+(cd "$MNT/Old Stuff" && sha256sum notes.txt) >> "$D/expected.sha256"
 
 # Recycle Bin: the deleted file is $R<6 chars><ext>, its original path is in the matching $I file.
 # The engine should recover each $R file under its original name.
@@ -78,7 +87,8 @@ done
 
 ntfs-3g "$IMG" "$MNT"
 rm "$MNT/fragmented.bin" "$MNT/$LONG" "$MNT/tiny_resident.bin" "$MNT/sparse.bin" \
-  "$MNT/Čačak ćevapi.txt" "$MNT/фотографија.jpg" "$MNT/Grüße.txt" "$MNT/preview.png" \
-  "$MNT"/'$R'* "$MNT"/'$I'*
+  "$MNT/Čačak ćevapi.txt" "$MNT/фотографија.jpg" "$MNT/Grüße.txt" "$MNT/preview.png" "$MNT/letter.pdf" \
+  "$MNT/Photos/2014/holiday.png" "$MNT"/'$R'* "$MNT"/'$I'*
+rm -r "$MNT/Old Stuff"
 umount "$MNT"
 echo "image ready: $IMG"

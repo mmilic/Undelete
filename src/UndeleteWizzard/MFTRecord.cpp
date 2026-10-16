@@ -50,6 +50,8 @@ CMFTRecord::CMFTRecord() {
     memset(&m_attrFilename, 0, sizeof (ATTR_FILENAME));
 
     m_bInUse = false;
+    m_bDirectory = false;
+    m_wSequence = 0;
 }
 
 CMFTRecord::~CMFTRecord() {
@@ -158,7 +160,8 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
         return nRet;
 
     m_bInUse = (ntfsMFT.wFlags & 0x01); //0x01  	Record is in use
-    //0x02 	Record is a directory
+    m_bDirectory = (ntfsMFT.wFlags & 0x02) != 0; //0x02 	Record is a directory
+    m_wSequence = ntfsMFT.wSequence;
 
     // only walk the part of the record that is actually used
     DWORD dwLimit = dwRecSize;

@@ -9,6 +9,7 @@
 //#include <wx/srchctrl.h>
 
 #include "NTFSDrive.h"
+#include "FileContents.h"
 #include "MyThreadClass.h"
 #include "MyWizzard.h"
 #include "Page_SelectFilesPage.h"
@@ -87,12 +88,17 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     m_txtShowing = new wxStaticText(this, -1, wxEmptyString);
     m_txtShowing->SetForegroundColour(wxColour(60, 60, 60));
 
+    wxButton *wxCheckContentsButton = new wxButton(this, CHECK_CONTENTS_BUTTON, wxT("Check contents"));
+    wxCheckContentsButton->SetToolTip(wxT("Reads the start of each selected file (or of every shown file, if none is selected)\n"
+            "and checks that it still looks like its type - e.g. that a .jpg still holds a JPEG image."));
+
     wxBoxSizer *sizerHoldingTheFilters = new wxBoxSizer(wxHORIZONTAL);
     sizerHoldingTheFilters->Add(new wxStaticText(this, -1, wxT("Show:")), 0, wxALIGN_CENTER_VERTICAL, 0);
     sizerHoldingTheFilters->Add(m_choiceRecoverability, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     sizerHoldingTheFilters->Add(new wxStaticText(this, -1, wxT("Type:")), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
     sizerHoldingTheFilters->Add(m_choiceType, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     sizerHoldingTheFilters->Add(m_txtShowing, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
+    sizerHoldingTheFilters->Add(wxCheckContentsButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
 
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -155,6 +161,9 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
 
     Connect(FILTER_TYPE_CHOICE, wxEVT_COMMAND_CHOICE_SELECTED,
             wxCommandEventHandler(wxSelectFilesPage::OnFilterChoice));
+
+    Connect(CHECK_CONTENTS_BUTTON, wxEVT_COMMAND_BUTTON_CLICKED,
+            wxCommandEventHandler(wxSelectFilesPage::OnCheckContentsClick));
 
     SetSizerAndFit(mainSizer);
 }
@@ -399,6 +408,52 @@ void wxSelectFilesPage::OnFilterChoice(wxCommandEvent & event) {
     UpdateFoundFilesLabel();
 }
 
+// read the start of the selected files (or of every shown file) and compare it with the file type. Runs in the
+// GUI thread like the preview - one small read per file, and the progress dialog keeps the window responsive.
+
+void wxSelectFilesPage::OnCheckContentsClick(wxCommandEvent & event) {
+    std::vector<t_FileInfo *> vFiles;
+    m_lcFilesInSelectedDrive->GetSelectedFiles(vFiles);
+    if (vFiles.empty())
+        for (long lItem = 0; lItem < m_lcFilesInSelectedDrive->GetFileCount(); lItem++)
+            vFiles.push_back(m_lcFilesInSelectedDrive->GetFile(lItem));
+    if (vFiles.empty())
+        return;
+
+    CNTFSDrive *pDrive = ((MyWizard *) GetParent())->GetPtrCNTFSDrive();
+    wxProgressDialog dialog(wxT("Checking contents"), wxString::Format("Checking %d files...", (int) vFiles.size()),
+            (int) vFiles.size(), this, wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME | wxPD_REMAINING_TIME | wxPD_AUTO_HIDE);
+
+    int aCount[CONTENT_UNREADABLE + 1] = {0};
+    size_t i;
+    DWORD dwLastUpdate = 0;
+    for (i = 0; i < vFiles.size(); i++) {
+        if (GetTickCount() - dwLastUpdate > 100) {
+            dwLastUpdate = GetTickCount();
+            if (!dialog.Update((int) i, wxString::Format("Checking file %d of %d", (int) i + 1, (int) vFiles.size())))
+                break; // cancelled - what was checked so far is kept
+        }
+        if (vFiles[i]->iContent == CONTENT_NOT_CHECKED)
+            pDrive->CheckFileContents(*vFiles[i]);
+        if (vFiles[i]->iContent >= 0 && vFiles[i]->iContent <= CONTENT_UNREADABLE)
+            aCount[vFiles[i]->iContent]++;
+    }
+    dialog.Hide();
+
+    m_lcFilesInSelectedDrive->Refilter(); // the "Contents look valid" filter and the sort may depend on it
+    UpdateFoundFilesLabel();
+
+    wxString sSummary = wxString::Format("%d files checked%s:\n\n", (int) i, i < vFiles.size() ? " (cancelled)" : "");
+    sSummary += wxString::Format("Looks valid: %d\n", aCount[CONTENT_OK]);
+    sSummary += wxString::Format("Damaged: %d\n", aCount[CONTENT_DAMAGED] + aCount[CONTENT_ZEROS]);
+    sSummary += wxString::Format("Start overwritten: %d\n", aCount[CONTENT_START_OVERWRITTEN]);
+    sSummary += wxString::Format("Can't check this file type: %d\n", aCount[CONTENT_NO_SIGNATURE]);
+    if (aCount[CONTENT_UNREADABLE])
+        sSummary += wxString::Format("Can't read: %d\n", aCount[CONTENT_UNREADABLE]);
+    sSummary += "\n\"Looks valid\" means the start of the file matches its type - the rest of it can still be damaged.";
+    wxMessageBox(sSummary, wxT("Contents checked"), wxOK | wxICON_INFORMATION, this);
+}
+
 void wxSelectFilesPage::OnSearchAction(wxCommandEvent & event) {
     // for an empty string the list shows all files again
     m_lcFilesInSelectedDrive->SetNameFilter(event.GetString());
@@ -436,6 +491,12 @@ void wxSelectFilesPage::OnPreviewTimer(wxTimerEvent & event) {
     if (!pFile) {
         m_txtPreview->SetLabel(wxT("Select an image\nto see a preview."));
         return;
+    }
+
+    // the focused file's contents are checked right away - one small read
+    if (pFile->iContent == CONTENT_NOT_CHECKED) {
+        ((MyWizard *) GetParent())->GetPtrCNTFSDrive()->CheckFileContents(*pFile);
+        m_lcFilesInSelectedDrive->RefreshItem(lItem);
     }
     if (FileTypeOf(pFile->sFilename.c_str()) != FILE_TYPE_IMAGE) {
         m_txtPreview->SetLabel(wxT("No preview -\nnot an image."));

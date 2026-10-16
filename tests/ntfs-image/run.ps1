@@ -25,11 +25,13 @@ if ($LASTEXITCODE -ne 0) { throw "harness failed - see $OutDir\run.log" }
 
 # recoverability the engine reported for each file (from the harness's tab separated FILE lines)
 $recoverability = @{}
+$folder = @{}
+$content = @{}
 $preview = @{}
 $progress = $null
 foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "run.log")) {
     $f = $line -split "`t"
-    if ($f[0] -eq "FILE") { $recoverability[$f[2]] = $f[3] }
+    if ($f[0] -eq "FILE") { $recoverability[$f[2]] = $f[3]; $folder[$f[2]] = $f[6]; $content[$f[2]] = $f[7] }
     if ($f[0] -eq "PROGRESS") { $progress = $f }
     if ($f[0] -eq "PREVIEW") { $preview[$f[1]] = $f[2] }
 }
@@ -41,6 +43,29 @@ foreach ($check in @(@("preview.png", "120x80"), @("фотографија.jpg",
     $got = $preview[$check[0]]
     if ($got -eq $check[1]) { Write-Host "Preview of $($check[0]): $got - OK" }
     else { Write-Host "Preview of $($check[0]): '$got' instead of '$($check[1])' - WRONG"; $failed++ }
+}
+
+# the folder each file was deleted from - from the MFT parent references (also through a deleted folder),
+# and for Recycle Bin files from the original path in their $I file
+foreach ($check in @(@("fragmented.bin", "\"), @("holiday.png", "\Photos\2014"), @("notes.txt", "\Old Stuff"),
+        @("Летовање 2014.jpg", "\Users\test\Pictures"), @("Izveštaj.docx", "\Users\test\Documents"))) {
+    $got = $folder[$check[0]]
+    if ($got -eq $check[1]) { Write-Host "Folder of $($check[0]): $got - OK" }
+    else { Write-Host "Folder of $($check[0]): '$got' instead of '$($check[1])' - WRONG"; $failed++ }
+}
+
+# every $I file gave its $R file the original name back - they are bookkeeping and must not be listed
+$infoFiles = @($recoverability.Keys | Where-Object { $_ -like '$I*' })
+if ($infoFiles.Count) { Write-Host "Recycle Bin info files listed: $($infoFiles -join ', ') - WRONG"; $failed++ }
+else { Write-Host "Recycle Bin info files not listed - OK" }
+
+# the content check: real files of a known type look valid, random bytes under such a name don't
+foreach ($check in @(@("preview.png", "Looks valid"), @("holiday.png", "Looks valid"), @("notes.txt", "Looks valid"),
+        @("letter.pdf", "Looks valid"), @("фотографија.jpg", "Damaged"), @("Čačak ćevapi.txt", "Damaged"),
+        @("Izveštaj.docx", "Damaged"), @("fragmented.bin", "Can't check"))) {
+    $got = $content[$check[0]]
+    if ($got -eq $check[1]) { Write-Host "Contents of $($check[0]): $got - OK" }
+    else { Write-Host "Contents of $($check[0]): '$got' instead of '$($check[1])' - WRONG"; $failed++ }
 }
 
 # the copy progress counter must match what was written (whole KB, so up to 1 KB per file may be missing)

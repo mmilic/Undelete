@@ -18,11 +18,14 @@ if ($WithOld) {
     $Old = Join-Path $OutDir "old-src"
     New-Item -ItemType Directory -Force -Path $Old | Out-Null
     $files = @{"NTFSDrive.cpp" = "src/UndeleteWizzard"; "NTFSDrive.h" = "src/UndeleteWizzard"; "MFTRecord.cpp" = "src/UndeleteWizzard";
-        "MFTRecord.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
+        "MFTRecord.h" = "src/UndeleteWizzard"; "FileContents.cpp" = "src/UndeleteWizzard"; "FileContents.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
     foreach ($f in $files.Keys) {
         # cmd redirection keeps the bytes as they are (a PowerShell 5.1 pipe would re-encode them)
-        cmd /c "git -C `"$Root`" show HEAD:$($files[$f])/$f > `"$(Join-Path $Old $f)`""
-        if ($LASTEXITCODE -ne 0) { throw "git show HEAD:$($files[$f])/$f failed" }
+        cmd /c "git -C `"$Root`" show HEAD:$($files[$f])/$f > `"$(Join-Path $Old $f)`" 2>nul"
+        if ($LASTEXITCODE -ne 0) {
+            Remove-Item -Force (Join-Path $Old $f)
+            if ($f -notlike "FileContents.*") { throw "git show HEAD:$($files[$f])/$f failed" }
+        }
     }
     $variants += @{Name = "old"; Src = $Old; Harness = (Join-Path $Old "harness.cpp")}
 }
@@ -36,6 +39,8 @@ $libs = @("-mthreads", "-L", "$Wx\lib", "-static",
 foreach ($variant in $variants) {
     $exe = Join-Path $OutDir ("harness-" + $variant.Name + ".exe")
     $sources = @($variant.Harness,(Join-Path $variant.Src "NTFSDrive.cpp"), (Join-Path $variant.Src "MFTRecord.cpp"))
+    # the content check is part of the engine since it was added - an older HEAD has no FileContents.cpp
+    if (Test-Path (Join-Path $variant.Src "FileContents.cpp")) { $sources += (Join-Path $variant.Src "FileContents.cpp") }
     & g++ @sources @common "-I" $variant.Src @libs -o $exe
     if ($LASTEXITCODE -ne 0) { throw "build of $exe failed" }
     Write-Host "Built $exe"

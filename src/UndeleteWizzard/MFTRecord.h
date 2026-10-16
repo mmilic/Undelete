@@ -177,6 +177,8 @@ public:
     WORD m_wDataFlags; // attribute flags of the main data stream (0x0001 = compressed)
 
     bool m_bInUse;
+    bool m_bDirectory; // the record is a folder
+    WORD m_wSequence; // bumped every time the record is freed - tells a reused record from the one a reference meant
 
 public:
     int SetRecordInfo(LONGLONG n64StartPos, DWORD dwRecSize, DWORD dwBytesPerCluster);

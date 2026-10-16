@@ -39,6 +39,7 @@ public:
     void OnFilesListClick(wxCommandEvent & event);
     void OnListColumnClick(wxCommandEvent & event);
     void OnFilterChoice(wxCommandEvent & event);
+    void OnCheckContentsClick(wxCommandEvent & event);
     void OnPageShown(wxWizardEvent& event);
 
     void SelectFilesOfType(int iFileType, bool bSelect);

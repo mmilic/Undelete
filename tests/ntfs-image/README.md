@@ -24,6 +24,11 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
      and one has no file extension. Each must come back under its original name.
    - `preview.png`, a real image written by `make_png.py`. The image preview's read-and-decode path must
      show it, and must reject `фотографија.jpg`, which is random bytes.
+   - `Photos/2014/holiday.png` (the folder stays) and `Old Stuff/notes.txt` (the folder is deleted too): each
+     must come back with its folder, `\Photos\2014` and `\Old Stuff`. The Recycle Bin files must get the
+     folder from their original path, and their `$I` files must not be listed.
+   - `letter.pdf`, 20 KB starting with `%PDF`: with the PNGs and the text file it must pass the content check
+     ("Looks valid"), while the random-byte `.jpg`, `.txt` and `.docx` files must be "Damaged".
    - `keeper.bin`, which is not deleted: it takes the rest of the freed filler clusters, so some deleted
      fillers really are overwritten. The engine must flag those, and flag every test file Good.
 2. `build_harness.ps1` compiles `harness.cpp` with the engine sources from `src\`. With `-WithOld` it also

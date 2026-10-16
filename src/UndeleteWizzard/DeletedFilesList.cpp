@@ -6,6 +6,7 @@
 #include <set>
 
 #include "DeletedFilesList.h"
+#include "FileContents.h"
 
 // order of the "Recoverable" column: most promising first
 
@@ -18,6 +19,24 @@ static int RecoverabilityRank(const t_FileInfo *pFile) {
     }
 }
 
+// order of the "Contents" column: valid first, not checked last
+
+static int ContentRank(const t_FileInfo *pFile) {
+    switch (pFile->iContent) {
+        case CONTENT_OK: return 0;
+        case CONTENT_NO_SIGNATURE: return 1;
+        case CONTENT_UNREADABLE: return 2;
+        case CONTENT_DAMAGED: return 3;
+        case CONTENT_ZEROS: return 4;
+        case CONTENT_START_OVERWRITTEN: return 5;
+        default: return 6; // not checked
+    }
+}
+
+static int CompareLongLong(LONGLONG a, LONGLONG b) {
+    return (a < b) ? -1 : (a > b ? 1 : 0);
+}
+
 struct DeletedFilesOrder {
     int iColumn;
     bool bAscending;
@@ -25,13 +44,25 @@ struct DeletedFilesOrder {
     bool operator()(const t_FileInfo *a, const t_FileInfo *b) const {
         int r = 0;
         switch (iColumn) {
+            case DELETED_FILES_COLUMN_FOLDER:
+                if (a->sFolder.c_str() != b->sFolder.c_str()) // files of one folder share the string
+                    r = _wcsicmp(a->sFolder.c_str(), b->sFolder.c_str());
+                break;
             case DELETED_FILES_COLUMN_SIZE:
-                r = (a->n64RealSize < b->n64RealSize) ? -1 : (a->n64RealSize > b->n64RealSize ? 1 : 0);
+                r = CompareLongLong(a->n64RealSize, b->n64RealSize);
+                break;
+            case DELETED_FILES_COLUMN_MODIFIED:
+                r = CompareLongLong(a->n64Modify, b->n64Modify);
                 break;
             case DELETED_FILES_COLUMN_RECOVERABILITY:
                 r = RecoverabilityRank(a) - RecoverabilityRank(b);
                 if (!r) // more intact first
                     r = b->iPercentIntact - a->iPercentIntact;
+                break;
+            case DELETED_FILES_COLUMN_CONTENTS:
+                r = ContentRank(a) - ContentRank(b);
+                if (!r)
+                    r = RecoverabilityRank(a) - RecoverabilityRank(b);
                 break;
             case DELETED_FILES_COLUMN_STATUS:
                 r = (int) a->bInRecycleBin - (int) b->bInRecycleBin; // group by status without building its text
@@ -119,8 +150,21 @@ const char *RecoverabilityFilterLabel(int iFilter) {
     switch (iFilter) {
         case RECOVERABILITY_FILTER_GOOD: return "Good only";
         case RECOVERABILITY_FILTER_NOT_OVERWRITTEN: return "Hide overwritten";
+        case RECOVERABILITY_FILTER_CONTENT_OK: return "Contents look valid";
         default: return "All files";
     }
+}
+
+wxString FormatFileTime(LONGLONG llFileTime) {
+    if (llFileTime <= 0)
+        return wxEmptyString;
+    FILETIME ftUtc, ftLocal;
+    SYSTEMTIME st;
+    ftUtc.dwLowDateTime = (DWORD) llFileTime;
+    ftUtc.dwHighDateTime = (DWORD) (llFileTime >> 32);
+    if (!FileTimeToLocalFileTime(&ftUtc, &ftLocal) || !FileTimeToSystemTime(&ftLocal, &st))
+        return wxEmptyString;
+    return wxString::Format("%04d-%02d-%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
 }
 
 CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size)
@@ -130,10 +174,13 @@ CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPo
     m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
     m_iTypeFilter = FILE_TYPE_ANY;
 
-    InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, 280);
-    InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, 80);
+    InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, 220);
+    InsertColumn(DELETED_FILES_COLUMN_FOLDER, wxT("Folder"), wxLIST_FORMAT_LEFT, 200);
+    InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, 75);
+    InsertColumn(DELETED_FILES_COLUMN_MODIFIED, wxT("Modified"), wxLIST_FORMAT_LEFT, 110);
     InsertColumn(DELETED_FILES_COLUMN_RECOVERABILITY, wxT("Recoverable"), wxLIST_FORMAT_LEFT, 150);
-    InsertColumn(DELETED_FILES_COLUMN_STATUS, wxT("File Status"), wxLIST_FORMAT_LEFT, 150);
+    InsertColumn(DELETED_FILES_COLUMN_CONTENTS, wxT("Contents"), wxLIST_FORMAT_LEFT, 110);
+    InsertColumn(DELETED_FILES_COLUMN_STATUS, wxT("File Status"), wxLIST_FORMAT_LEFT, 130);
 
     m_attrPartial.SetTextColour(wxColour(170, 90, 0)); // dark orange
     m_attrOverwritten.SetTextColour(wxColour(150, 150, 150)); // grey
@@ -189,10 +236,18 @@ bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile) const {
         return false;
     if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_NOT_OVERWRITTEN && pFile->iRecoverability == RECOVERABILITY_OVERWRITTEN)
         return false;
+    if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_CONTENT_OK && pFile->iContent != CONTENT_OK)
+        return false;
     if (m_iTypeFilter != FILE_TYPE_ANY && FileTypeOf(pFile->sFilename.c_str()) != m_iTypeFilter)
         return false;
-    if (!m_sFilterUpper.IsEmpty() && !wxString(pFile->sFilename.c_str()).Upper().Contains(m_sFilterUpper))
-        return false;
+    if (!m_sFilterUpper.IsEmpty()) { // the whole path, so "Pictures\IMG" or a folder name finds files too
+        wxString sPath(pFile->sFolder.c_str());
+        if (!sPath.EndsWith("\\"))
+            sPath += "\\";
+        sPath += pFile->sFilename.c_str();
+        if (!sPath.Upper().Contains(m_sFilterUpper))
+            return false;
+    }
     return true;
 }
 
@@ -279,8 +334,14 @@ wxString CDeletedFilesList::OnGetItemText(long lItem, long lColumn) const {
     switch (lColumn) {
         case DELETED_FILES_COLUMN_NAME:
             return wxString(pFile->sFilename.c_str());
+        case DELETED_FILES_COLUMN_FOLDER:
+            return wxString(pFile->sFolder.c_str());
         case DELETED_FILES_COLUMN_SIZE:
             return FormatFileSize(pFile->n64RealSize);
+        case DELETED_FILES_COLUMN_MODIFIED:
+            return FormatFileTime(pFile->n64Modify);
+        case DELETED_FILES_COLUMN_CONTENTS:
+            return wxString(ContentLabel(pFile->iContent));
         case DELETED_FILES_COLUMN_RECOVERABILITY:
             if (pFile->iRecoverability == RECOVERABILITY_PARTIAL)
                 return wxString::Format("%s (%d%% intact)", RecoverabilityLabel(pFile->iRecoverability), pFile->iPercentIntact);

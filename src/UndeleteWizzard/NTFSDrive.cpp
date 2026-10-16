@@ -7,11 +7,16 @@
 #include <windows.h>
 #include <wx/wx.h>
 #include <wx/hashmap.h>
+#include <algorithm>
 #include <map>
 #include <new>
 #include <string>
 #include "NTFSDrive.h"
 #include "MFTRecord.h"
+#include "FileContents.h"
+
+// MFT record of the root folder of every NTFS volume
+#define ROOT_FOLDER_RECORD 5
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -389,6 +394,7 @@ void CNTFSDrive::CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFile
     LONGLONG llNeeded = (cFile.m_llDataSize + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster;
     LONGLONG llTotal = 0, llFree = 0;
     const BYTE *puchBitmap = &m_vVolumeBitmap[0];
+    bool bStartChecked = false;
 
     for (size_t i = 0; i < cFile.m_vDataRuns.size() && llNeeded > 0; i++) {
         const NTFS_DATA_RUN &run = cFile.m_vDataRuns[i];
@@ -396,6 +402,11 @@ void CNTFSDrive::CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFile
         llNeeded -= llCount;
         if (run.bSparse)
             continue; // no clusters on disk - nothing to overwrite
+
+        if (!bStartChecked) { // the first cluster holds the file's header - the content check needs it
+            bStartChecked = true;
+            stFileInfo.bStartReused = run.llLCN >= llBitmapClusters || (puchBitmap[run.llLCN >> 3] & (1 << (run.llLCN & 7)));
+        }
 
         LONGLONG c = run.llLCN, llEnd = run.llLCN + llCount;
         llTotal += llCount;
@@ -475,6 +486,73 @@ int CNTFSDrive::Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileData
     return ERROR_SUCCESS;
 }
 
+int CNTFSDrive::ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dwMax) {
+    vData.clear();
+    if (!m_bInitialized)
+        return ERROR_INVALID_ACCESS;
+
+    int nRet = LoadMFTRecord(nFileSeq);
+    if (nRet)
+        return nRet;
+
+    CMFTRecord cFile;
+    cFile.SetDriveHandle(m_hDrive);
+    cFile.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
+    nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, true); // where the data is, not the data
+    if (nRet)
+        return nRet;
+
+    if (cFile.m_bDataResident) {
+        // the data is in the record itself - extract it from a fresh copy (the fixups were applied to this one)
+        nRet = LoadMFTRecord(nFileSeq);
+        if (!nRet)
+            nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz);
+        if (nRet)
+            return nRet;
+        DWORD dwLen = (cFile.m_llFileDataSz < dwMax) ? (DWORD) cFile.m_llFileDataSz : dwMax;
+        if (dwLen)
+            vData.assign(cFile.m_puchFileData, cFile.m_puchFileData + dwLen);
+        return ERROR_SUCCESS;
+    }
+
+    if (cFile.m_wDataFlags & 0x0001)
+        return ERROR_NOT_SUPPORTED; // compressed - the clusters don't hold the plain data
+    if (cFile.m_llDataSize <= 0)
+        return ERROR_SUCCESS;
+    if (cFile.m_vDataRuns.empty())
+        return ERROR_NOT_SUPPORTED; // damaged run list, or it starts in another record
+
+    DWORD dwWant = (cFile.m_llDataSize < dwMax) ? (DWORD) cFile.m_llDataSize : dwMax;
+    DWORD dwRead = ((dwWant + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster) * m_dwBytesPerCluster; // whole clusters
+    vData.resize(dwRead);
+    nRet = ReadRunsBytes(cFile.m_vDataRuns, 0, &vData[0], dwRead);
+    if (nRet) {
+        vData.clear();
+        return nRet;
+    }
+    vData.resize(dwWant);
+    return ERROR_SUCCESS;
+}
+
+void CNTFSDrive::CheckFileContents(t_FileInfo &stFileInfo) {
+    if (!CanCheckFileContents(stFileInfo.sFilename.c_str())) {
+        stFileInfo.iContent = CONTENT_NO_SIGNATURE; // nothing to compare with - don't even read it
+        return;
+    }
+    if (stFileInfo.iRecoverability == RECOVERABILITY_OVERWRITTEN || stFileInfo.bStartReused) {
+        // another file's data is there now - it could even be a file of the same type, which would "look valid"
+        stFileInfo.iContent = CONTENT_START_OVERWRITTEN;
+        return;
+    }
+
+    std::vector<BYTE> vStart;
+    if (ReadFileStart(stFileInfo.iRecordId, vStart, CONTENT_CHECK_BYTES)) {
+        stFileInfo.iContent = CONTENT_UNREADABLE;
+        return;
+    }
+    stFileInfo.iContent = ClassifyFileContents(stFileInfo.sFilename.c_str(), vStart.empty() ? NULL : &vStart[0], (DWORD) vStart.size());
+}
+
 // open a drive letter ("E:" or "E:\") as a raw volume and load its NTFS structures.
 // Runs in the scan thread - no message boxes here, the caller shows the error.
 
@@ -543,8 +621,14 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     stFileInfo.n64SizeOnDisk = cFile.m_attrFilename.n64Allocated; // Size of the file
     stFileInfo.n64RealSize = cFile.m_llDataSize;
 
+    // the parent reference: 48-bit record number + the 16-bit sequence number that record had back then
+    stFileInfo.dwParentRecord = (DWORD) (cFile.m_attrFilename.dwMftParentDir & 0xFFFFFFFFFFFFLL);
+    stFileInfo.wParentSeq = (WORD) ((ULONGLONG) cFile.m_attrFilename.dwMftParentDir >> 48);
+    stFileInfo.wSequence = cFile.m_wSequence;
+    stFileInfo.bDirectory = cFile.m_bDirectory || (cFile.m_attrFilename.dwFlags & 0x10000000);
+
     stFileInfo.bDeleted = !cFile.m_bInUse;
-    if (stFileInfo.bDeleted)
+    if (stFileInfo.bDeleted && !stFileInfo.bDirectory)
         CheckRecoverability(cFile, stFileInfo);
 
     return (ERROR_SUCCESS);
@@ -556,6 +640,7 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
 int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
     t_FileInfo stFileInfo;
     int nRet, i;
+    std::vector<ST_FOLDER> vFolders;
 
     // which clusters are in use right now - to tell which deleted files are probably still intact
     if (LoadVolumeBitmap())
@@ -571,14 +656,23 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
         }
 
         nRet = this->GetFileDetail(i, stFileInfo); // get the file detail one by one,
-        if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS)) {
-            wxLogMessage("No more files to add to the list");
-            std::vector<BYTE>().swap(m_vVolumeBitmap); // only needed during the scan
-            ResolveRecycleBinNames(m_FileInfoHash);
-            return (0); // ovde smisli sta ces - ne moze ovako da ostane :)
-        }
+        if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS))
+            break;
         if (nRet) // unused or damaged record - skip it, keep scanning the rest of the MFT
             continue;
+
+        if (stFileInfo.bDirectory && !stFileInfo.sFilename.empty()) {
+            // every folder, in use or deleted - the files' folder paths are built from these after the scan
+            ST_FOLDER folder;
+            folder.dwRecord = i;
+            folder.dwParentRecord = stFileInfo.dwParentRecord;
+            folder.wParentSeq = stFileInfo.wParentSeq;
+            folder.wSequence = stFileInfo.wSequence;
+            folder.bInUse = !stFileInfo.bDeleted;
+            folder.sName = stFileInfo.sFilename;
+            vFolders.push_back(folder);
+            continue;
+        }
 
         if (stFileInfo.bDeleted
                 && !stFileInfo.sFilename.empty() //obrisan i ima ime fajla
@@ -591,7 +685,72 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
             (*m_FileInfoHash)[i] = new t_FileInfo(stFileInfo);
         }
     }
+
+    wxLogMessage("No more files to add to the list (%u folders seen).", (unsigned) vFolders.size());
+    std::vector<BYTE>().swap(m_vVolumeBitmap); // only needed during the scan
+    ResolveFolders(m_FileInfoHash, vFolders);
+    ResolveRecycleBinNames(m_FileInfoHash);
     return (ERROR_SUCCESS);
+}
+
+// builds folder paths from the scan's folder records, remembering each folder's path once
+
+class CFolderPaths {
+public:
+    typedef CNTFSDrive::ST_FOLDER ST_FOLDER;
+
+    CFolderPaths(const std::vector<ST_FOLDER> &vFolders) : m_vFolders(vFolders) {
+    }
+
+    // path of the folder a reference points to: "\" for the root, "?" if that folder can't be known
+    const std::wstring &PathOf(DWORD dwRecord, WORD wSeq, int iDepth = 0) {
+        static const std::wstring sRoot(L"\\"), sUnknown(L"?");
+        if (dwRecord == ROOT_FOLDER_RECORD)
+            return sRoot;
+
+        const ST_FOLDER *pFolder = Find(dwRecord);
+        if (!pFolder || !StillTheSameFolder(*pFolder, wSeq) || iDepth > 100) // the depth guards against loops
+            return sUnknown;
+
+        std::map<DWORD, std::wstring>::iterator it = m_mapPaths.find(dwRecord);
+        if (it != m_mapPaths.end())
+            return it->second;
+
+        const std::wstring &sParent = PathOf(pFolder->dwParentRecord, pFolder->wParentSeq, iDepth + 1);
+        std::wstring sPath = (sParent == sRoot) ? sParent + pFolder->sName : sParent + L"\\" + pFolder->sName;
+        return m_mapPaths[dwRecord] = sPath;
+    }
+
+private:
+    const std::vector<ST_FOLDER> &m_vFolders;
+    std::map<DWORD, std::wstring> m_mapPaths;
+
+    struct RecordLess {
+        bool operator()(const ST_FOLDER &folder, DWORD dwRecord) const {
+            return folder.dwRecord < dwRecord;
+        }
+    };
+
+    const ST_FOLDER *Find(DWORD dwRecord) const {
+        std::vector<ST_FOLDER>::const_iterator it = std::lower_bound(m_vFolders.begin(), m_vFolders.end(), dwRecord, RecordLess());
+        return (it != m_vFolders.end() && it->dwRecord == dwRecord) ? &*it : NULL;
+    }
+
+    // a record is reused for other files and folders - its sequence number goes up by one each time it is freed
+    static bool StillTheSameFolder(const ST_FOLDER &folder, WORD wReferencedSeq) {
+        if (!wReferencedSeq || folder.wSequence == wReferencedSeq)
+            return true;
+        WORD wAfterDelete = (WORD) (wReferencedSeq + 1);
+        if (!wAfterDelete)
+            wAfterDelete = 1; // 0 is skipped
+        return !folder.bInUse && folder.wSequence == wAfterDelete; // the folder was deleted too, record not reused
+    }
+};
+
+void CNTFSDrive::ResolveFolders(FileInfoHash *finfohash, const std::vector<ST_FOLDER> &vFolders) {
+    CFolderPaths paths(vFolders);
+    for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
+        it->second->sFolder = paths.PathOf(it->second->dwParentRecord, it->second->wParentSeq);
 }
 
 // Recycle Bin (Vista and later): a deleted file is renamed to $R<6 random chars><original extension>
@@ -639,6 +798,7 @@ void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
     FileInfoHash::iterator it;
 
     std::map<std::wstring, int> mapInfoFiles; // "$I...." name -> MFT record
+    std::vector<int> vUsedInfoFiles;
     for (it = finfohash->begin(); it != finfohash->end(); ++it)
         if (!it->second->sFilename.compare(0, 2, L"$I"))
             mapInfoFiles[it->second->sFilename] = it->second->iRecordId;
@@ -679,7 +839,23 @@ void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
 
         pFileInfo->sFilename = wsName;
         pFileInfo->bInRecycleBin = true;
+
+        // its real folder is the one it was deleted from, not $Recycle.Bin - without the drive letter, like the others
+        std::wstring wsFolder = (nSlash == std::wstring::npos) ? L"" : wsPath.substr(0, nSlash);
+        if (wsFolder.length() >= 2 && wsFolder[1] == L':')
+            wsFolder.erase(0, 2);
+        pFileInfo->sFolder = wsFolder.empty() ? L"\\" : wsFolder;
+        vUsedInfoFiles.push_back(itInfo->second);
         wxLogMessage("A file name retrieved from Recycle Bin: %s", wxString(pFileInfo->sFilename.c_str()));
+    }
+
+    // a $I file that gave its file the name back is only bookkeeping - e.g. "$IA1B2C3.jpg" is no JPEG, don't list it
+    for (size_t i = 0; i < vUsedInfoFiles.size(); i++) {
+        it = finfohash->find(vUsedInfoFiles[i]);
+        if (it != finfohash->end()) {
+            delete it->second;
+            finfohash->erase(it);
+        }
     }
 }
 

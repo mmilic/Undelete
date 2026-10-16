@@ -9,6 +9,7 @@
 #include <wx/mstream.h>
 #include <stdio.h>
 #include "NTFSDrive.h"
+#include "FileContents.h"
 
 // like the app's log file: UTF-8, so non-ANSI file names show up (wxLogStderr drops those lines)
 class wxLogUtf8Stdout : public wxLog {
@@ -57,14 +58,16 @@ int main(int argc, char **argv) {
         t_FileInfo *pInfo = it->second;
         wxString name(pInfo->sFilename.c_str());
         wxString dest = outDir + "\\" + name;
+        drive.CheckFileContents(*pInfo); // what the "Check contents" button does
         nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
         if (!nRet) {
             llBytesRecovered += pInfo->n64RealSize;
             iRecovered++;
         }
-        // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result
-        printf("FILE\t%d\t%s\t%s\t%d\t%s\n", pInfo->iRecordId, (const char *) name.utf8_str(),
-                RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok");
+        // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result, folder, contents
+        printf("FILE\t%d\t%s\t%s\t%d\t%s\t%s\t%s\n", pInfo->iRecordId, (const char *) name.utf8_str(),
+                RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok",
+                (const char *) wxString(pInfo->sFolder.c_str()).utf8_str(), ContentLabel(pInfo->iContent));
     }
     // each file can leave up to 1 KB uncounted (the counter is in whole KB)
     printf("PROGRESS\t%ld\t%ld\t%d\n", (long) lKBWritten, (long) (llBytesRecovered / 1024), iRecovered);

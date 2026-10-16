@@ -87,9 +87,20 @@ struct ST_FILEINFO // this struct is to retrieve the file detail from this class
     LONGLONG n64RealSize; // real size of the data, from the DATA attribute (FILE_NAME sizes are often stale)
     int iRecoverability; // RECOVERABILITY_*
     int iPercentIntact; // share of the file's clusters that are still free (not reused), 0..100
+    bool bStartReused; // its first cluster is in use by another file now (the start of the data is gone)
+    int iContent; // CONTENT_* (FileContents.h) - checked on demand, not by the scan
+
+    // the folder the file was in, e.g. "\Users\Ana\Pictures" ("\" = the root of the drive). A part that
+    // can't be known any more (its folder record was reused) is "?". Files of one folder share the string.
+    std::wstring sFolder;
+    DWORD dwParentRecord; // MFT record of the folder - with the sequence number it had when it was referenced
+    WORD wParentSeq;
+    WORD wSequence; // this record's own sequence number
+    bool bDirectory;
 
     ST_FILEINFO() : n64Create(0), n64Modify(0), n64Modfil(0), n64Access(0), dwAttributes(0), bDeleted(false),
-    bInRecycleBin(false), iRecordId(0), n64SizeOnDisk(0), n64RealSize(0), iRecoverability(0), iPercentIntact(0) {
+    bInRecycleBin(false), iRecordId(0), n64SizeOnDisk(0), n64RealSize(0), iRecoverability(0), iPercentIntact(0),
+    bStartReused(false), iContent(0), dwParentRecord(0), wParentSeq(0), wSequence(0), bDirectory(false) {
     }
 };
 typedef ST_FILEINFO t_FileInfo;
@@ -154,6 +165,19 @@ protected:
     int LoadVolumeBitmap();
     void CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFileInfo);
 
+public:
+    // folders seen by the scan (in use and deleted), in record order - to rebuild each file's folder path
+    struct ST_FOLDER {
+        DWORD dwRecord;
+        DWORD dwParentRecord;
+        WORD wParentSeq;
+        WORD wSequence;
+        bool bInUse;
+        std::wstring sName;
+    };
+protected:
+    void ResolveFolders(FileInfoHash *finfohash, const std::vector<ST_FOLDER> &vFolders);
+
     BYTE *m_puchMFTRecord; // 1K, or the cluster size, whichever is larger
     LONGLONG m_llMFTRecordSz; // MFT record size
 
@@ -162,6 +186,12 @@ public:
 
     int GetFileDetail(DWORD nFileSeq, ST_FILEINFO &stFileInfo);
     int Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileDataLen);
+
+    // the first dwMax bytes of a file's data (fewer for a smaller file) - only the clusters needed are read
+    int ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dwMax);
+
+    // check whether the start of the file still looks like its type, sets stFileInfo.iContent
+    void CheckFileContents(t_FileInfo &stFileInfo);
 
     void SetDriveHandle(HANDLE hDrive);
     void SetStartSector(DWORD dwStartSector, DWORD dwBytesPerSector);

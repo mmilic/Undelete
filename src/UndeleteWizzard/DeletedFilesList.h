@@ -39,14 +39,21 @@ enum {
     RECOVERABILITY_FILTER_ALL = 0,
     RECOVERABILITY_FILTER_GOOD, // only files whose clusters are all free
     RECOVERABILITY_FILTER_NOT_OVERWRITTEN, // everything except overwritten files
+    RECOVERABILITY_FILTER_CONTENT_OK, // checked files whose contents look valid
     RECOVERABILITY_FILTER_COUNT
 };
 const char *RecoverabilityFilterLabel(int iFilter);
 
+// "2024-05-12 14:33" in local time, "" for no time
+wxString FormatFileTime(LONGLONG llFileTime);
+
 enum {
     DELETED_FILES_COLUMN_NAME = 0,
+    DELETED_FILES_COLUMN_FOLDER,
     DELETED_FILES_COLUMN_SIZE,
+    DELETED_FILES_COLUMN_MODIFIED,
     DELETED_FILES_COLUMN_RECOVERABILITY,
+    DELETED_FILES_COLUMN_CONTENTS,
     DELETED_FILES_COLUMN_STATUS,
     DELETED_FILES_COLUMN_COUNT
 };
@@ -59,10 +66,11 @@ public:
     void SetFiles(FileInfoHash *finfohash);
     void Clear();
 
-    // show only the files whose name contains sFilter (case insensitive), "" = all
+    // show only the files whose folder or name contains sFilter (case insensitive), "" = all
     void SetNameFilter(const wxString &sFilter);
     void SetRecoverabilityFilter(int iFilter); // RECOVERABILITY_FILTER_*
     void SetTypeFilter(int iType); // FILE_TYPE_*, FILE_TYPE_ANY = all
+    void Refilter() { Rebuild(); } // after the files changed (e.g. their contents were checked)
 
     // sort by a column - clicking the same column again reverses the order
     void SortByColumn(int iColumn);
