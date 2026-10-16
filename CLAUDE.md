@@ -35,8 +35,11 @@ The compiler needs **its own `tools\MinGW\bin` directory on `PATH`**, not just i
 line — `cc1plus.exe` fails to start (`STATUS_DLL_NOT_FOUND`) if that directory (which holds the compiler's own
 support DLLs) isn't on `PATH`. `build.ps1` handles this.
 
-There is no automated test suite — validation is manual (run the wizard against a real/virtual drive and
-check recovered files).
+The recovery engine has one automated end-to-end test, `tests\ntfs-image\run.ps1` (see its README). It needs
+WSL with `ntfs-3g`. It builds an NTFS image containing deleted fragmented, sparse and resident files, runs the
+engine against the image, and checks the recovered files byte-for-byte. Run it after touching `NTFSDrive.*` or
+`MFTRecord.*`. The GUI and Windows-specific behaviour are still tested by hand: run the wizard against a
+real/virtual drive and check the recovered files.
 
 ## Architecture
 

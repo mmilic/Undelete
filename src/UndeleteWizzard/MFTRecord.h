@@ -4,6 +4,7 @@
 
 //#include <windows.h>
 #include <stdio.h>
+#include <vector>
 
 #if !defined(AFX_MFTRECORD_H__04A1B8DF_0EB0_4B72_8587_2703342C5675__INCLUDED_)
 #define AFX_MFTRECORD_H__04A1B8DF_0EB0_4B72_8587_2703342C5675__INCLUDED_
@@ -135,6 +136,13 @@ typedef struct {
 
 #pragma pack(pop, curAlignment)
 
+// one data run of a non-resident attribute (a contiguous fragment of the file on disk)
+struct NTFS_DATA_RUN {
+    LONGLONG llLCN; // first cluster of the fragment on the volume (unused when bSparse)
+    LONGLONG llClusters; // fragment length in clusters
+    bool bSparse; // no clusters on disk - the fragment reads as zeros
+};
+
 class CMFTRecord {
 protected:
     HANDLE m_hDrive;
@@ -145,8 +153,10 @@ protected:
     DWORD m_dwBytesPerCluster;
     LONGLONG m_n64StartPos;
 
-    int ReadRaw(LONGLONG n64LCN, BYTE *chData, DWORD &dwLen);
-    int ExtractData(NTFS_ATTRIBUTE ntfsAttr, BYTE *&puchData, LONGLONG &dwDataLen, HANDLE hFile);
+    int ApplyFixups(BYTE *puchRecord, DWORD dwRecSize);
+    int ParseDataRuns(const BYTE *puchRuns, DWORD dwRunsLen, std::vector<NTFS_DATA_RUN> &vRuns);
+    int ReadRaw(LONGLONG n64LCN, BYTE *chData, DWORD dwLen);
+    int ExtractData(const BYTE *puchAttr, const NTFS_ATTRIBUTE &ntfsAttr, BYTE *&puchData, LONGLONG &llDataLen, HANDLE hFile);
 
 public:
     ///////// attributes //////////////////////
@@ -155,7 +165,6 @@ public:
 
     BYTE *m_puchFileData; // collected file data buffer
     LONGLONG m_llFileDataSz; // file data size , ie. m_pchFileData buffer length
-    SYSTEM_INFO m_SystemInfo;
 
     bool m_bInUse;
 

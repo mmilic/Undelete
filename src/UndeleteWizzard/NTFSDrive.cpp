@@ -41,10 +41,21 @@ bool CNTFSDrive::IsInitialised() {
 }
 
 CNTFSDrive::~CNTFSDrive() {
-    if (m_puchMFT)
-        delete m_puchMFT;
+    delete[] m_puchMFT;
     m_puchMFT = 0;
     m_dwMFTLen = 0;
+
+    delete[] m_puchMFTRecord;
+    m_puchMFTRecord = 0;
+}
+
+// the boot sector stores the MFT record size as clusters per record when positive,
+// or as 2^(-value) bytes when negative (the usual case - e.g. 0xF6 = -10 = 1024 bytes)
+
+static LONGLONG MFTRecordSizeFromBootSector(signed char chClustPerMFTRecord, DWORD dwBytesPerCluster) {
+    if (chClustPerMFTRecord > 0)
+        return (LONGLONG) chClustPerMFTRecord * dwBytesPerCluster;
+    return (LONGLONG) 1 << (-chClustPerMFTRecord);
 }
 
 void CNTFSDrive::SetDriveHandle(HANDLE hDrive) {
@@ -93,10 +104,14 @@ int CNTFSDrive::Initialize() {
     ///  which is made up of several sectors (a physical entity) 
     m_dwBytesPerCluster = ntfsBS.bpb.uchSecPerClust * ntfsBS.bpb.wBytesPerSec;
 
-    if (m_puchMFTRecord)
-        delete m_puchMFTRecord;
+    delete[] m_puchMFTRecord;
+    m_puchMFTRecord = 0;
 
-    m_llMFTRecordSz = 0x01 << ((-1)*((char) ntfsBS.bpb.nClustPerMFTRecord));
+    m_llMFTRecordSz = MFTRecordSizeFromBootSector((signed char) ntfsBS.bpb.nClustPerMFTRecord, m_dwBytesPerCluster);
+    if (m_llMFTRecordSz < 256 || m_llMFTRecordSz > 65536) {
+        wxLogMessage("Invalid MFT record size in the boot sector.");
+        return ERROR_INVALID_DRIVE;
+    }
     m_puchMFTRecord = new BYTE[m_llMFTRecordSz];
 
     m_bInitialized = true;
@@ -159,8 +174,7 @@ int CNTFSDrive::LoadMFT(LONGLONG nStartCluster) {
     if (memcmp(cMFTRec.m_attrFilename.wFilename, uszMFTName, 8))
         return ERROR_BAD_DEVICE; // no MFT file available
 
-    if (m_puchMFT)
-        delete m_puchMFT;
+    delete[] m_puchMFT;
     m_puchMFT = 0;
     m_dwMFTLen = 0;
 
@@ -185,6 +199,9 @@ int CNTFSDrive::Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileData
         wxLogError("Calling Read_File for a drive that is not initialized.");
         return ERROR_INVALID_ACCESS;
     }
+
+    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen)
+        return (ERROR_NO_MORE_FILES);
 
     CMFTRecord cFile;
 
@@ -274,10 +291,14 @@ int CNTFSDrive::ReadVolume(wxString wxsSelectedDir) {
     /// which is made up of several sectors (a physical entity)
     m_dwBytesPerCluster = ntfsBS.bpb.uchSecPerClust * ntfsBS.bpb.wBytesPerSec;
 
-    if (m_puchMFTRecord)
-        delete m_puchMFTRecord;
+    delete[] m_puchMFTRecord;
+    m_puchMFTRecord = 0;
 
-    m_llMFTRecordSz = 0x01 << ((-1)*((char) ntfsBS.bpb.nClustPerMFTRecord));
+    m_llMFTRecordSz = MFTRecordSizeFromBootSector((signed char) ntfsBS.bpb.nClustPerMFTRecord, m_dwBytesPerCluster);
+    if (m_llMFTRecordSz < 256 || m_llMFTRecordSz > 65536) {
+        wxLogMessage("Invalid MFT record size in the boot sector.");
+        return ERROR_INVALID_DRIVE;
+    }
     m_puchMFTRecord = new BYTE[m_llMFTRecordSz];
 
     m_bInitialized = true;
@@ -299,7 +320,7 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     if (!m_bInitialized)
         return (ERROR_INVALID_ACCESS);
 
-    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) >= m_dwMFTLen)
+    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen)
         return (ERROR_NO_MORE_FILES);
 
     CMFTRecord cFile;
@@ -311,7 +332,8 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     cFile.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, true);
     if (nRet) {
-        wxLogMessage("ExtractFile failed");
+        if (nRet != ERROR_FILE_INVALID) // unused (never written) records are normal - don't flood the log
+            wxLogMessage("ExtractFile failed for MFT record %u (error %d)", nFileSeq, nRet);
         return (nRet);
     }
     // set the struct and pass the struct of file detail
@@ -348,9 +370,14 @@ int CNTFSDrive::GetFileList(FileInfoHash *m_FileInfoHash) {
         memset(pFileInfo->szBuffer, '\0', 255);
 
         nRet = this->GetFileDetail(i, *pFileInfo); // get the file detail one by one, 
-        if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_PARAMETER)) {
+        if ((nRet == ERROR_NO_MORE_FILES) || (nRet == ERROR_INVALID_ACCESS)) {
+            delete pFileInfo;
             wxLogMessage("No more files to add to the list");
             return (0); // ovde smisli sta ces - ne moze ovako da ostane :)
+        }
+        if (nRet) { // unused or damaged record - skip it, keep scanning the rest of the MFT
+            delete pFileInfo;
+            continue;
         }
 
         strcpy(pFileInfo->szBuffer, "");
@@ -434,7 +461,7 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, char* sDestintat
         return (ERROR_INVALID_ACCESS);
     }
 
-    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) >= m_dwMFTLen) {
+    if ((nFileSeq * m_llMFTRecordSz + m_llMFTRecordSz) > m_dwMFTLen) {
         wxLogMessage("No more files");
         return (ERROR_NO_MORE_FILES);
     }
@@ -473,6 +500,7 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, char* sDestintat
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, false, hFile);
     if (nRet) {
         wxLogMessage("Extracting file \'%s\' FAILED!!!", sDestintationFileName);
+        CloseHandle(hFile);
         return (nRet);
     }
 
