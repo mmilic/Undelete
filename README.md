@@ -23,6 +23,18 @@ deleted files you want back.
 That's all - no MinGW, no separately installed CMake, no wxWidgets download, no admin rights (except to
 run the finished app). Windows PowerShell 5.1, which every Windows 10/11 has, runs the build scripts.
 
+**Install everything in one go** (PowerShell; Windows asks for admin rights once per installer):
+
+```powershell
+winget install -e --id Git.Git; winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.Vcpkg"
+```
+
+It installs Git, then the Build Tools for Visual Studio 2022 with the C++ workload (`VCTools`; its recommended
+components include the MSVC x64 compiler and the Windows SDK) plus CMake and vcpkg, named explicitly so they're
+there even if the defaults change. The Build Tools installer shows its progress window and takes a while
+(several GB). Open a new PowerShell window afterwards so `git` is on the `PATH`. Already have Visual Studio 2022
+with "Desktop development with C++"? Then you need nothing from this line.
+
 Things to know:
 - **Visual Studio 2022 specifically.** `CMakePresets.json` uses the "Visual Studio 17 2022" generator; a machine
   with only a newer Visual Studio needs that line changed.
