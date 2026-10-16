@@ -136,22 +136,16 @@ MyWizard::MyWizard(wxFrame *frame, bool useSizer) {
     wxSelectFilesPage *page4 = new wxSelectFilesPage(this);
     wxEndPage *page5 = new wxEndPage(this);
 
-    wxSizer *MyWizardSizer = this->GetPageAreaSizer();
-    MyWizardSizer->SetMinSize(1000, 1000);
-
-    this->SetPageSize(wxSize(500, 400)); //jedini koji radi to sto treba - samo manuel kaze da ne treba tako
-
-//    page4->SetSize(wxSize(1000, 1000));
-    //    SetFinishLabel(wxT("Retrieve"));
-    //    this->FinishLayout();
-    //    this->
-
     // set the page order using a convenience function - could also use
     // SetNext/Prev directly as below
     wxWizardPageSimple::Chain(m_page1, page2);
     wxWizardPageSimple::Chain(page2, page3);
     wxWizardPageSimple::Chain(page3, page4);
     wxWizardPageSimple::Chain(page4, page5);
+
+    // the wizard sizes itself to the largest page in the chain (the file list) - adding the first page is enough.
+    // No fixed SetPageSize: it kept the window at 500x400 and cut the file list page off.
+    GetPageAreaSizer()->Add(m_page1);
 
     // this page is not a wxWizardPageSimple, so we use SetNext/Prev to insert
     // it into the chain of pages

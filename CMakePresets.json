@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "x64",
+      "displayName": "Windows x64 (MSVC, static wxWidgets from vcpkg)",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/out/build/x64",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/out/vcpkg_installed"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "release", "configurePreset": "x64", "configuration": "Release" },
+    { "name": "debug", "configurePreset": "x64", "configuration": "Debug" }
+  ]
+}

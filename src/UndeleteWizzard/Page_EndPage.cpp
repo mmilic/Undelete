@@ -1,6 +1,7 @@
 
 #include <wx/wx.h>
 #include <wx/wizard.h>
+#include <shellapi.h> // ShellExecute - not in a WIN32_LEAN_AND_MEAN windows.h
 #include <wx/listctrl.h>
 #include "NTFSDrive.h"
 #include "MyThreadClass.h"
@@ -22,7 +23,7 @@ wxEndPage::wxEndPage(wxWizard *parent) : wxWizardPageSimple(parent) {
 
     // filled in OnPageShown - the numbers are only known after the recovery
     m_wxEndPageText = new wxStaticText(this, -1, wxEmptyString);
-    m_wxEndPageText->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    m_wxEndPageText->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     m_wxOverwrittenText = new wxStaticText(this, -1, wxEmptyString);
     m_wxOverwrittenText->SetForegroundColour(wxColour(170, 90, 0)); // dark orange, like partly overwritten rows

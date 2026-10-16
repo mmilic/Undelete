@@ -174,13 +174,14 @@ CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPo
     m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
     m_iTypeFilter = FILE_TYPE_ANY;
 
-    InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, 220);
-    InsertColumn(DELETED_FILES_COLUMN_FOLDER, wxT("Folder"), wxLIST_FORMAT_LEFT, 200);
-    InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, 75);
-    InsertColumn(DELETED_FILES_COLUMN_MODIFIED, wxT("Modified"), wxLIST_FORMAT_LEFT, 110);
-    InsertColumn(DELETED_FILES_COLUMN_RECOVERABILITY, wxT("Recoverable"), wxLIST_FORMAT_LEFT, 150);
-    InsertColumn(DELETED_FILES_COLUMN_CONTENTS, wxT("Contents"), wxLIST_FORMAT_LEFT, 110);
-    InsertColumn(DELETED_FILES_COLUMN_STATUS, wxT("File Status"), wxLIST_FORMAT_LEFT, 130);
+    // together about as wide as the list on the smallest wizard (the user can drag them wider)
+    InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, FromDIP(190));
+    InsertColumn(DELETED_FILES_COLUMN_FOLDER, wxT("Folder"), wxLIST_FORMAT_LEFT, FromDIP(170));
+    InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, FromDIP(70));
+    InsertColumn(DELETED_FILES_COLUMN_MODIFIED, wxT("Modified"), wxLIST_FORMAT_LEFT, FromDIP(105));
+    InsertColumn(DELETED_FILES_COLUMN_RECOVERABILITY, wxT("Recoverable"), wxLIST_FORMAT_LEFT, FromDIP(115));
+    InsertColumn(DELETED_FILES_COLUMN_CONTENTS, wxT("Contents"), wxLIST_FORMAT_LEFT, FromDIP(90));
+    InsertColumn(DELETED_FILES_COLUMN_STATUS, wxT("File Status"), wxLIST_FORMAT_LEFT, FromDIP(100));
 
     m_attrPartial.SetTextColour(wxColour(170, 90, 0)); // dark orange
     m_attrOverwritten.SetTextColour(wxColour(150, 150, 150)); // grey

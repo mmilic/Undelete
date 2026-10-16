@@ -1,0 +1,12 @@
+{
+  "name": "getmyfilesback",
+  "version-string": "1.0",
+  "description": "NTFS undelete wizard - wxWidgets GUI, statically linked",
+  "dependencies": [
+    {
+      "name": "wxwidgets",
+      "default-features": false
+    }
+  ],
+  "builtin-baseline": "3cd21e48a75f67acfef289da52893ce79144aaa1"
+}

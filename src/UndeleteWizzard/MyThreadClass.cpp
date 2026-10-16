@@ -249,7 +249,8 @@ void *MyThreadCopyFiles::Entry() {
         for (int iNumber = 2; wxDestinationFileName.FileExists(wxDestinationFileName.GetFullPath()); iNumber++)
             wxDestinationFileName.SetFullName(NumberedFileName(sOriginalName, iNumber));
 
-        wxDestinationFileName.Normalize(); //skidamo duple // simbole i slicno
+        // skidamo duple // simbole i slicno - only that: the default flags also expand %VARIABLES% in the file name
+        wxDestinationFileName.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
 
         wxString wxsDestinationPath = wxDestinationFileName.GetFullPath();
 

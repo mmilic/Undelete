@@ -65,7 +65,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
     wxStaticText *wxSelectDriveMessage = new wxStaticText(this, -1,
             languagePack->getWXText(SELECT_SOURCE_DRIVE_PAGE, PLEASE_SELECT_SOURCE));
 
-    wxSelectDriveMessage->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wxSelectDriveMessage->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(wxSelectDriveMessage, 0, wxALL, 0);
@@ -78,7 +78,8 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
     int iDriveOpticalImage = m_imageListNormal->Add(wxIcon(drive_optical__));
     int iDriveRemovableMediaImage = m_imageListNormal->Add(wxIcon(drive_removable_media__));
     int iDriveMediaFlashImage = m_imageListNormal->Add(wxIcon(media_flash__));
-    int iDesktopImage = m_imageListNormal->Add(wxIcon(desktopIcon64x64_xpm));
+    // the desktop icon is 64x64 - an image list holds one size; wxWidgets 3.3 no longer shrinks it on its own
+    int iDesktopImage = m_imageListNormal->Add(wxBitmap(wxImage(desktopIcon64x64_xpm).Scale(32, 32, wxIMAGE_QUALITY_HIGH)));
 
 
     m_DriveListCtrlPtr = new wxListCtrl(this, LIST_CTRL_SOURCE_DRIVES,

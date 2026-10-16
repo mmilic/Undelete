@@ -18,10 +18,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <bits/basic_string.h>
 
-//LALAL
-#include "FAT/phmain.h"
+// FAT recovery - FAT/phmain.c, not linked yet: photorecz_stub.c stands in (README.md, "FAT support").
+// Declared here, because FAT/phmain.h pulls in TestDisk's whole header tree, which only builds with GCC.
+extern "C" int photorecz(char drive_letter, const char *dest_path);
 
 //Various pictures
 #include "resources/SidePicture2.xpm"
@@ -42,7 +42,7 @@ wxSelectDestinationDirPage::wxSelectDestinationDirPage(wxWizard *parent) : wxWiz
 
     wxStaticText *wxSelectDestinationDirMessage = new wxStaticText(this, -1,
             languagePack->getWXText(SELECT_DESTINATION_PAGE, PLEASE_SELECT_DESTINATION));
-    wxSelectDestinationDirMessage->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wxSelectDestinationDirMessage->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -134,7 +134,9 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         // TODO Ovde napravi proveru da li ti je dest drajv isti kao i source drajv
         wxString *ptrSourceDrive = ((MyWizard *) GetParent())->GetMwPtr_strSourceDrive();
-        if (!strncasecmp(ptrDestinationDir->mbc_str(), ptrSourceDrive->mb_str(), 1)) {
+        // same drive letter (the paths start with it)
+        if (!ptrDestinationDir->IsEmpty() && !ptrSourceDrive->IsEmpty()
+                && wxToupper((*ptrDestinationDir)[0]) == wxToupper((*ptrSourceDrive)[0])) {
             wxMessageDialog *dial = new wxMessageDialog(NULL,
                     languagePack->getWXText(SELECT_DESTINATION_PAGE, SAME_DRIVE_ERROR),
                     languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);

@@ -3,15 +3,24 @@
 #   2. builds the harness, which runs CNTFSDrive/CMFTRecord against the image
 #   3. recovers every deleted file and compares the test files with their original checksums
 # Run from anywhere: powershell -ExecutionPolicy Bypass -File tests\ntfs-image\run.ps1
+# -UseExistingImage: skip step 1 and use out\ntfs-test\test.img + expected.sha256 made elsewhere
+# (the GitHub Actions build makes them on Linux - its Windows machines have no WSL)
+param([switch]$UseExistingImage)
 $ErrorActionPreference = "Stop"
 $Here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = Resolve-Path (Join-Path $Here "..\..")
 $OutDir = Join-Path $Root "out\ntfs-test"
 
-Write-Host "Building test image (WSL, as root)..."
-$wslScript = (& wsl -e wslpath -a ($Here -replace '\\', '/')) + "/make_image.sh"
-& wsl -u root -e sh $wslScript
-if ($LASTEXITCODE -ne 0) { throw "make_image.sh failed - is ntfs-3g installed in WSL?" }
+if ($UseExistingImage) {
+    foreach ($f in "test.img", "expected.sha256") {
+        if (-not (Test-Path (Join-Path $OutDir $f))) { throw "-UseExistingImage: $OutDir\$f is missing" }
+    }
+} else {
+    Write-Host "Building test image (WSL, as root)..."
+    $wslScript = (& wsl -e wslpath -a ($Here -replace '\\', '/')) + "/make_image.sh"
+    & wsl -u root -e sh $wslScript
+    if ($LASTEXITCODE -ne 0) { throw "make_image.sh failed - is ntfs-3g installed in WSL?" }
+}
 
 & (Join-Path $Here "build_harness.ps1")
 

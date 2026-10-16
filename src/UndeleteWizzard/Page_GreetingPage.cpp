@@ -20,27 +20,27 @@ wxGreetingPage::wxGreetingPage(wxWizard *parent) : wxWizardPageSimple(parent) {
     wxStaticText *wstaticGreetingMessage_1 = new wxStaticText(this, -1,
             languagePack->getWXText(GREETINGS_PAGE, WELCOME));
     
-    wstaticGreetingMessage_1->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wstaticGreetingMessage_1->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     wxStaticText *wstaticGreetingMessage_2 = new wxStaticText(this, -1,
             languagePack->getWXText(GREETINGS_PAGE, WINDOWS_UNDELETE_WIZARD));
     
-    wstaticGreetingMessage_2->SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    wstaticGreetingMessage_2->SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
 
     wxStaticText *wstaticGreetingMessage_3 = new wxStaticText(this, -1,
             languagePack->getWXText(GREETINGS_PAGE, THIS_WIZARD_WILL_GUIDE_YOU));
     
-    wstaticGreetingMessage_3->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wstaticGreetingMessage_3->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     wxStaticText *wstaticGreetingMessage_4 = new wxStaticText(this, -1,
             languagePack->getWXText(GREETINGS_PAGE, THE_UNDELETE_PROCESS_CONSISTS));
     
-    wstaticGreetingMessage_4->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wstaticGreetingMessage_4->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     wxStaticText *wstaticGreetingMessage_5 = new wxStaticText(this, -1,
             languagePack->getWXText(GREETINGS_PAGE, CLICK_NEXT_TO_CONTINUE));
     
-    wstaticGreetingMessage_5->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wstaticGreetingMessage_5->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
 

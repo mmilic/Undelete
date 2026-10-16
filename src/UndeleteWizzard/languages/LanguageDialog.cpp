@@ -10,7 +10,7 @@
 ///run for i=1,GetAchievementNumCriteria(7298)do local a,b,c,d,e=GetAchievementCriteriaInfo(7298,i) print(format("%s %d/%d",a,d,e)) end
 
 LanguageDialog::LanguageDialog(const wxString & title, MyWizard *wizard)
-: wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(320, 63)) {
+: wxDialog(NULL, -1, title) { // sized by its sizer below - a fixed size clips the controls with other fonts/themes/DPI
 
     this->SetOwnBackgroundColour(wxColour(210, 222, 255));
     this->SetOwnForegroundColour(wxColour(210, 222, 255));
@@ -30,12 +30,13 @@ LanguageDialog::LanguageDialog(const wxString & title, MyWizard *wizard)
 
     OKButton = new wxButton(this, 1, "OK");
    
-    hFlagBox->Add(LanguageComboBox, 3, wxEXPAND | wxALL, 5);
-    hFlagBox->Add(OKButton, 1, wxEXPAND | wxALL, 5);
-   
+    hFlagBox->Add(LanguageComboBox, 3, wxALIGN_CENTER_VERTICAL | wxALL, 8);
+    hFlagBox->Add(OKButton, 1, wxALIGN_CENTER_VERTICAL | wxTOP | wxBOTTOM | wxRIGHT, 8);
+    hFlagBox->SetMinSize(FromDIP(wxSize(320, -1)));
+
     LanguageComboBox->Bind(wxEVT_COMBOBOX, &LanguageDialog::setLanguage, this);
 
-    SetSizer(hFlagBox);
+    SetSizerAndFit(hFlagBox);
 
     Centre();
 

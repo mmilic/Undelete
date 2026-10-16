@@ -1,0 +1,77 @@
+# Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS image test.
+# The exe is attached to each run as the "GetMyFilesBack" artifact (Actions tab -> the run -> Artifacts).
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # the test image is made with ntfs-3g on Linux (the Windows runners have no WSL);
+  # an NTFS image is the same bytes wherever it was made
+  test-image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ntfs-3g
+        run: sudo apt-get update && sudo apt-get install -y ntfs-3g
+      - name: Make the NTFS test image
+        run: sudo sh tests/ntfs-image/make_image.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ntfs-test-image
+          path: |
+            out/ntfs-test/test.img
+            out/ntfs-test/expected.sha256
+          retention-days: 3
+
+  build:
+    needs: test-image
+    # pinned: CMakePresets.json uses the "Visual Studio 17 2022" generator
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      # a full vcpkg checkout - vcpkg.json's builtin-baseline commit has to be in its history
+      - name: Get vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg "$env:RUNNER_TEMP\vcpkg"
+          & "$env:RUNNER_TEMP\vcpkg\bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg bootstrap failed" }
+          "VCPKG_ROOT=$env:RUNNER_TEMP\vcpkg" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      # wxWidgets and its libraries, built by vcpkg - only the first run (or a vcpkg.json change) compiles them
+      - name: Cache the built libraries
+        uses: actions/cache@v4
+        with:
+          path: out/vcpkg-cache
+          key: vcpkg-x64-windows-static-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build the app
+        run: .\build.ps1
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ntfs-test-image
+          path: out/ntfs-test
+
+      - name: NTFS image test
+        run: .\tests\ntfs-image\run.ps1 -UseExistingImage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GetMyFilesBack
+          path: out/GetMyFilesBack.exe
+
+      - name: Test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ntfs-test-log
+          path: out/ntfs-test/run.log
+          if-no-files-found: ignore

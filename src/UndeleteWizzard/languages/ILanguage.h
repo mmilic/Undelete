@@ -9,8 +9,6 @@
 #define	ILANGUAGE_H
 
 
-
-using namespace std;
 #include <wx/stattext.h>
 #include <iostream>
 

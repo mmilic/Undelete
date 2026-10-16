@@ -97,8 +97,9 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     sizerHoldingTheFilters->Add(m_choiceRecoverability, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     sizerHoldingTheFilters->Add(new wxStaticText(this, -1, wxT("Type:")), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
     sizerHoldingTheFilters->Add(m_choiceType, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-    sizerHoldingTheFilters->Add(m_txtShowing, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
-    sizerHoldingTheFilters->Add(wxCheckContentsButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+
+    // the filter row is as wide as the list - the button goes to the column on the right, under the type buttons
+    sizerHoldingTheButtonsOnTheRightSide->Insert(3, wxCheckContentsButton, 0, wxEXPAND | wxTOP, 12);
 
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -106,7 +107,7 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     wxSelectFilesMessage = new wxStaticText(this, -1,
             languagePack->getWXText(SELECT_FILES_PAGE, SELECT_FILES));
 
-    wxSelectFilesMessage->SetFont(wxFont(11, wxSWISS, wxNORMAL, wxNORMAL));
+    wxSelectFilesMessage->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     // virtual list - filled by wxSelectDestinationDirPage when the scan is done
     m_lcFilesInSelectedDrive = new CDeletedFilesList(this, LIST_CTRL_DELETED_FILES, wxPoint(-1, -1), wxSize(600, 400));
@@ -116,6 +117,7 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     sizerHoldingButtonsAndSearchAndTheList->Add(sizerHoldingButtonsAboveTheList, 0, wxEXPAND, 0);
     sizerHoldingButtonsAndSearchAndTheList->Add(sizerHoldingTheFilters, 0, wxEXPAND | wxTOP, 5);
     sizerHoldingButtonsAndSearchAndTheList->Add(m_lcFilesInSelectedDrive, 1, wxEXPAND | wxTOP, 5);
+    sizerHoldingButtonsAndSearchAndTheList->Add(m_txtShowing, 0, wxEXPAND | wxTOP, 3); // "Showing 12 of 340 files"
     //    lowerSizer->SetItemMinSize(m_lcFilesInSelectedDrive, 600, 600);
     //    sizerHoldingButtonsAndSearchAndTheList->SetMinSize(700, 700);
     //    sizerHoldingButtonsAndSearchAndTheList->SetItemMinSize(m_lcFilesInSelectedDrive, 700, 700);
@@ -127,7 +129,8 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     mainSizer->Add(wxSelectFilesMessage, 0, wxALL, 4);
     mainSizer->Add(sizerHoldingEverythingBelowTheMessage, 1, wxEXPAND, 0);
 
-    mainSizer->SetMinSize(800, 800);
+    // the list, its 7 columns and the column of buttons/preview - and the whole wizard still fits a 1366x768 screen
+    mainSizer->SetMinSize(FromDIP(wxSize(1000, 540)));
 
     Connect(this->GetId(), wxEVT_SELECT_FILES_PAGE_PULSE_DIALOG,
             wxCommandEventHandler(wxSelectFilesPage::OnPulseDialogEvent));

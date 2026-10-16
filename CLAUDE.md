@@ -9,31 +9,30 @@ C++ with wxWidgets. It scans a drive's NTFS MFT for deleted-but-recoverable file
 and copies recovered files to a destination chosen by the user. It was built/sold as a small commercial
 product; its expiry check in `main.cpp` has since been removed (see below).
 
-This repo is self-contained on purpose: `src/` has the application source and `tools/` vendors the exact
-compiler and static-library versions needed to build it, so `git clone` + `build.ps1` is enough — no MinGW or
-wxWidgets install required. That's a deliberate size-for-convenience tradeoff, not a recommended long-term
-layout; see README.md.
-
 ## Build
 
 ```powershell
-powershell -File build.ps1
+powershell -ExecutionPolicy Bypass -File build.ps1   # -Debug for a debug build
 ```
 
-Produces `src\UndeleteWizzard\GetMyFilesBack.exe`. Read `build.ps1` before changing the source file list —
-it compiles an explicit list of `.cpp` files (not a glob), because the source tree also contains stale
-merge-conflict leftovers that must never be compiled (see below).
+64-bit MSVC, CMake (`CMakeLists.txt`, `CMakePresets.json`) and vcpkg (`vcpkg.json`: wxWidgets 3.3, pinned by
+`builtin-baseline`). Needs Visual Studio 2022 or its Build Tools with the C++ workload - `build-env.ps1` finds
+its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg packages and caches stay in
+`out\`. The first build compiles wxWidgets (10-15 min), later ones reuse `out\vcpkg-cache`.
 
-**Toolchain version is load-bearing.** `tools\MinGW` is GCC 4.6.2 specifically, matching what the vendored
-static wxWidgets 3.0.1 libs (`tools\wxWidgets-3.0.1_static`) were built with. Linking this app with a
-*different* GCC (e.g. 4.8.x) compiles and links with zero errors, but the resulting exe segfaults inside
-wxWidgets' own pre-`main` static initializers (`wxClassInfo::Register()` constructing a `std::wstring`) — a
-libstdc++ ABI mismatch between GCC versions, confirmed via `gdb -batch -ex run -ex bt`. Don't repoint the
-build at a system-installed MinGW/MSYS2/newer GCC.
-
-The compiler needs **its own `tools\MinGW\bin` directory on `PATH`**, not just its full path on the command
-line — `cc1plus.exe` fails to start (`STATUS_DLL_NOT_FOUND`) if that directory (which holds the compiler's own
-support DLLs) isn't on `PATH`. `build.ps1` handles this.
+- **Static on purpose**: triplet `x64-windows-static` plus the static CRT (`CMAKE_MSVC_RUNTIME_LIBRARY`) - a
+  single exe that runs from a USB stick without installing anything on the drive being recovered. Keep it so.
+- The app's sources are an **explicit list** in `CMakeLists.txt`, not a glob: the source tree may contain
+  stale merge-conflict leftovers that must never be compiled (see below). Add new `.cpp` files there.
+- `WIN32_LEAN_AND_MEAN` is defined for everything - a full `<windows.h>` drags in `winsock.h`, which clashes
+  with wxWidgets' `winsock2.h`. Include `<shellapi.h>`, `<shlobj.h>`... explicitly where needed.
+- No `using namespace std;` in headers: with C++17, `std::byte` clashes with the Windows SDK's `byte`.
+- `undelete.rc` embeds `undelete.exe.manifest` (requireAdministrator, Common Controls 6) - the linker's own
+  manifest is switched off (`/MANIFEST:NO`).
+- `.github/workflows/build.yml` builds and tests every push on GitHub (Linux job makes the test image with
+  ntfs-3g, Windows job builds and runs `run.ps1 -UseExistingImage`) and attaches the exe as an artifact.
+- The tag `last-gcc462-x86` is the last commit built with the old vendored 32-bit MinGW GCC 4.6.2 +
+  wxWidgets 3.0.1 toolchain (`tools/`, removed after it).
 
 The recovery engine has one automated end-to-end test, `tests\ntfs-image\run.ps1` (see its README). It needs
 WSL with `ntfs-3g`. It builds an NTFS image containing deleted fragmented, sparse and resident files, runs the
@@ -82,8 +81,8 @@ real/virtual drive and check the recovered files.
   a big hard disk take far too long. Files whose first cluster is reused aren't read ("Start overwritten").
 - `languages/` — plugin-style i18n: `ILanguage` interface (`getWXText(page, text)`), concrete packs
   (`English`, `Srpski`, `Srpski_Cyr`, `Deutsch`) via `LanguageFactory`/`LanguageDialog`.
-- `FAT/` — vendored TestDisk/PhotoRec source (~357 files), kept in full but **not linked into the build**.
-  `build.ps1` compiles a stub `photorecz()` instead. See README.md's "FAT support" section for exactly why and
+- `FAT/` — vendored TestDisk/PhotoRec source (~357 files), kept in full but **not linked into the build**
+  (GCC-only code, GPL). `photorecz_stub.c` stands in for `photorecz()`. See README.md's "FAT support" section for exactly why and
   what finishing it would take — short version: the real `photorecz()` delegates into testdisk's own
   interactive ncurses UI, which needs PDCurses (not vendored here) and was never wired up to this wx GUI.
 - Comments/identifiers mix English and Serbian (Latin and occasionally Cyrillic) — normal for this codebase.

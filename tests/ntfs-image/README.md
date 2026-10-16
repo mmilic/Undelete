@@ -31,8 +31,9 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
      ("Looks valid"), while the random-byte `.jpg`, `.txt` and `.docx` files must be "Damaged".
    - `keeper.bin`, which is not deleted: it takes the rest of the freed filler clusters, so some deleted
      fillers really are overwritten. The engine must flag those, and flag every test file Good.
-2. `build_harness.ps1` compiles `harness.cpp` with the engine sources from `src\`. With `-WithOld` it also
-   builds the engine and the harness from git `HEAD`, so you can compare before and after a change.
+2. `build_harness.ps1` builds the `ntfs_harness` CMake target (`harness.cpp` with the engine sources from
+   `src\`, same toolchain as `build.ps1`). With `-WithOld` it also builds the engine and the harness from git
+   `HEAD` in a second build tree, so you can compare before and after a change.
 3. The harness opens `test.img` as if it were a raw volume (`\\.\X:`), scans the MFT and recovers every deleted
    file. `run.ps1` then checks the test files against their original checksums and checks the recoverability
    each file was given.
