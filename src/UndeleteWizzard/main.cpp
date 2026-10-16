@@ -1,6 +1,6 @@
 
 #include "main.h"
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 
 #include <wx/listctrl.h>
 #include <wx/progdlg.h>

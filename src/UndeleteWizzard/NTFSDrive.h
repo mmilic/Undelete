@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include "MFTRecord.h"
+#include "RecoveryDrive.h"
 //#include <wx/hashmap.h>
 
 #if !defined(AFX_NTFSDRIVE_H__078B2392_2978_4C23_97FD_166C4B234BF3__INCLUDED_)
@@ -70,72 +71,9 @@ struct NTFS_PART_BOOT_SEC {
 /////////////////////////////////////////////////////////////////////////////////////////
 #pragma pack(pop, curAlignment)
 
-// one deleted file found by a scan. A big drive has hundreds of thousands of them, so keep this small:
-// the name is sized to fit, and the status text is built from the flags only when a row is shown.
-struct ST_FILEINFO // this struct is to retrieve the file detail from this class
-{
-    std::wstring sFilename; // file name - UTF-16, exactly as stored in the MFT
-    LONGLONG n64Create; // Creation time
-    LONGLONG n64Modify; // Last Modify time
-    LONGLONG n64Modfil; // Last modify of record
-    LONGLONG n64Access; // Last Access time
-    DWORD dwAttributes; // file attribute
-    bool bDeleted; // if true then its deleted file
-    bool bInRecycleBin; // the name was recovered from a Recycle Bin $I file
-    int iRecordId;
-    LONGLONG n64SizeOnDisk;
-    LONGLONG n64RealSize; // real size of the data, from the DATA attribute (FILE_NAME sizes are often stale)
-    int iRecoverability; // RECOVERABILITY_*
-    int iPercentIntact; // share of the file's clusters that are still free (not reused), 0..100
-    bool bStartReused; // its first cluster is in use by another file now (the start of the data is gone)
-    int iContent; // CONTENT_* (FileContents.h) - checked on demand, not by the scan
-
-    // the folder the file was in, e.g. "\Users\Ana\Pictures" ("\" = the root of the drive). A part that
-    // can't be known any more (its folder record was reused) is "?". Files of one folder share the string.
-    std::wstring sFolder;
-    DWORD dwParentRecord; // MFT record of the folder - with the sequence number it had when it was referenced
-    WORD wParentSeq;
-    WORD wSequence; // this record's own sequence number
-    bool bDirectory;
-
-    ST_FILEINFO() : n64Create(0), n64Modify(0), n64Modfil(0), n64Access(0), dwAttributes(0), bDeleted(false),
-    bInRecycleBin(false), iRecordId(0), n64SizeOnDisk(0), n64RealSize(0), iRecoverability(0), iPercentIntact(0),
-    bStartReused(false), iContent(0), dwParentRecord(0), wParentSeq(0), wSequence(0), bDirectory(false) {
-    }
-};
-typedef ST_FILEINFO t_FileInfo;
-
-// "File Status" column text, e.g. "Hidden, Deleted in Recycle Bin"
-std::string FileStatusText(const t_FileInfo &stFileInfo);
-
-// can the deleted file's data still be there? Judged by whether its clusters have been reused since -
-// a free cluster may still hold the old data, a cluster in use by another file certainly doesn't.
-enum {
-    RECOVERABILITY_UNKNOWN = 0, // no cluster information (damaged/compressed record, bitmap not loaded)
-    RECOVERABILITY_GOOD, // none of its clusters is in use - most likely intact
-    RECOVERABILITY_PARTIAL, // some of its clusters are in use by other files
-    RECOVERABILITY_OVERWRITTEN // all of its clusters are in use by other files
-};
-
-inline const char *RecoverabilityLabel(int iRecoverability) {
-    switch (iRecoverability) {
-        case RECOVERABILITY_GOOD: return "Good";
-        case RECOVERABILITY_PARTIAL: return "Partly overwritten";
-        case RECOVERABILITY_OVERWRITTEN: return "Overwritten";
-        default: return "Unknown";
-    }
-}
-
-//ovde je key tipa int - treba razmisliti da li je bolje da je key tipa string
-WX_DECLARE_HASH_MAP(int, t_FileInfo*, wxIntegerHash, wxIntegerEqual, FileInfoHash);
-
-// delete the files of a previous scan and empty the map (clear() alone leaks every t_FileInfo)
-void DeleteFileInfoHash(FileInfoHash *finfohash);
-
-class CNTFSDrive {
+class CNTFSDrive : public CRecoveryDrive {
 protected:
     //////////////// physical drive info/////////////
-    HANDLE m_hDrive;
     LONGLONG m_llStartSector;
     bool m_bInitialized;
 
@@ -158,10 +96,6 @@ protected:
 
     // $Bitmap - one bit per cluster, set = in use. Loaded once per scan to judge recoverability.
     std::vector<BYTE> m_vVolumeBitmap;
-    volatile bool *m_pbCancel;
-    volatile LONG *m_plProgressKB;
-    bool m_bOwnsHandle; // m_hDrive was opened by ReadVolume (not passed in with SetDriveHandle)
-    bool IsCancelled() const { return m_pbCancel && *m_pbCancel; }
     int LoadVolumeBitmap();
     void CheckRecoverability(const CMFTRecord &cFile, t_FileInfo &stFileInfo);
 
@@ -184,28 +118,18 @@ protected:
 public:
 
 
+    const char *FileSystemName() const override { return "NTFS"; }
+
     int GetFileDetail(DWORD nFileSeq, ST_FILEINFO &stFileInfo);
-    int Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileDataLen);
-
-    // the first dwMax bytes of a file's data (fewer for a smaller file) - only the clusters needed are read
-    int ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dwMax);
-
-    // check whether the start of the file still looks like its type, sets stFileInfo.iContent
-    void CheckFileContents(t_FileInfo &stFileInfo);
+    int Read_File(DWORD nFileSeq, BYTE *&puchFileData, DWORD &dwFileDataLen) override;
+    int ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dwMax) override;
 
     void SetDriveHandle(HANDLE hDrive);
     void SetStartSector(DWORD dwStartSector, DWORD dwBytesPerSector);
     bool IsInitialised();
-    int ReadVolume(wxString wxsSelectedDrive);
-    int GetFileList(FileInfoHash *finfohash);
-
-    // long operations (scan, recovery of one file) stop with ERROR_CANCELLED once *pbCancel becomes true
-    void SetCancelFlag(volatile bool *pbCancel);
-
-    // RetreiveAndWriteFileToDestination adds the KB it writes here (for the copy progress bar)
-    void SetProgressCounter(volatile LONG *plKBWritten) { m_plProgressKB = plKBWritten; }
-    void ResolveRecycleBinNames(FileInfoHash *finfohash);
-    int RetreiveAndWriteFileToDestination(int iFileRecordId, const wchar_t *wszDestinationFileName);
+    int ReadVolume(wxString wxsSelectedDrive) override;
+    int GetFileList(FileInfoHash *finfohash) override;
+    int RetreiveAndWriteFileToDestination(int iFileRecordId, const wchar_t *wszDestinationFileName) override;
 
     int Initialize();
     CNTFSDrive();

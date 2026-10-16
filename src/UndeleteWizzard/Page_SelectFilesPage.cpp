@@ -8,7 +8,7 @@
 #include <wx/image.h>
 //#include <wx/srchctrl.h>
 
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 #include "FileContents.h"
 #include "MyThreadClass.h"
 #include "MyWizzard.h"
@@ -244,7 +244,7 @@ void wxSelectFilesPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         MyThreadCopyFiles *thCopyFiles = new MyThreadCopyFiles(this);
 
-        thCopyFiles->SetNTFSDrivePtr(pWizard->GetPtrCNTFSDrive());
+        thCopyFiles->SetDrivePtr(pWizard->GetPtrDrive());
         thCopyFiles->SetFinfoHashPtr(pWizard->GetPtrFileInfoHash());
         thCopyFiles->SetFilesToCopy(vFilesToCopy);
         thCopyFiles->SetDestinationDirPtr(pWizard->GetMw_ptrDestinationDir());
@@ -423,7 +423,7 @@ void wxSelectFilesPage::OnCheckContentsClick(wxCommandEvent & event) {
     if (vFiles.empty())
         return;
 
-    CNTFSDrive *pDrive = ((MyWizard *) GetParent())->GetPtrCNTFSDrive();
+    CRecoveryDrive *pDrive = ((MyWizard *) GetParent())->GetPtrDrive();
     wxProgressDialog dialog(wxT("Checking contents"), wxString::Format("Checking %d files...", (int) vFiles.size()),
             (int) vFiles.size(), this, wxPD_APP_MODAL | wxPD_CAN_ABORT | wxPD_ELAPSED_TIME | wxPD_REMAINING_TIME | wxPD_AUTO_HIDE);
 
@@ -498,7 +498,7 @@ void wxSelectFilesPage::OnPreviewTimer(wxTimerEvent & event) {
 
     // the focused file's contents are checked right away - one small read
     if (pFile->iContent == CONTENT_NOT_CHECKED) {
-        ((MyWizard *) GetParent())->GetPtrCNTFSDrive()->CheckFileContents(*pFile);
+        ((MyWizard *) GetParent())->GetPtrDrive()->CheckFileContents(*pFile);
         m_lcFilesInSelectedDrive->RefreshItem(lItem);
     }
     if (FileTypeOf(pFile->sFilename.c_str()) != FILE_TYPE_IMAGE) {
@@ -519,7 +519,7 @@ void wxSelectFilesPage::OnPreviewTimer(wxTimerEvent & event) {
     int nRet;
     {
         wxBusyCursor busy;
-        nRet = ((MyWizard *) GetParent())->GetPtrCNTFSDrive()->Read_File(pFile->iRecordId, puchData, dwLen);
+        nRet = ((MyWizard *) GetParent())->GetPtrDrive()->Read_File(pFile->iRecordId, puchData, dwLen);
     }
     if (nRet) {
         m_txtPreview->SetLabel(wxT("No preview -\nthe data can't be read."));

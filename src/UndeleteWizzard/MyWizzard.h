@@ -15,7 +15,7 @@
 #include <wx/font.h>
 #include <wx/hashmap.h>
 #include <wx/listctrl.h>
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 #include "DeletedFilesList.h"
 #include "languages/LanguageFactory.h"
 
@@ -72,8 +72,10 @@ public:
     void SetPtrFileInfoHash(FileInfoHash *PtrFileInfoHash);
     FileInfoHash *GetPtrFileInfoHash();
 
-    void SetPtrCNTFSDrive(CNTFSDrive *PtrCNTFSDrive);
-    CNTFSDrive *GetPtrCNTFSDrive();
+    // the engine for the source drive's file system (CNTFSDrive, CFATDrive) - chosen when the scan starts.
+    // Setting a new one deletes the previous one.
+    void SetPtrDrive(CRecoveryDrive *PtrDrive);
+    CRecoveryDrive *GetPtrDrive();
 
     void SetMw_ptrDestinationDir(wxString *PtrSelectedDir);
     wxString *GetMw_ptrDestinationDir();
@@ -97,7 +99,7 @@ private:
     wxWizardPageSimple *m_page1;
 
     //LOGIC ELEMENTS: mw_Ptr => mw: member wizzard, Ptr = pointer
-    CNTFSDrive *mwPtr_CNTFSDrive;
+    CRecoveryDrive *mwPtr_Drive;
     wxString *mwPtr_strSourceDrive;
     wxString *mwPtr_DestinationDir;
     FileInfoHash *mwPtr_FileInfoHash;

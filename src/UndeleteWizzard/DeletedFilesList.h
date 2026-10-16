@@ -14,7 +14,7 @@
 #include <wx/hashmap.h>
 #include <wx/listctrl.h>
 #include <vector>
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 
 // "512 B", "12.3 KB", "4.5 MB", "1.20 GB"
 wxString FormatFileSize(LONGLONG llSize);

@@ -244,7 +244,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
                 }
 #endif
 
-                strLabel.Printf("%s (%s) [%s]", szVolNameBuff, szHD, strDriveSize);
+                strLabel.Printf("%s (%s) [%s, %s]", szVolNameBuff, szHD, strDriveSize, szFileSys);
                 ptrListItem->SetText(strLabel);
                 ptrListItem->SetData((void*) (new wxString(szHD))); //ovde stoji bas ime drajva, na primer "D:\\"
                 ptrListItem->SetImage(iDriveMediaFlashImage);
@@ -276,7 +276,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
                 }
 #endif
                 //dodavanje u listu diskova
-                strLabel.Printf("%s (%s) [%s]", szVolNameBuff, szHD, strDriveSize);
+                strLabel.Printf("%s (%s) [%s, %s]", szVolNameBuff, szHD, strDriveSize, szFileSys);
                 ptrListItem->SetText(strLabel);
                 ptrListItem->SetData((void*) (new wxString(szHD))); //ovde stoji bas ime drajva, na primer "D:\\" ovo treba da se prosiri
                 ptrListItem->SetImage(iDriveHardDiskImage);
@@ -307,7 +307,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
                 }
 #endif
 
-                strLabel.Printf("%s (%s) [%s]", szVolNameBuff, szHD, strDriveSize);
+                strLabel.Printf("%s (%s) [%s, %s]", szVolNameBuff, szHD, strDriveSize, szFileSys);
                 ptrListItem->SetText(strLabel);
                 ptrListItem->SetData((void*) (new wxString(szHD))); //ovde stoji bas ime drajva, na primer "D:\\"
                 //                    ptrListItem->SetItemPtrData();
@@ -340,7 +340,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
                 }
 #endif
 
-                strLabel.Printf("%s (%s) [%s]", szVolNameBuff, szHD, strDriveSize);
+                strLabel.Printf("%s (%s) [%s, %s]", szVolNameBuff, szHD, strDriveSize, szFileSys);
                 ptrListItem->SetText(strLabel);
                 ptrListItem->SetData((void*) (new wxString(szHD))); //ovde stoji bas ime drajva, na primer "D:\\"
                 ptrListItem->SetImage(iDriveOpticalImage);
@@ -370,7 +370,7 @@ wxSelectSourceDrivePage::wxSelectSourceDrivePage(wxWizard *parent) : wxWizardPag
                     break;
                 }
 
-                strLabel.Printf("%s (%s) [%s]", szVolNameBuff, szHD, strDriveSize);
+                strLabel.Printf("%s (%s) [%s, %s]", szVolNameBuff, szHD, strDriveSize, szFileSys);
                 ptrListItem->SetText(strLabel);
                 ptrListItem->SetData((void*) (new wxString(szHD))); //ovde stoji bas ime drajva, na primer "D:\\"
                 ptrListItem->SetImage(iDriveMediaFlashImage);

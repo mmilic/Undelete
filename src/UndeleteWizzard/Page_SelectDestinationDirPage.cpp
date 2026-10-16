@@ -9,6 +9,7 @@
 #include <wx/filename.h>
 
 #include "NTFSDrive.h"
+#include "FATDrive.h"
 #include "MyThreadClass.h"
 #include "MyWizzard.h"
 #include "Page_SelectDestinationDirPage.h"
@@ -18,10 +19,6 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-
-// FAT recovery - FAT/phmain.c, not linked yet: photorecz_stub.c stands in (README.md, "FAT support").
-// Declared here, because FAT/phmain.h pulls in TestDisk's whole header tree, which only builds with GCC.
-extern "C" int photorecz(char drive_letter, const char *dest_path);
 
 //Various pictures
 #include "resources/SidePicture2.xpm"
@@ -78,6 +75,7 @@ wxSelectDestinationDirPage::wxSelectDestinationDirPage(wxWizard *parent) : wxWiz
 void getFilesystemTypeFromDisk(wchar_t * szFileSys, wxString *ptrSourceDrive) {//TODO mozda da vrati neki integer, da znam da li je sve proslo OK
     wchar_t szVolNameBuff[255];
     DWORD dwSerial, dwMFL, dwSysFlags;
+    szFileSys[0] = 0; // stays empty if the drive can't be read (no file system Windows knows)
     TCHAR lPath[255];
     memset(lPath, '\0', 255 * sizeof (TCHAR));
 
@@ -156,15 +154,24 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
 
         
         wchar_t szFileSys[255]; 
-        getFilesystemTypeFromDisk(szFileSys, ptrSourceDrive); //budz straaasan, naso na internetu! //TODO podatak o file sistemu treba da se ubaci u Listctrl diskova
+        getFilesystemTypeFromDisk(szFileSys, ptrSourceDrive); //budz straaasan, naso na internetu!
+        wxLogMessage("File system of the source drive: %s", szFileSys);
 
-        wchar_t wsNTFS[4 + 1] = L"NTFS";
-        if (!wcscmp(szFileSys, wsNTFS)) {
-            int i = 0;
-            i++;
-        } else if (!wcsncmp(szFileSys, L"FAT",3)) {
-            wxString *wxDrive = ((MyWizard *) GetParent())->GetMwPtr_strSourceDrive();
-            photorecz(wxDrive->ToStdString().at(0), ptrDestinationDir->ToStdString().c_str());
+        // the recovery engine for the file system: Windows calls FAT12/16 "FAT", and FAT32 "FAT32"
+        CRecoveryDrive *pDrive = NULL;
+        if (!wcscmp(szFileSys, L"NTFS"))
+            pDrive = new CNTFSDrive;
+        else if (!wcscmp(szFileSys, L"FAT") || !wcscmp(szFileSys, L"FAT32"))
+            pDrive = new CFATDrive;
+        else {
+            wxString sReason = szFileSys[0]
+                    ? wxString::Format("Files can't be recovered from this drive: its file system is %s.\n\n"
+                    "Only NTFS and FAT (FAT12, FAT16, FAT32) drives are supported.", szFileSys)
+                    : wxString("The file system of this drive can't be read.\n\n"
+                    "Only NTFS and FAT (FAT12, FAT16, FAT32) drives are supported.");
+            wxMessageDialog dial(NULL, sReason, languagePack->getWXText(GENERAL, ERROR), wxOK | wxICON_ERROR);
+            dial.ShowModal();
+            event.Veto();
             return;
         }
 
@@ -196,9 +203,10 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
         // the list still points into the hash map the scan is about to refill
         CDeletedFilesList *pFilesList = ((MyWizard *) GetParent())->GetPtrSelectedFiles();
         pFilesList->Clear();
+        ((MyWizard *) GetParent())->SetPtrDrive(pDrive); // the previous scan's engine goes - nothing points into it any more
 
-        MyThreadLoadFilesFromDiskNTFS *thLoadFiles = new MyThreadLoadFilesFromDiskNTFS(this);
-        thLoadFiles->SetNTFSDrivePtr(((MyWizard *) GetParent())->GetPtrCNTFSDrive());
+        MyThreadScanVolume *thLoadFiles = new MyThreadScanVolume(this);
+        thLoadFiles->SetDrivePtr(pDrive);
         thLoadFiles->SetFinfoHashPtr(((MyWizard *) GetParent())->GetPtrFileInfoHash());
         thLoadFiles->SetDestinationDirPtr(ptrDestinationDir);
         thLoadFiles->SetCancelProgresControl(false);
@@ -271,7 +279,7 @@ void wxSelectDestinationDirPage::OnWizardPageChanging(wxWizardEvent& event) {
             if (iScanResult == ERROR_ACCESS_DENIED)
                 sReason = "Access to the drive was denied.\nPlease run the program as administrator.";
             else if (iScanResult == ERROR_INVALID_DRIVE || iScanResult == ERROR_BAD_DEVICE)
-                sReason = "This drive does not look like an NTFS drive.";
+                sReason.Printf("This drive does not look like a valid %s drive.", szFileSys);
             else
                 sReason.Printf("The drive could not be read (error %d).", iScanResult);
             wxMessageDialog dial(NULL, sReason + "\n\nDetails are in the log file in the destination folder.",

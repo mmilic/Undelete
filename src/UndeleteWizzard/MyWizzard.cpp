@@ -9,7 +9,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/hashmap.h>
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 #include "MyThreadClass.h"
 
 //icon image
@@ -124,7 +124,7 @@ MyWizard::MyWizard(wxFrame *frame, bool useSizer) {
     m_page1 = new wxGreetingPage(this);
 
     //inicijalizuj sve "sistemske" varijable koje su potrebne
-    mwPtr_CNTFSDrive = new CNTFSDrive;
+    mwPtr_Drive = NULL; // set by the destination page, once the file system of the source drive is known
     mwPtr_FileInfoHash = new FileInfoHash;
     mwPtr_strSourceDrive = new wxString;
     mwPtr_DestinationDir = new wxString;
@@ -169,14 +169,15 @@ FileInfoHash *MyWizard::GetPtrFileInfoHash() {
     return mwPtr_FileInfoHash;
 }
 
-void MyWizard::SetPtrCNTFSDrive(CNTFSDrive *PtrCNTFSDrive) {
-
-    this->mwPtr_CNTFSDrive = PtrCNTFSDrive;
+void MyWizard::SetPtrDrive(CRecoveryDrive *PtrDrive) {
+    if (this->mwPtr_Drive != PtrDrive)
+        delete this->mwPtr_Drive;
+    this->mwPtr_Drive = PtrDrive;
 }
 
-CNTFSDrive *MyWizard::GetPtrCNTFSDrive() {
+CRecoveryDrive *MyWizard::GetPtrDrive() {
 
-    return mwPtr_CNTFSDrive;
+    return mwPtr_Drive;
 }
 
 void MyWizard::SetMw_ptrDestinationDir(wxString *PtrSelectedDir) {

@@ -43,40 +43,6 @@ CNTFSDrive::CNTFSDrive() {
     m_dwMFTCacheLen = 0;
 
     m_llStartSector = 0;
-    m_pbCancel = 0;
-    m_plProgressKB = 0;
-    m_bOwnsHandle = false;
-}
-
-void CNTFSDrive::SetCancelFlag(volatile bool *pbCancel) {
-    m_pbCancel = pbCancel;
-}
-
-void DeleteFileInfoHash(FileInfoHash *finfohash) {
-    for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
-        delete it->second;
-    finfohash->clear();
-}
-
-std::string FileStatusText(const t_FileInfo &stFileInfo) {
-    std::string sStatus;
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_READONLY)
-        sStatus += "Read Only, ";
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_ENCRYPTED)
-        sStatus += "Encrypted, ";
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_COMPRESSED)
-        sStatus += "Compressed, ";
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
-        sStatus += "Sparse, ";
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
-        sStatus += "Reparse Point, ";
-    if (stFileInfo.dwAttributes & FILE_ATTRIBUTE_OFFLINE)
-        sStatus += "Offline, ";
-    if (stFileInfo.bInRecycleBin)
-        sStatus += "Deleted in Recycle Bin";
-    else if (stFileInfo.bDeleted)
-        sStatus += "Deleted";
-    return sStatus;
 }
 
 bool CNTFSDrive::IsInitialised() {
@@ -84,9 +50,6 @@ bool CNTFSDrive::IsInitialised() {
 }
 
 CNTFSDrive::~CNTFSDrive() {
-    if (m_bOwnsHandle && m_hDrive && m_hDrive != INVALID_HANDLE_VALUE)
-        CloseHandle(m_hDrive);
-
     delete[] m_puchMFTRecord;
     m_puchMFTRecord = 0;
 }
@@ -534,53 +497,22 @@ int CNTFSDrive::ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dw
     return ERROR_SUCCESS;
 }
 
-void CNTFSDrive::CheckFileContents(t_FileInfo &stFileInfo) {
-    if (!CanCheckFileContents(stFileInfo.sFilename.c_str())) {
-        stFileInfo.iContent = CONTENT_NO_SIGNATURE; // nothing to compare with - don't even read it
-        return;
-    }
-    if (stFileInfo.iRecoverability == RECOVERABILITY_OVERWRITTEN || stFileInfo.bStartReused) {
-        // another file's data is there now - it could even be a file of the same type, which would "look valid"
-        stFileInfo.iContent = CONTENT_START_OVERWRITTEN;
-        return;
-    }
-
-    std::vector<BYTE> vStart;
-    if (ReadFileStart(stFileInfo.iRecordId, vStart, CONTENT_CHECK_BYTES)) {
-        stFileInfo.iContent = CONTENT_UNREADABLE;
-        return;
-    }
-    stFileInfo.iContent = ClassifyFileContents(stFileInfo.sFilename.c_str(), vStart.empty() ? NULL : &vStart[0], (DWORD) vStart.size());
-}
-
-// open a drive letter ("E:" or "E:\") as a raw volume and load its NTFS structures.
-// Runs in the scan thread - no message boxes here, the caller shows the error.
+// open a drive letter ("E:" or "E:\") as a raw volume and load its NTFS structures
 
 int CNTFSDrive::ReadVolume(wxString wxsSelectedDir) {
-    wxString sVolume = wxString("\\\\.\\") + wxsSelectedDir.Left(2); // "\\.\E:"
-
-    if (m_bOwnsHandle && m_hDrive && m_hDrive != INVALID_HANDLE_VALUE)
-        CloseHandle(m_hDrive); // the previous scan's drive
-    m_bOwnsHandle = false;
     m_bInitialized = false;
-
-    m_hDrive = CreateFileW(sVolume.wc_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
-    if (m_hDrive == INVALID_HANDLE_VALUE) {
-        DWORD dwErrorCode = GetLastError();
-        wxLogMessage("Cannot open %s (error %u).", sVolume, (unsigned) dwErrorCode);
-        m_hDrive = 0;
-        return dwErrorCode ? (int) dwErrorCode : ERROR_ACCESS_DENIED;
-    }
-    m_bOwnsHandle = true;
+    int nRet = OpenVolume(wxsSelectedDir);
+    if (nRet)
+        return nRet;
 
     // the volume starts at byte 0 of its own handle, so the sector size only matters for multiplying with 0
     DWORD dwSectorsPerCluster, dwBytesPerSector = 512, dwFreeClusters, dwTotalClusters;
     GetDiskFreeSpaceW((wxsSelectedDir.Left(2) + "\\").wc_str(), &dwSectorsPerCluster, &dwBytesPerSector, &dwFreeClusters, &dwTotalClusters);
     SetStartSector(0, dwBytesPerSector);
 
-    int nRet = Initialize();
+    nRet = Initialize();
     if (nRet)
-        wxLogMessage("Reading the NTFS structures of %s failed (error %d).", sVolume, nRet);
+        wxLogMessage("Reading the NTFS structures of %s failed (error %d).", wxsSelectedDir.Left(2), nRet);
     return nRet;
 }
 
@@ -751,112 +683,6 @@ void CNTFSDrive::ResolveFolders(FileInfoHash *finfohash, const std::vector<ST_FO
     CFolderPaths paths(vFolders);
     for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
         it->second->sFolder = paths.PathOf(it->second->dwParentRecord, it->second->wParentSeq);
-}
-
-// Recycle Bin (Vista and later): a deleted file is renamed to $R<6 random chars><original extension>
-// and a small companion file $I<same 6 chars><extension> holds its original full path:
-//   version 1 (Vista - 8.1): 8 bytes version, 8 file size, 8 deletion time, path as 260 WCHARs
-//   version 2 (Windows 10+): 8 bytes version, 8 file size, 8 deletion time, 4 path length in WCHARs, path
-
-static bool GetOriginalPathFromRecycleBinInfo(const BYTE *puchData, DWORD dwLen, std::wstring &wsPath) {
-    if (dwLen < 24)
-        return false;
-
-    LONGLONG llVersion;
-    memcpy(&llVersion, puchData, sizeof (llVersion));
-
-    const wchar_t *pwPath;
-    DWORD dwMaxChars;
-    if (llVersion == 1) {
-        pwPath = (const wchar_t *) (puchData + 24);
-        dwMaxChars = (dwLen - 24) / sizeof (wchar_t);
-        if (dwMaxChars > MAX_PATH)
-            dwMaxChars = MAX_PATH;
-    } else if (llVersion == 2) {
-        if (dwLen < 28)
-            return false;
-        memcpy(&dwMaxChars, puchData + 24, sizeof (DWORD));
-        if (dwMaxChars > (dwLen - 28) / sizeof (wchar_t))
-            return false;
-        pwPath = (const wchar_t *) (puchData + 28);
-    } else
-        return false;
-
-    DWORD dwChars = 0;
-    while (dwChars < dwMaxChars && pwPath[dwChars])
-        dwChars++;
-    if (!dwChars)
-        return false;
-
-    wsPath.assign(pwPath, dwChars);
-    return true;
-}
-
-// replace "$R...." names with the original file names stored in the matching "$I...." files
-
-void CNTFSDrive::ResolveRecycleBinNames(FileInfoHash *finfohash) {
-    FileInfoHash::iterator it;
-
-    std::map<std::wstring, int> mapInfoFiles; // "$I...." name -> MFT record
-    std::vector<int> vUsedInfoFiles;
-    for (it = finfohash->begin(); it != finfohash->end(); ++it)
-        if (!it->second->sFilename.compare(0, 2, L"$I"))
-            mapInfoFiles[it->second->sFilename] = it->second->iRecordId;
-
-    for (it = finfohash->begin(); it != finfohash->end(); ++it) {
-        t_FileInfo *pFileInfo = it->second;
-        if (pFileInfo->sFilename.compare(0, 2, L"$R") || pFileInfo->sFilename.length() < 8)
-            continue;
-
-        wxLogMessage("A file deleted from Recycle Bin is found: %s", wxString(pFileInfo->sFilename.c_str()));
-
-        std::wstring wsInfoName = L"$I" + pFileInfo->sFilename.substr(2);
-        std::map<std::wstring, int>::iterator itInfo = mapInfoFiles.find(wsInfoName);
-        if (itInfo == mapInfoFiles.end()) {
-            wxLogMessage("No %s found - the original name is lost.", wxString(wsInfoName.c_str()));
-            continue;
-        }
-
-        BYTE *puchData = 0;
-        DWORD dwLen = 0;
-        if (Read_File(itInfo->second, puchData, dwLen)) {
-            wxLogMessage("Error when trying to retrieve contents of %s", wxString(wsInfoName.c_str()));
-            continue;
-        }
-
-        std::wstring wsPath;
-        bool bFound = GetOriginalPathFromRecycleBinInfo(puchData, dwLen, wsPath);
-        delete[] puchData;
-        if (!bFound) {
-            wxLogMessage("%s has an unknown format.", wxString(wsInfoName.c_str()));
-            continue;
-        }
-
-        size_t nSlash = wsPath.find_last_of(L'\\');
-        std::wstring wsName = (nSlash == std::wstring::npos) ? wsPath : wsPath.substr(nSlash + 1);
-        if (wsName.empty())
-            continue;
-
-        pFileInfo->sFilename = wsName;
-        pFileInfo->bInRecycleBin = true;
-
-        // its real folder is the one it was deleted from, not $Recycle.Bin - without the drive letter, like the others
-        std::wstring wsFolder = (nSlash == std::wstring::npos) ? L"" : wsPath.substr(0, nSlash);
-        if (wsFolder.length() >= 2 && wsFolder[1] == L':')
-            wsFolder.erase(0, 2);
-        pFileInfo->sFolder = wsFolder.empty() ? L"\\" : wsFolder;
-        vUsedInfoFiles.push_back(itInfo->second);
-        wxLogMessage("A file name retrieved from Recycle Bin: %s", wxString(pFileInfo->sFilename.c_str()));
-    }
-
-    // a $I file that gave its file the name back is only bookkeeping - e.g. "$IA1B2C3.jpg" is no JPEG, don't list it
-    for (size_t i = 0; i < vUsedInfoFiles.size(); i++) {
-        it = finfohash->find(vUsedInfoFiles[i]);
-        if (it != finfohash->end()) {
-            delete it->second;
-            finfohash->erase(it);
-        }
-    }
 }
 
 int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *wszDestinationFileName) {

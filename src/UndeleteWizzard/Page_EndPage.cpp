@@ -3,7 +3,7 @@
 #include <wx/wizard.h>
 #include <shellapi.h> // ShellExecute - not in a WIN32_LEAN_AND_MEAN windows.h
 #include <wx/listctrl.h>
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 #include "MyThreadClass.h"
 #include "MyWizzard.h"
 

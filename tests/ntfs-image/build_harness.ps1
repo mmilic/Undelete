@@ -24,13 +24,17 @@ try {
         New-Item -ItemType Directory -Force -Path $Old | Out-Null
         $files = @{"NTFSDrive.cpp" = "src/UndeleteWizzard"; "NTFSDrive.h" = "src/UndeleteWizzard"; "MFTRecord.cpp" = "src/UndeleteWizzard";
             "MFTRecord.h" = "src/UndeleteWizzard"; "FileContents.cpp" = "src/UndeleteWizzard"; "FileContents.h" = "src/UndeleteWizzard";
-            "harness.cpp" = "tests/ntfs-image"}
+            "RecoveryDrive.cpp" = "src/UndeleteWizzard"; "RecoveryDrive.h" = "src/UndeleteWizzard";
+            "FATDrive.cpp" = "src/UndeleteWizzard"; "FATDrive.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
         foreach ($f in $files.Keys) {
             # cmd redirection keeps the bytes as they are (a PowerShell 5.1 pipe would re-encode them)
             cmd /c "git -C `"$Root`" show HEAD:$($files[$f])/$f > `"$(Join-Path $Old $f)`" 2>nul"
             if ($LASTEXITCODE -ne 0) {
                 Remove-Item -Force (Join-Path $Old $f)
-                if ($f -notlike "FileContents.*") { throw "git show HEAD:$($files[$f])/$f failed" }
+                # files that older engines don't have
+                if ($f -notlike "FileContents.*" -and $f -notlike "RecoveryDrive.*" -and $f -notlike "FATDrive.*") {
+                    throw "git show HEAD:$($files[$f])/$f failed"
+                }
             }
         }
         # a second build tree with only the harness, on the old engine (the vcpkg packages are shared)

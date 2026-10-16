@@ -27,7 +27,7 @@ public:
     // thread execution starts here
     virtual void *Entry();
 
-    void SetNTFSDrivePtr(CNTFSDrive *ptr);
+    void SetDrivePtr(CRecoveryDrive *ptr);
     void SetFinfoHashPtr(FileInfoHash *ptr);
     void SetDestinationDirPtr(wxString *ptr);
     void SetSourceDrive(wxString *ptr);
@@ -41,7 +41,7 @@ public:
 
 
 public:
-    CNTFSDrive *m_pUsedNTFSDrive;
+    CRecoveryDrive *m_pDrive; // the engine of the scanned drive (NTFS or FAT)
     FileInfoHash *m_finfohash;
     wxString *m_wxpDestinationDir;
     wxString *m_wxpSourceDrive;
@@ -62,10 +62,10 @@ private:
 };
 
 
-class MyThreadLoadFilesFromDiskNTFS : public MyThreadClass {
+class MyThreadScanVolume : public MyThreadClass {
 public:
-    MyThreadLoadFilesFromDiskNTFS();
-    MyThreadLoadFilesFromDiskNTFS(wxWindow *);
+    MyThreadScanVolume();
+    MyThreadScanVolume(wxWindow *);
     void *Entry();
 };
 

@@ -4,14 +4,14 @@
 #include <wx/filename.h>
 #include <wx/listctrl.h>
 
-#include "NTFSDrive.h"
+#include "RecoveryDrive.h"
 #include "MyThreadClass.h"
 #include "IsValidFileName.h"
 
 //First define the thread classes. In some other versions, this should probably go into a different file so that it is more readoble, but for now, it stays here.
 
 void MyThreadClass::Init() {
-    m_pUsedNTFSDrive = NULL;
+    m_pDrive = NULL;
     m_finfohash = NULL;
     m_wxpDestinationDir = NULL;
     m_wxpSourceDrive = NULL;
@@ -38,7 +38,7 @@ int* MyThreadClass::GetIptrNumberOfCopiedFiles() const {
 }
 
 // joinable: the page that starts a thread waits for it (Wait()) and deletes it, so a cancelled scan or copy
-// has really stopped before another one can start on the same CNTFSDrive and hash map
+// has really stopped before another one can start on the same drive engine and hash map
 
 MyThreadClass::MyThreadClass()
 : wxThread(wxTHREAD_JOINABLE) {
@@ -50,8 +50,8 @@ MyThreadClass::MyThreadClass(wxWindow *parent) : wxThread(wxTHREAD_JOINABLE) {
     m_parent = parent; //treba mi da bi ovaj thread mogao da baca evente
 }
 
-void MyThreadClass::SetNTFSDrivePtr(CNTFSDrive *ptr) {
-    m_pUsedNTFSDrive = ptr;
+void MyThreadClass::SetDrivePtr(CRecoveryDrive *ptr) {
+    m_pDrive = ptr;
 }
 
 void MyThreadClass::SetFinfoHashPtr(FileInfoHash *ptr) {
@@ -69,7 +69,7 @@ void MyThreadClass::SetSourceDrive(wxString *ptr) {
 MyThreadClass::~MyThreadClass() {
 }
 
-MyThreadLoadFilesFromDiskNTFS::MyThreadLoadFilesFromDiskNTFS(wxWindow *parent)
+MyThreadScanVolume::MyThreadScanVolume(wxWindow *parent)
 : MyThreadClass(parent) {
 }
 
@@ -124,14 +124,14 @@ void MyThreadClass::ThrowSelectFilesDialogStopEvent() {
 
 void *MyThreadClass::ScanVolume() {
     wxLogMessage("LoadFiles Thread started executing.");
-    m_pUsedNTFSDrive->SetCancelFlag(&m_CancelProgresControl);
+    m_pDrive->SetCancelFlag(&m_CancelProgresControl);
 
     // the files of a previous scan - the page has already emptied the list that pointed to them
     DeleteFileInfoHash(m_finfohash);
 
     ThrowSelectDestinationDrivePulseEvent("Reading Volume.\nThis can take several minutes..."); // update progress bar message ;)
-    wxLogMessage("Started reading volume %s", *m_wxpSourceDrive);
-    m_iResult = m_pUsedNTFSDrive->ReadVolume(*m_wxpSourceDrive);
+    wxLogMessage("Started reading volume %s (%s)", *m_wxpSourceDrive, m_pDrive->FileSystemName());
+    m_iResult = m_pDrive->ReadVolume(*m_wxpSourceDrive);
     if (m_iResult) {
         wxLogMessage("ReadVolume failed with error %d.", m_iResult);
     } else if (!IsCancelProgresControl()) { //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
@@ -139,16 +139,16 @@ void *MyThreadClass::ScanVolume() {
         ThrowSelectDestinationDrivePulseEvent("Creating deleted files list.\nThis can take several minutes...");
 
         wxLogMessage("Creating deleted files list...");
-        m_iResult = m_pUsedNTFSDrive->GetFileList(m_finfohash);
+        m_iResult = m_pDrive->GetFileList(m_finfohash);
         wxLogMessage("Completed creating deleted files list: %u deleted files found (result %d).", (unsigned) m_finfohash->size(), m_iResult);
     }
 
-    m_pUsedNTFSDrive->SetCancelFlag(NULL);
+    m_pDrive->SetCancelFlag(NULL);
     ThrowSelectDestinationDriveStopEvent();
     return (0);
 }
 
-void *MyThreadLoadFilesFromDiskNTFS::Entry() { //ovde pocinje izvrsavanje threada
+void *MyThreadScanVolume::Entry() { //ovde pocinje izvrsavanje threada
     return ScanVolume();
 }
 
@@ -214,10 +214,10 @@ void MyThreadCopyFiles::SetFilesToCopy(const std::vector<t_FileInfo *> &vFiles) 
 void *MyThreadCopyFiles::Entry() {
     wxLogMessage("Started execution of ThreadCopyFiles");
     // cancel stops a long file in the middle (checked per 1 MB), not only between files
-    m_pUsedNTFSDrive->SetCancelFlag(&m_CancelProgresControl);
+    m_pDrive->SetCancelFlag(&m_CancelProgresControl);
     m_lKBWritten = 0;
     m_vFailures.clear();
-    m_pUsedNTFSDrive->SetProgressCounter(&m_lKBWritten);
+    m_pDrive->SetProgressCounter(&m_lKBWritten);
 
     wxFileName wxDestinationFileName;
     wxDestinationFileName.AssignDir(*m_wxpDestinationDir);
@@ -260,7 +260,7 @@ void *MyThreadCopyFiles::Entry() {
         if (IsCancelProgresControl()) //promenljiva koja se postavlja iz progress-bar-a kad stisnes cancel
             break;
 
-        int iRet = m_pUsedNTFSDrive->RetreiveAndWriteFileToDestination(pTempFInfo->iRecordId, wxsDestinationPath.wc_str());
+        int iRet = m_pDrive->RetreiveAndWriteFileToDestination(pTempFInfo->iRecordId, wxsDestinationPath.wc_str());
         if (iRet == ERROR_CANCELLED)
             break;
         if (iRet) {
@@ -272,8 +272,8 @@ void *MyThreadCopyFiles::Entry() {
         }
     }
 
-    m_pUsedNTFSDrive->SetCancelFlag(NULL);
-    m_pUsedNTFSDrive->SetProgressCounter(NULL);
+    m_pDrive->SetCancelFlag(NULL);
+    m_pDrive->SetProgressCounter(NULL);
     ThrowSelectFilesDialogStopEvent();
     wxLogMessage("%s\nCheck %s", IsCancelProgresControl() ? "CANCELLED!" : "FINISHED!", wxDestinationFileName.GetPath());
 

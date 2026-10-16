@@ -15,10 +15,10 @@ find_package(wxWidgets CONFIG REQUIRED)
 set(SRC "${CMAKE_SOURCE_DIR}/src/UndeleteWizzard")
 
 # where the recovery engine comes from - tests/ntfs-image/build_harness.ps1 -WithOld points it at a copy from git HEAD
-set(UNDELETE_ENGINE_DIR "${SRC}" CACHE PATH "Directory with NTFSDrive.cpp, MFTRecord.cpp, FileContents.cpp")
+set(UNDELETE_ENGINE_DIR "${SRC}" CACHE PATH "Directory with the engine sources (NTFSDrive.cpp, FATDrive.cpp...)")
 set(UNDELETE_HARNESS_SOURCE "${CMAKE_SOURCE_DIR}/tests/ntfs-image/harness.cpp" CACHE FILEPATH "The test harness source")
 option(UNDELETE_BUILD_APP "Build the GUI app" ON)
-option(UNDELETE_BUILD_TESTS "Build the NTFS image test harness" ON)
+option(UNDELETE_BUILD_TESTS "Build the disk image test harness (NTFS and FAT)" ON)
 
 # WIN32_LEAN_AND_MEAN: a full <windows.h> brings the old winsock.h, which clashes with the winsock2.h of wxWidgets
 add_compile_definitions(UNICODE _UNICODE _CRT_SECURE_NO_WARNINGS WIN32_LEAN_AND_MEAN NOMINMAX)
@@ -26,19 +26,22 @@ if(MSVC)
     add_compile_options(/W3 /utf-8 /MP)
 endif()
 
-# the recovery engine: NTFS parsing, recoverability, content check - no GUI
+# the recovery engine: NTFS and FAT parsing, recoverability, content check - no GUI
 set(ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/NTFSDrive.cpp" "${UNDELETE_ENGINE_DIR}/MFTRecord.cpp")
-if(EXISTS "${UNDELETE_ENGINE_DIR}/FileContents.cpp") # older engines (git HEAD for -WithOld) may not have it
-    list(APPEND ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/FileContents.cpp")
-endif()
+# older engines (git HEAD for -WithOld) may not have these
+foreach(ENGINE_FILE FileContents.cpp RecoveryDrive.cpp FATDrive.cpp)
+    if(EXISTS "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
+        list(APPEND ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
+    endif()
+endforeach()
 add_library(undelete_engine STATIC ${ENGINE_SOURCES})
 target_include_directories(undelete_engine PUBLIC "${UNDELETE_ENGINE_DIR}")
 target_link_libraries(undelete_engine PUBLIC wx::base)
 
 if(UNDELETE_BUILD_APP)
     # An explicit list, not a glob: the source tree may hold stray merge leftovers
-    # (e.g. Page_SelectFilesPage.cpp.BACKUP.*.cpp) that must never be compiled. FAT/ isn't linked either -
-    # photorecz_stub.c stands in for it (README.md, "FAT support").
+    # (e.g. Page_SelectFilesPage.cpp.BACKUP.*.cpp) that must never be compiled. FAT/ (TestDisk) isn't
+    # linked either - FAT drives are read by the engine's own FATDrive.cpp (README.md, "FAT support").
     add_executable(GetMyFilesBack WIN32
         "${SRC}/main.cpp"
         "${SRC}/MyWizzard.cpp"
@@ -54,7 +57,6 @@ if(UNDELETE_BUILD_APP)
         "${SRC}/languages/LanguageDialog.cpp"
         "${SRC}/languages/LanguageFactory.cpp"
         "${SRC}/languages/LanguagesImpl.cpp"
-        "${SRC}/photorecz_stub.c"
         "${SRC}/undelete.rc")
     target_link_libraries(GetMyFilesBack PRIVATE undelete_engine wx::core wx::base)
     # the resource script embeds these - rebuild it when they change
@@ -67,7 +69,7 @@ if(UNDELETE_BUILD_APP)
 endif()
 
 if(UNDELETE_BUILD_TESTS)
-    # runs the engine against a disk image - see tests/ntfs-image/README.md
+    # runs the engine against a disk image - see tests/ntfs-image/README.md and tests/fat-image/README.md
     add_executable(ntfs_harness "${UNDELETE_HARNESS_SOURCE}")
     target_link_libraries(ntfs_harness PRIVATE undelete_engine wx::core wx::base)
 endif()

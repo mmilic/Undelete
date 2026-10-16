@@ -1,7 +1,7 @@
 # GetMyFilesBack (UndeleteWizzard)
 
-A Windows GUI file-undelete/recovery tool (wxWidgets wizard) that scans a drive's NTFS MFT for
-deleted-but-recoverable files and copies them to a destination you choose.
+A Windows GUI file-undelete/recovery tool (wxWidgets wizard) that scans an NTFS or FAT (FAT12/16/32)
+drive for deleted-but-recoverable files and copies them to a destination you choose.
 
 It builds as one 64-bit exe with everything linked in statically - no DLLs, no installer. That is
 on purpose: a recovery tool should run from a USB stick, not be installed onto the drive whose
@@ -40,11 +40,12 @@ Things to know:
   with only a newer Visual Studio needs that line changed.
 - **Keep the clone path short**, e.g. `C:\src\Undelete`. vcpkg's build paths inside `out\` are long, and a
   deeply nested clone can hit Windows' 260-character path limit while building wxWidgets.
-- **The tests need more**: WSL with `ntfs-3g` and `python3` - see "Tests" below. Building the app doesn't.
+- **The tests need more**: WSL with `ntfs-3g` and `python3` for the NTFS test, Python 3 on Windows for the
+  FAT test - see "Tests" below. Building the app doesn't.
 
 **Without installing anything:** every push to `master` is built on GitHub's own Windows machines
 (`.github/workflows/build.yml`). Open the repo's **Actions** tab, pick the latest "Build" run and download
-the **GetMyFilesBack** artifact - the exe, built from that commit, after the image test passed.
+the **GetMyFilesBack** artifact - the exe, built from that commit, after the image tests passed.
 
 ### Building
 
@@ -87,7 +88,7 @@ rebuild that version.
 
 ### Running it
 
-The built exe's manifest requests `requestedExecutionLevel="requireAdministrator"` (it needs raw NTFS
+The built exe's manifest requests `requestedExecutionLevel="requireAdministrator"` (it needs raw
 volume access), so:
 - Started from Explorer, Windows shows the UAC prompt (a standard user is asked for admin
   credentials) - the app never runs without admin rights.
@@ -99,29 +100,51 @@ volume access), so:
 `tests\ntfs-image\run.ps1` builds an NTFS disk image with deleted files (in WSL, with ntfs-3g), runs the
 recovery engine against it and checks every recovered file byte-for-byte - see
 `tests\ntfs-image\README.md`. Besides the build requirements it needs WSL (`wsl --install`) with
-`sudo apt-get install ntfs-3g python3` inside it. The GitHub build runs the same test on every push.
+`sudo apt-get install ntfs-3g python3` inside it.
+
+`tests\fat-image\run.ps1` does the same for FAT12, FAT16 and FAT32 - see `tests\fat-image\README.md`. It
+needs Python 3 on Windows (it installs `pyfatfs` into a venv under `out\fat-test` on its own), no WSL.
+
+The GitHub build runs both tests on every push.
 
 ## Repo layout
 
 - `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json` - the build; `build.ps1` / `build-env.ps1` run it.
 - `.github/workflows/build.yml` - the GitHub Actions build and test.
-- `src/UndeleteWizzard/` — the application source (wxWidgets wizard: NTFS MFT scan/recovery,
+- `src/UndeleteWizzard/` — the application source (wxWidgets wizard: NTFS and FAT scan/recovery,
   multi-language UI, wizard pages). See `CLAUDE.md` for the internal architecture.
-- `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept in full for reference.
-  **Not linked into the current build** — see "FAT support" below.
+- `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept for reference only.
+  **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT support" below.
 - `src/UndeleteWizzard/Makefile`, `nbproject/`, `*.conf` — the original NetBeans/MinGW build files of the
   commercial version. They point at paths on the original developer's machine and aren't used.
-- `tests/ntfs-image/` — the end-to-end test of the recovery engine.
+- `tests/ntfs-image/`, `tests/fat-image/` — the end-to-end tests of the recovery engine.
 
-## FAT support (not implemented)
+## FAT support
 
-`Page_SelectDestinationDirPage.cpp` calls `photorecz()` only when the selected source drive is FAT, not
-NTFS. The real `photorecz()` (in `FAT/phmain.c`) delegates into testdisk's own **interactive ncurses
-disk/partition-selection UI** (`do_curses_photorec` in `FAT/pdisksel.c`) — this was never actually wired
-up to the wx wizard, and would need a PDCurses-for-Windows build (not included here) plus a console,
-which a windowed app doesn't have. The build links a stub `photorecz()` (`photorecz_stub.c`) instead, so
-the real, finished feature (NTFS recovery) works; selecting a FAT drive will just do nothing useful.
+FAT12, FAT16 and FAT32 drives (USB sticks, memory cards) are scanned by `FATDrive.cpp`, the app's own
+engine; the wizard picks it when Windows reports the drive as `FAT` or `FAT32`. **exFAT is not supported
+yet** - the wizard says so when an exFAT drive is chosen.
 
-The TestDisk code is written for GCC (`__attribute__((packed))`, `typeof`, `<sys/time.h>`...) and does not
-compile with MSVC as it is. It is also GPL-licensed: linking it in would put the whole app under the GPL.
-Native FAT32/exFAT support written for this app is the more practical route.
+What FAT leaves of a deleted file decides what can be recovered:
+- Windows marks the file's directory entry as deleted (its first byte becomes `0xE5`) and frees its
+  clusters in the FAT. The size, the dates and the first cluster stay.
+- **The name**: a long file name comes back in full, and so does the first character of the short (8.3)
+  name, via the checksum the long name entries keep. A file with only an 8.3 name loses its first
+  character - it is listed as `_EADME.TXT`. In the Recycle Bin the lost character is always `$`, so
+  `$R`/`$I` pairs still get their original names back.
+- **The data**: the chain of clusters is gone, only the first cluster is known. The engine takes as many
+  clusters as the size needs from the first one on, skipping clusters in use now (what DOS UNDELETE did).
+  - A contiguous file comes back whole, flagged Good.
+  - A file fragmented around files that still exist comes back whole too, but is flagged "Partly
+    overwritten": a file that was really partly overwritten looks the same.
+  - A file fragmented around space that is free now comes back **wrong**, flagged Good - nothing on the
+    volume tells it apart from a contiguous one. Its first cluster is right (the content check passes),
+    the rest is whatever was in the free clusters after it.
+  - If its first cluster is in use, the file is judged like a contiguous one: "Overwritten" or "Partly
+    overwritten".
+- **Folders**: the scan walks the folder tree, so every file comes with its folder. A deleted folder is
+  walked too, while its first cluster is free and still holds directory entries.
+
+The TestDisk/PhotoRec source in `FAT/` was the original plan for FAT and isn't used: it is written for GCC,
+its recovery runs its own interactive ncurses UI, and it is GPL-licensed - linking it in would put the
+whole app under the GPL.
