@@ -57,10 +57,78 @@ wxString FormatFileSize(LONGLONG llSize) {
     return wxString::Format("%.2f GB", llSize / (1024.0 * 1024 * 1024));
 }
 
+struct FileTypeExtension {
+    const wchar_t *szExtension;
+    int iType;
+};
+
+static const FileTypeExtension s_aFileTypes[] = {
+    {L"jpg", FILE_TYPE_IMAGE}, {L"jpeg", FILE_TYPE_IMAGE}, {L"jpe", FILE_TYPE_IMAGE}, {L"gif", FILE_TYPE_IMAGE},
+    {L"png", FILE_TYPE_IMAGE}, {L"bmp", FILE_TYPE_IMAGE}, {L"tif", FILE_TYPE_IMAGE}, {L"tiff", FILE_TYPE_IMAGE},
+    {L"ico", FILE_TYPE_IMAGE}, {L"heic", FILE_TYPE_IMAGE}, {L"heif", FILE_TYPE_IMAGE}, {L"webp", FILE_TYPE_IMAGE},
+    {L"psd", FILE_TYPE_IMAGE}, {L"svg", FILE_TYPE_IMAGE}, {L"raw", FILE_TYPE_IMAGE}, {L"cr2", FILE_TYPE_IMAGE},
+    {L"nef", FILE_TYPE_IMAGE}, {L"arw", FILE_TYPE_IMAGE}, {L"dng", FILE_TYPE_IMAGE},
+
+    {L"avi", FILE_TYPE_VIDEO}, {L"mov", FILE_TYPE_VIDEO}, {L"wmv", FILE_TYPE_VIDEO}, {L"mp4", FILE_TYPE_VIDEO},
+    {L"mkv", FILE_TYPE_VIDEO}, {L"m4v", FILE_TYPE_VIDEO}, {L"mpg", FILE_TYPE_VIDEO}, {L"mpeg", FILE_TYPE_VIDEO},
+    {L"3gp", FILE_TYPE_VIDEO}, {L"webm", FILE_TYPE_VIDEO}, {L"flv", FILE_TYPE_VIDEO}, {L"vob", FILE_TYPE_VIDEO},
+    {L"mts", FILE_TYPE_VIDEO}, {L"m2ts", FILE_TYPE_VIDEO},
+
+    {L"mp3", FILE_TYPE_MUSIC}, {L"wma", FILE_TYPE_MUSIC}, {L"wav", FILE_TYPE_MUSIC}, {L"flac", FILE_TYPE_MUSIC},
+    {L"m4a", FILE_TYPE_MUSIC}, {L"ogg", FILE_TYPE_MUSIC}, {L"aac", FILE_TYPE_MUSIC}, {L"aif", FILE_TYPE_MUSIC},
+    {L"aiff", FILE_TYPE_MUSIC}, {L"opus", FILE_TYPE_MUSIC}, {L"mid", FILE_TYPE_MUSIC}, {L"midi", FILE_TYPE_MUSIC},
+
+    {L"pdf", FILE_TYPE_DOCUMENT}, {L"doc", FILE_TYPE_DOCUMENT}, {L"docx", FILE_TYPE_DOCUMENT}, {L"xls", FILE_TYPE_DOCUMENT},
+    {L"xlsx", FILE_TYPE_DOCUMENT}, {L"ppt", FILE_TYPE_DOCUMENT}, {L"pptx", FILE_TYPE_DOCUMENT}, {L"odt", FILE_TYPE_DOCUMENT},
+    {L"ods", FILE_TYPE_DOCUMENT}, {L"odp", FILE_TYPE_DOCUMENT}, {L"rtf", FILE_TYPE_DOCUMENT}, {L"epub", FILE_TYPE_DOCUMENT},
+    {L"pages", FILE_TYPE_DOCUMENT}, {L"numbers", FILE_TYPE_DOCUMENT}, {L"key", FILE_TYPE_DOCUMENT},
+
+    {L"txt", FILE_TYPE_TEXT}, {L"csv", FILE_TYPE_TEXT}, {L"log", FILE_TYPE_TEXT}, {L"md", FILE_TYPE_TEXT},
+    {L"xml", FILE_TYPE_TEXT}, {L"json", FILE_TYPE_TEXT}, {L"htm", FILE_TYPE_TEXT}, {L"html", FILE_TYPE_TEXT},
+    {L"ini", FILE_TYPE_TEXT},
+
+    {L"zip", FILE_TYPE_ARCHIVE}, {L"rar", FILE_TYPE_ARCHIVE}, {L"7z", FILE_TYPE_ARCHIVE}, {L"gz", FILE_TYPE_ARCHIVE},
+    {L"tgz", FILE_TYPE_ARCHIVE}, {L"tar", FILE_TYPE_ARCHIVE}, {L"bz2", FILE_TYPE_ARCHIVE}, {L"xz", FILE_TYPE_ARCHIVE},
+    {L"cab", FILE_TYPE_ARCHIVE}, {L"iso", FILE_TYPE_ARCHIVE},
+};
+
+int FileTypeOf(const wchar_t *szFilename) {
+    const wchar_t *pDot = wcsrchr(szFilename, L'.');
+    if (!pDot || pDot == szFilename || !pDot[1]) // no extension (".profile" is a name, not an extension)
+        return FILE_TYPE_OTHER;
+    for (size_t i = 0; i < sizeof (s_aFileTypes) / sizeof (s_aFileTypes[0]); i++)
+        if (!_wcsicmp(pDot + 1, s_aFileTypes[i].szExtension))
+            return s_aFileTypes[i].iType;
+    return FILE_TYPE_OTHER;
+}
+
+const char *FileTypeFilterLabel(int iType) {
+    switch (iType) {
+        case FILE_TYPE_ANY: return "All types";
+        case FILE_TYPE_IMAGE: return "Images";
+        case FILE_TYPE_VIDEO: return "Videos";
+        case FILE_TYPE_MUSIC: return "Music";
+        case FILE_TYPE_DOCUMENT: return "Documents (PDF, Office)";
+        case FILE_TYPE_TEXT: return "Text";
+        case FILE_TYPE_ARCHIVE: return "Archives";
+        default: return "Other";
+    }
+}
+
+const char *RecoverabilityFilterLabel(int iFilter) {
+    switch (iFilter) {
+        case RECOVERABILITY_FILTER_GOOD: return "Good only";
+        case RECOVERABILITY_FILTER_NOT_OVERWRITTEN: return "Hide overwritten";
+        default: return "All files";
+    }
+}
+
 CDeletedFilesList::CDeletedFilesList(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size)
 : wxListCtrl(parent, id, pos, size, wxLC_REPORT | wxLC_VIRTUAL | wxBORDER_THEME | wxLC_HRULES | wxLC_VRULES) {
     m_iSortColumn = DELETED_FILES_COLUMN_RECOVERABILITY; // the most useful order: what can still be recovered first
     m_bSortAscending = true;
+    m_iRecoverabilityFilter = RECOVERABILITY_FILTER_ALL;
+    m_iTypeFilter = FILE_TYPE_ANY;
 
     InsertColumn(DELETED_FILES_COLUMN_NAME, wxT("File Name"), wxLIST_FORMAT_LEFT, 280);
     InsertColumn(DELETED_FILES_COLUMN_SIZE, wxT("File Size"), wxLIST_FORMAT_RIGHT, 80);
@@ -104,6 +172,28 @@ void CDeletedFilesList::Clear() {
 void CDeletedFilesList::SetNameFilter(const wxString &sFilter) {
     m_sFilterUpper = sFilter.Upper();
     Rebuild();
+}
+
+void CDeletedFilesList::SetRecoverabilityFilter(int iFilter) {
+    m_iRecoverabilityFilter = iFilter;
+    Rebuild();
+}
+
+void CDeletedFilesList::SetTypeFilter(int iType) {
+    m_iTypeFilter = iType;
+    Rebuild();
+}
+
+bool CDeletedFilesList::PassesFilters(const t_FileInfo *pFile) const {
+    if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_GOOD && pFile->iRecoverability != RECOVERABILITY_GOOD)
+        return false;
+    if (m_iRecoverabilityFilter == RECOVERABILITY_FILTER_NOT_OVERWRITTEN && pFile->iRecoverability == RECOVERABILITY_OVERWRITTEN)
+        return false;
+    if (m_iTypeFilter != FILE_TYPE_ANY && FileTypeOf(pFile->sFilename.c_str()) != m_iTypeFilter)
+        return false;
+    if (!m_sFilterUpper.IsEmpty() && !wxString(pFile->sFilename.c_str()).Upper().Contains(m_sFilterUpper))
+        return false;
+    return true;
 }
 
 void CDeletedFilesList::SortByColumn(int iColumn) {
@@ -153,11 +243,11 @@ void CDeletedFilesList::Rebuild() {
     SelectAll(false);
 
     m_vVisible.clear();
-    if (m_sFilterUpper.IsEmpty())
+    if (m_sFilterUpper.IsEmpty() && m_iRecoverabilityFilter == RECOVERABILITY_FILTER_ALL && m_iTypeFilter == FILE_TYPE_ANY)
         m_vVisible = m_vAll;
     else
         for (size_t i = 0; i < m_vAll.size(); i++)
-            if (wxString(m_vAll[i]->sFilename.c_str()).Upper().Contains(m_sFilterUpper))
+            if (PassesFilters(m_vAll[i]))
                 m_vVisible.push_back(m_vAll[i]);
 
     DeletedFilesOrder order;

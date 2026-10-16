@@ -38,9 +38,10 @@ public:
     void OnFilterMusicClick(wxCommandEvent & event);
     void OnFilesListClick(wxCommandEvent & event);
     void OnListColumnClick(wxCommandEvent & event);
+    void OnFilterChoice(wxCommandEvent & event);
     void OnPageShown(wxWizardEvent& event);
 
-    void SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect);
+    void SelectFilesOfType(int iFileType, bool bSelect);
     void UpdateFoundFilesLabel();
     void OnPreviewTimer(wxTimerEvent & event);
 
@@ -62,6 +63,10 @@ public:
     wxToggleButton *wxFilterImages;
     wxToggleButton *wxFilterVideo;
     wxToggleButton *wxFilterMusic;
+
+    wxChoice *m_choiceRecoverability; // show: all / good only / hide overwritten
+    wxChoice *m_choiceType; // show: all types / images / videos / ...
+    wxStaticText *m_txtShowing; // "Showing 120 of 3 400 files"
 private:
     wxString mw_sDialogString; // only through Set/GetDialogString - shared with the copy thread
     wxCriticalSection m_csDialogString;

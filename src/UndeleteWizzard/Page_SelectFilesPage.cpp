@@ -73,6 +73,27 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
     sizerHoldingButtonsAboveTheList->Add(wxUnselectAllButton, 0, wxLEFT, 5);
     sizerHoldingButtonsAboveTheList->Add(m_wxSearchCtrlSearchList, 1, wxEXPAND | wxLEFT, 80);
 
+    // filters: which files the list shows (the buttons on the right select files, these hide them)
+    m_choiceRecoverability = new wxChoice(this, FILTER_RECOVERABILITY_CHOICE);
+    for (int i = 0; i < RECOVERABILITY_FILTER_COUNT; i++)
+        m_choiceRecoverability->Append(RecoverabilityFilterLabel(i));
+    m_choiceRecoverability->SetSelection(RECOVERABILITY_FILTER_ALL);
+
+    m_choiceType = new wxChoice(this, FILTER_TYPE_CHOICE);
+    for (int i = FILE_TYPE_ANY; i < FILE_TYPE_COUNT; i++) // item index == FILE_TYPE_*
+        m_choiceType->Append(FileTypeFilterLabel(i));
+    m_choiceType->SetSelection(FILE_TYPE_ANY);
+
+    m_txtShowing = new wxStaticText(this, -1, wxEmptyString);
+    m_txtShowing->SetForegroundColour(wxColour(60, 60, 60));
+
+    wxBoxSizer *sizerHoldingTheFilters = new wxBoxSizer(wxHORIZONTAL);
+    sizerHoldingTheFilters->Add(new wxStaticText(this, -1, wxT("Show:")), 0, wxALIGN_CENTER_VERTICAL, 0);
+    sizerHoldingTheFilters->Add(m_choiceRecoverability, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    sizerHoldingTheFilters->Add(new wxStaticText(this, -1, wxT("Type:")), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
+    sizerHoldingTheFilters->Add(m_choiceType, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    sizerHoldingTheFilters->Add(m_txtShowing, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 15);
+
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -87,6 +108,7 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
 
 
     sizerHoldingButtonsAndSearchAndTheList->Add(sizerHoldingButtonsAboveTheList, 0, wxEXPAND, 0);
+    sizerHoldingButtonsAndSearchAndTheList->Add(sizerHoldingTheFilters, 0, wxEXPAND | wxTOP, 5);
     sizerHoldingButtonsAndSearchAndTheList->Add(m_lcFilesInSelectedDrive, 1, wxEXPAND | wxTOP, 5);
     //    lowerSizer->SetItemMinSize(m_lcFilesInSelectedDrive, 600, 600);
     //    sizerHoldingButtonsAndSearchAndTheList->SetMinSize(700, 700);
@@ -127,6 +149,12 @@ wxSelectFilesPage::wxSelectFilesPage(wxWizard *parent) : wxWizardPageSimple(pare
 
     Connect(LIST_CTRL_DELETED_FILES, wxEVT_COMMAND_LIST_COL_CLICK, //radi do nekle, ne bas savrseno
             wxCommandEventHandler(wxSelectFilesPage::OnListColumnClick));
+
+    Connect(FILTER_RECOVERABILITY_CHOICE, wxEVT_COMMAND_CHOICE_SELECTED,
+            wxCommandEventHandler(wxSelectFilesPage::OnFilterChoice));
+
+    Connect(FILTER_TYPE_CHOICE, wxEVT_COMMAND_CHOICE_SELECTED,
+            wxCommandEventHandler(wxSelectFilesPage::OnFilterChoice));
 
     SetSizerAndFit(mainSizer);
 }
@@ -322,49 +350,53 @@ void wxSelectFilesPage::OnUnselectAllClick(wxCommandEvent & event) {
     wxFilterMusic->SetValue(false);
 }
 
-static bool _hasExtension(const wchar_t *szFilename, const char *const *extensions, int count) {
+// image formats the preview can decode (wxWidgets has no HEIC, WebP, RAW... decoders)
+
+static bool _canPreview(const wchar_t *szFilename) {
+    static const char *const PreviewExtensions[] = {"jpg", "jpeg", "jpe", "gif", "png", "bmp", "tif", "tiff", "ico"};
     wxString name(szFilename);
     name.MakeLower(); // -> mala slova
-    for (int i = 0; i < count; i++)
-        if (name.EndsWith(wxString(".") + extensions[i]))
+    for (size_t i = 0; i < sizeof (PreviewExtensions) / sizeof (PreviewExtensions[0]); i++)
+        if (name.EndsWith(wxString(".") + PreviewExtensions[i]))
             return true;
     return false;
 }
 
-static bool _isImage(const wchar_t *szFilename) {
-    static const char *const ImageExtensions[] = {"jpg", "jpeg", "gif", "png", "bmp", "tif", "tiff", "heic"};
-    return _hasExtension(szFilename, ImageExtensions, sizeof (ImageExtensions) / sizeof (ImageExtensions[0]));
-}
-
-static bool _isVideo(const wchar_t *szFilename) {
-    static const char *const VideoExtensions[] = {"avi", "mov", "wmv", "mp4", "mkv", "m4v", "mpg", "mpeg"};
-    return _hasExtension(szFilename, VideoExtensions, sizeof (VideoExtensions) / sizeof (VideoExtensions[0]));
-}
-
-static bool _isMusic(const wchar_t *szFilename) {
-    static const char *const MusicExtensions[] = {"mp3", "wma", "wav", "flac", "m4a", "ogg"};
-    return _hasExtension(szFilename, MusicExtensions, sizeof (MusicExtensions) / sizeof (MusicExtensions[0]));
-}
-
 // select (or unselect) every listed file of one type, e.g. all images
 
-void wxSelectFilesPage::SelectFilesOfType(bool (*isOfType)(const wchar_t *), bool bSelect) {
+void wxSelectFilesPage::SelectFilesOfType(int iFileType, bool bSelect) {
     long lCount = m_lcFilesInSelectedDrive->GetFileCount();
     for (long lItem = 0; lItem < lCount; lItem++)
-        if (isOfType(m_lcFilesInSelectedDrive->GetFile(lItem)->sFilename.c_str()))
+        if (FileTypeOf(m_lcFilesInSelectedDrive->GetFile(lItem)->sFilename.c_str()) == iFileType)
             m_lcFilesInSelectedDrive->SelectItem(lItem, bSelect);
 }
 
 void wxSelectFilesPage::OnFilterImagesClick(wxCommandEvent & event) {
-    SelectFilesOfType(_isImage, wxFilterImages->GetValue());
+    SelectFilesOfType(FILE_TYPE_IMAGE, wxFilterImages->GetValue());
 }
 
 void wxSelectFilesPage::OnFilterVideosClick(wxCommandEvent & event) {
-    SelectFilesOfType(_isVideo, wxFilterVideo->GetValue());
+    SelectFilesOfType(FILE_TYPE_VIDEO, wxFilterVideo->GetValue());
 }
 
 void wxSelectFilesPage::OnFilterMusicClick(wxCommandEvent & event) {
-    SelectFilesOfType(_isMusic, wxFilterMusic->GetValue());
+    SelectFilesOfType(FILE_TYPE_MUSIC, wxFilterMusic->GetValue());
+}
+
+// the "Show" or "Type" filter changed - files that get hidden also lose their selection (Retrieve takes only what is shown)
+
+void wxSelectFilesPage::OnFilterChoice(wxCommandEvent & event) {
+    {
+        wxBusyCursor busy; // a few hundred thousand files take a moment
+        if (event.GetId() == FILTER_RECOVERABILITY_CHOICE)
+            m_lcFilesInSelectedDrive->SetRecoverabilityFilter(m_choiceRecoverability->GetSelection());
+        else
+            m_lcFilesInSelectedDrive->SetTypeFilter(m_choiceType->GetSelection());
+    }
+    wxFilterImages->SetValue(false);
+    wxFilterVideo->SetValue(false);
+    wxFilterMusic->SetValue(false);
+    UpdateFoundFilesLabel();
 }
 
 void wxSelectFilesPage::OnSearchAction(wxCommandEvent & event) {
@@ -405,8 +437,12 @@ void wxSelectFilesPage::OnPreviewTimer(wxTimerEvent & event) {
         m_txtPreview->SetLabel(wxT("Select an image\nto see a preview."));
         return;
     }
-    if (!_isImage(pFile->sFilename.c_str())) {
+    if (FileTypeOf(pFile->sFilename.c_str()) != FILE_TYPE_IMAGE) {
         m_txtPreview->SetLabel(wxT("No preview -\nnot an image."));
+        return;
+    }
+    if (!_canPreview(pFile->sFilename.c_str())) {
+        m_txtPreview->SetLabel(wxT("No preview for\nthis image format."));
         return;
     }
     if (pFile->n64RealSize > MAX_PREVIEW_FILE_SIZE) {
@@ -454,8 +490,11 @@ void wxSelectFilesPage::OnListColumnClick(wxCommandEvent & event) {
 
 void wxSelectFilesPage::UpdateFoundFilesLabel() {
     ILanguage *languagePackLocal = ((MyWizard *) GetParent())->GetLanguagePack();
-    int itemNumber = (int) m_lcFilesInSelectedDrive->GetFileCount();
-    wxSelectFilesMessage->SetLabel(wxString::Format(languagePackLocal->getWXText(SELECT_FILES_PAGE, SELECT_FILES_OTHER), itemNumber));
+    long lShown = m_lcFilesInSelectedDrive->GetFileCount();
+    long lTotal = m_lcFilesInSelectedDrive->GetTotalFileCount();
+    wxSelectFilesMessage->SetLabel(wxString::Format(languagePackLocal->getWXText(SELECT_FILES_PAGE, SELECT_FILES_OTHER), (int) lTotal));
+    m_txtShowing->SetLabel(lShown == lTotal ? wxString::Format("Showing all %ld files", lTotal)
+            : wxString::Format("Showing %ld of %ld files", lShown, lTotal));
 }
 
 void wxSelectFilesPage::OnPageShown(wxWizardEvent& event) {

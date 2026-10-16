@@ -67,7 +67,8 @@ real/virtual drive and check the recovered files.
   Free scan results with `DeleteFileInfoHash()`, never `clear()` alone.
 - `DeletedFilesList.{h,cpp}` — `CDeletedFilesList`, the virtual (`wxLC_VIRTUAL`) list of deleted files. It
   holds only pointers and draws visible rows on demand, because a big drive yields hundreds of thousands of
-  files. Search, sorting and type filters work on its pointer vector.
+  files. Search, sorting and the "Show" (recoverability) / "Type" filters work on its pointer vector. File
+  types come from one extension table, `FileTypeOf()` — the type buttons, the filter and the preview all use it.
 - Recoverability: `CNTFSDrive` loads `$Bitmap` at the start of a scan and marks each deleted file Good /
   Partly overwritten / Overwritten by whether its clusters are in use now. "Good" can't tell whether a since-deleted file
   used the clusters in between.
