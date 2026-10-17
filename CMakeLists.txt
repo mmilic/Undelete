@@ -1,9 +1,10 @@
 # GetMyFilesBack (UndeleteWizzard) - 64-bit MSVC build, wxWidgets from vcpkg (static, see vcpkg.json).
 # Use build.ps1, or: cmake --preset x64 && cmake --build --preset release
 cmake_minimum_required(VERSION 3.21)
-# The app's version - the only place it is written. The window title and the exe's version info take it from
-# here (version.h.in), and a release is made by pushing the tag v<version> (.github/workflows/build.yml).
-project(GetMyFilesBack VERSION 2.7 LANGUAGES C CXX RC)
+# The app's version, MAJOR.MINOR.PATCH - the only place it is written. The window title and the exe's version
+# info take it from here (version.h.in), and a release is made by pushing the tag v<version>, e.g. v2.7.1
+# (.github/workflows/build.yml). PATCH: fixes only; MINOR: new features (resets PATCH); MAJOR: big changes.
+project(GetMyFilesBack VERSION 2.7.0 LANGUAGES C CXX RC)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

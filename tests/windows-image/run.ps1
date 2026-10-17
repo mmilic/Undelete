@@ -125,8 +125,9 @@ function New-TestImage($name, $fs, $cluster, $mb) {
         Write-VolumeCache -DriveLetter $part.DriveLetter
         Write-Host "Test files written"
 
-        # exFAT: Good if Windows leaves the deleted chain in the FAT, as Linux does - not checked (the log shows it)
-        $fragRecov = if ($fs -eq "NTFS") { "Good" } elseif ($fs -eq "exFAT") { "-" } else { "Partly overwritten" }
+        # NTFS keeps its fragments, and Windows leaves a deleted file's FAT chain on exFAT (v2.7's CI run: Good, 201
+        # fragments); FAT has to skip the clusters in use
+        $fragRecov = if ($fs -eq "NTFS" -or $fs -eq "exFAT") { "Good" } else { "Partly overwritten" }
         foreach ($f in $files.Keys) {
             $leaf = Split-Path -Leaf $f
             $folder = "\" + (Split-Path -Parent $f)

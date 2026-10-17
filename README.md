@@ -197,14 +197,16 @@ vcpkg checkout instead of the one that comes with Visual Studio, set `VCPKG_ROOT
 
 **Making a release:** the version is written in one place, `project(GetMyFilesBack VERSION ...)` in
 `CMakeLists.txt` - the window title and the exe's file properties show it. Raise it, commit and push, then tag
-that commit with `v` and the version and push the tag, e.g. for version 2.7:
+that commit with `v` and the version and push the tag. The version has three parts, MAJOR.MINOR.PATCH: raise
+PATCH for a release with fixes only (2.7.0 → 2.7.1), MINOR for new features (2.7.1 → 2.8.0), MAJOR for big
+changes. E.g. for version 2.7.1:
 
 ```cmd
-git tag v2.7
+git tag v2.7.1
 ```
 
 ```cmd
-git push origin v2.7
+git push origin v2.7.1
 ```
 
 The GitHub build then builds and tests the tagged commit and, if the tests pass, makes the release with the
@@ -250,11 +252,10 @@ exFAT keeps much more of a deleted file than FAT does:
   still free are read. A deleted folder knows its size and its chain too, so it doesn't have to be searched for.
 - What lies past a file's ValidDataLength (preallocated, never written) comes back as zeros, as Windows reads it.
 
-This is what Linux's kernel exfat driver leaves behind (`tests/exfat-image`). Not every device deletes this
-gently: `exfat-fuse`, for one, also clears the deleted file's FAT chain and shrinks a folder before deleting it.
-Then a fragmented file can only be guessed (and is shown as "Partly overwritten"), and files in a deleted
-folder's later clusters are lost. Windows is expected to do the same -
-the CI's Windows-written test makes an exFAT volume with Windows itself to check it.
+This is what both Windows (`tests/windows-image`) and Linux's kernel exfat driver (`tests/exfat-image`) leave
+behind. Not every device deletes this gently: `exfat-fuse`, for one, also clears the deleted file's FAT chain
+and shrinks a folder before deleting it. Then a fragmented file can only be guessed (and is shown as "Partly
+overwritten"), and files in a deleted folder's later clusters are lost.
 
 ### FAT
 
