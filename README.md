@@ -250,7 +250,10 @@ exFAT keeps much more of a deleted file than FAT does:
   still free are read. A deleted folder knows its size and its chain too, so it doesn't have to be searched for.
 - What lies past a file's ValidDataLength (preallocated, never written) comes back as zeros, as Windows reads it.
 
-This is what Linux's exfat driver leaves behind (`tests/exfat-image`). Windows is expected to do the same -
+This is what Linux's kernel exfat driver leaves behind (`tests/exfat-image`). Not every device deletes this
+gently: `exfat-fuse`, for one, also clears the deleted file's FAT chain and shrinks a folder before deleting it.
+Then a fragmented file can only be guessed (and is shown as "Partly overwritten"), and files in a deleted
+folder's later clusters are lost. Windows is expected to do the same -
 the CI's Windows-written test makes an exFAT volume with Windows itself to check it.
 
 ### FAT

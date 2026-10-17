@@ -1,0 +1,680 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no" initial-scale="1">
+    
+    <title>bit-back.</title>
+    <link href='http://fonts.googleapis.com/css?family=Lato:100,400,900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/libs/animate.css">
+    <link rel="stylesheet" href="css/style.css">
+     <link rel="stylesheet" href="css/slider.css">
+    
+
+   
+    <script type="text/javascript" src="js/scroll-nav.js"></script>
+    <script src="jquery.glide.js"></script>
+
+    <style>
+      .wow:first-child {
+        visibility: hidden;
+      }
+    </style>
+
+    <!--[if IE]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body id="scroll">
+<div class="overlay" id="contacting" style="display:none">
+      <div class="exit">
+        <img src="img/exit.png" width="30px" height="30px" id="hide">
+      </div>
+      <div class="contact-form">
+            <form class="form" id="form1">
+      
+            <p class="name">
+              <input name="name" type="text" class="validate[required,custom[onlyLetter],length[0,100]] feedback-input" placeholder="Name" id="name" />
+            </p>
+            
+            <p class="email">
+              <input name="email" type="text" class="validate[required,custom[email]] feedback-input" id="email" placeholder="Email" />
+            </p>
+            
+            <p class="text">
+              <textarea name="text" class="validate[required,length[6,300]] feedback-input" id="comment" placeholder="Comment"></textarea>
+            </p>
+            
+            
+            <div class="submit">
+        <input type="submit" value="SEND" id="button-blue"/>
+        <div class="ease"></div>
+      </div>
+    </form>
+      </div>
+    </div>
+    <div class="overlay" id="terms" style="display:none">
+      <div class="exit">
+        <img src="img/exit.png" width="30px" height="30px" id="hide">
+      </div>
+      <div class="overlay-box">
+        <h2>TERMS OF USE</h2>
+        <p>Your subscription or purchase of any Bit Back (bitback.org) products serves as your acknowledgement and representation that you have read and understand these TERMS OF USE and that you agree to be bound by such TERMS OF USE (&ldquo;Agreement&rdquo;).<br />
+You understand and agree to accept this Agreement is, legally, the same as manually signing this Agreement. Bit Back reserves the right, upon notice to you, to change or terminate this Agreement. You agree that your use of Bit Back after notice of change to this Agreement, or if you do not close your work with Bit Back within fifteen (15) calendar days of such notice, shall mean that you accept the changes. Changes required by law, however, will be effective immediately.<br />
+Bit Back is for your personal use only. You shall not distribute, exchange, modify, sell, or transmit anything from this Site. Bit Back grants you a non-exclusive, non-transferable, limited subscription to use the Bit Back service, as long as you comply with these Terms &amp; Conditions of Use.<br />
+All materials on www.bitback.org, including but not limited to audio, images, software, text, and video clips, are protected by copyright under U.S. copyright law, international conventions, and other copyright laws. You shall not use the materials, except as specified herein. You agree to follow the instructions on Bit Back, limiting the use of the materials. Any unauthorized use of the materials on Bit Back may violate copyright laws, trademark laws, the laws of privacy and publicity, and civil and criminal statutes.<br />
+Bit Back reserves the right to refuse any Subscription at its sole discretion. You agree to pay the applicable charges and taxes that may apply at the time services are rendered to your Subscription. Bit Back further reserves the right to change its charges any time by posting a modified schedule of Pricing and Rates on the Bit Back Web site.<br />
+Subscription Charges &ndash; All Subscription charges are refundable during the first 60 days from the date of purchase. Following 60 days from the date of purchase, subscriptions may be cancelled at any time. Where the date of request for cancellation falls within a billing cycle, subscription fees will be refunded at a prorated amount, beginning the business day following the date of request for cancellation.<br />
+The Bit Back makes no representation or warranty regarding its compliance with local laws in foreign jurisdictions, or regarding the appropriateness of the Web site&rsquo;s content or its compliance with such local laws. You understand that the Bit Back site is the only means of accessing your Bit Back Subscription. You agree that Bit Back shall not be liable for any losses or damages you incur as a result of the unavailability of Bit Back Web site from foreign countries.<br />
+This Agreement will be effective only upon our approval of your Subscription. Bit Back reserves the right to report to consumer and securities credit reporting agencies any debit balance or negative credit information pertaining to any Bit Back Subscription. Bit Back further reserves the right to reject a Subscription Application for any reason.<br />
+Bit Back may terminate any or all services rendered under this Agreement at any time and for any reason. The Subscription holder may close his or her Subscription at any time. Upon termination, you will remain liable for any deficiencies or debit balances in the Subscription. You agree to reimburse Bit Back for any collection costs relating to any unsecured debit balance in your Subscription, including attorney&rsquo;s fees, court costs, arbitration expenses, and interest.<br />
+In cases of fraud or theft by you, acting alone or in concert with others, involving, among other things, use of counterfeit checks, checks drawn on closed or non-existent Subscriptions, checks stolen from third parties, unauthorized electronic funds transfers from bank Subscriptions belonging to others, attempted electronic transfers from non-existent Subscriptions or similar illegal or improper conduct involving Subscription funding or withdrawals, and including situations in which you have allowed third parties to use your Subscription in any such manner, Bit Back shall assess against you, in addition to all other fees, damages and penalties to which it may be entitled, a $500 fee per forged, faked, fictitious, stolen or otherwise unauthorized item or transfer. This fee shall constitute liquidated damages to compensate Bit Back for the time and effort of Bit Back employees in rectifying said conduct.<br />
+You agree that Bit Back will not be liable to you or to third parties for losses incurred directly or indirectly by causes reasonably beyond its control, including but not limited to, government restrictions, natural disasters, severe weather conditions, wars, strikes, terrorist attacks, exchange or market rulings, interruptions of data processing services or communications, unauthorized access or operator errors.<br />
+You agree that Bit Back will not be liable to you for any losses or damages incurred by you peak demand, systems upgrades, maintenance or for other reasons.<br />
+Additionally, you understand that the Bit Back Web site is the primary means of processing your Bit Back Subscription and that, in the event of an interruption of communications systems or other hardware or software malfunction, access to view your Subscription could be delayed. In the event of a significant outage, Bit Back would not be liable for any losses or damages you might suffer as a result of such delays.<br />
+By opening a Subscription or buying Products on Bit Back.com and agreeing to these TERMS OF USE, you agree to receive all communications from Bit Back via the World Wide Web or e-mail. This will include, but not necessarily be limited to, confirmations of transactions, Subscription statements, financial statements, notices of modifications to The Bit Back TERMS OF USE, and other basic communications. Communications sent to your e-mail address or provided through the web site must be retrieved and read promptly. All communications sent by Bit Back by any means will be deemed to have been received by you. You agree to advise us promptly of any changes to your e-mail and/or mailing address. You agree to advise Bit Back promptly of any errors or omissions in any transaction or in the handling of your Subscription. Failure to provide prompt notice of any errors will be deemed to constitute acceptance of the accuracy of all information sent to you.<br />
+The Bit Back reserves the right to record telephone calls to monitor the quality of service you receive or for other purposes The Bit Back deems appropriate for its protection or for the protection of its customers.<br /></p>
+<h2>PREDISPUTE ARBITRATION CLAUSE DISCLOSURES</h2><br />
+<p>ALL PARTIES TO THIS AGREEMENT ARE GIVING UP THE RIGHT TO SUE EACH OTHER IN COURT, INCLUDING THE RIGHT TO A TRIAL BY JURY, EXCEPT AS PROVIDED BY THE RULES OF THE ARBITRATION FORUM IN WHICH A CLAIM IS FILED.<br />
+ARBITRATION AWARDS ARE GENERALLY FINAL AND BINDING; A PARTY&rsquo;S ABILITY TO HAVE A COURT REVERSE OR MODIFY AN ARBITRATION AWARD IS VERY LIMITED.<br />
+THE ABILITY OF THE PARTIES TO OBTAIN DOCUMENTS, WITNESS STATEMENTS AND OTHER DISCOVERY IS GENERALLY MORE LIMITED IN ARBITRATION THAN IN COURT PROCEEDINGS.<br />
+THE ARBITRATORS DO NOT HAVE TO EXPLAIN THE REASON(S) FOR THEIR AWARD.<br />
+THE PANEL OF ARBITRATORS WILL TYPICALLY INCLUDE A MINORITY OF ARBITRATORS WHO WERE OR ARE AFFILIATED WITH THE SECURITIES INDUSTRY.<br />
+THE RULES OF SOME ARBITRATION FORUMS MAY IMPOSE TIME LIMITS FOR BRINGING A CLAIM IN ARBITRATION. IN SOME CASES, A CLAIM THAT IS INELIGIBLE FOR ARBITRATION MAY BE BROUGHT IN COURT.<br />
+THE RULES OF THE ARBITRATION FORUM IN WHICH THE CLAIM IS FILED, AND ANY AMENDMENTS THERETO, SHALL BE INCORPORATED INTO THIS AGREEMENT.<br />
+SUBJECT TO THE LIMITED EXCEPTIONS DESCRIBED BELOW, YOU AGREE TO SUBMIT TO ARBITRATION ANY DISPUTE BETWEEN YOU AND THE Bit Back AND/OR ANY OF ITS MEMBERS, OFFICERS, DIRECTORS, EMPLOYEES OR AGENTS RELATING TO YOUR BROKERAGE SUBSCRIPTION(S). ANY ARBITRATION UNDER THIS AGREEMENT WILL BE CONDUCTED UNDER THE ARBITRATION RULES OF THE FINANCIAL INDUSTRY REGULATORY AUTHORITY. ARBITRATION MAY BE INITIATED BY EITHER OF US SERVING WRITTEN NOTICE ON THE OTHER. THE ARBITRATORS&rsquo; RULING WILL BE FINAL AND JUDGMENT ON IT MAY BE ENTERED IN ANY COURT OF COMPETENT JURISDICTION.<br />
+THE Bit Back RESERVES THE RIGHT TO PURSUE LEGAL ACTION AGAINST YOU THROUGH THE STATE AND FEDERAL COURTS OF ILLINOIS OR OTHER APPROPRIATE JURISDICTION IN THE EVENT THE Bit Back DETERMINES YOU HAVE COMMITTED FRAUD OR OTHER CRIMES AGAINST THE Bit Back AND/OR THIRD PARTIES INVOLVING THE FUNDING OF, TRANSACTIONS IN, OR WITHDRAWALS FROM YOUR SUBSCRIPTION(S) WITH THE Bit Back. IN SUCH CASES, YOU SHALL BE DEEMED BY THIS AGREEMENT TO HAVE ACCEPTED.<br />
+NO PERSON SHALL BRING A PUTATIVE OR CERTIFIED CLASS ACTION TO ARBITRATION, NOR SEEK TO ENFORCE ANY PREDISPUTE ARBITRATION AGREEMENT AGAINST ANY PERSON WHO HAS INITIATED IN COURT A PUTATIVE CLASS ACTION; OR WHO IS A MEMBER OF A PUTATIVE CLASS ACTION WHO HAS NOT OPTED OUT OF THE CLASS WITH RESPECT TO ANY CLAIMS ENCOMPASSED BY THE PUTATIVE CLASS ACTION UNTIL: (I) THE CLASS CERTIFICATION IS DENIED; OR (II) THE CLASS IS DECERTIFIED, OR (III) THE CUSTOMER IS EXCLUDED FROM THE CLASS BY THE COURT. SUCH FORBEARANCE TO ENFORCE AN AGREEMENT TO ARBITRATE SHALL NOT CONSTITUTE A WAIVER OF ANY RIGHTS UNDER THIS AGREEMENT EXCEPT TO THE EXTENT STATED HEREIN.<br />
+These TERMS OF USE constitute the entire agreement with respect to your access to and use of the The Bit Back Web site. If any provision of these TERMS OF USE is unlawful, void or unenforceable, then that provision shall be deemed severable from the remaining provisions and shall not affect their validity and enforceability.<br />
+This Agreement will pass to the benefit of The Bit Back successors, assigns and agents. The Bit Back may assign its rights and duties under this Agreement to any of its successors, subsidiaries or affiliates without giving you notice, or to any other entity on prior written notice to you. In addition, you agree that this Agreement and all terms hereof, will be binding on your heirs executors, administrators and personal representatives and any assigns permitted by The Bit Back.<br />
+To the extent permitted by law, The Bit Back shall not be liable for any expenses, losses, damages, liabilities, demands, charges and claims of any kind or nature whatsoever (including without limitation any legal expenses and costs and expenses relating to investigating or defending any demands, charges and claims) (&ldquo;Losses&rdquo;) by or with respect to the Subscription, except to the extent that such Losses are actual Losses proven with reasonable certainty, are not speculative, are proven to have been fairly within the contemplation of the parties as of the date hereof, and are determined by a court of competent jurisdiction or an arbitration panel in a final non-appealable judgment or order to have resulted solely from The Bit Back gross negligence or willful misconduct and without limiting the generality of the foregoing, Bit Back will not be liable for any indirect, special, incidental or consequential damages or other losses (regardless of whether such damages or other losses were reasonably foreseeable).<br />
+Bit Back shall have no liability for and you agree to reimburse, indemnify and hold Bit Back, its affiliates and their partners, directors, officers and employees and any person controlled by or controlling The Bit Back harmless from all expenses (including legal expenses and reasonable attorney&rsquo;s fees), Losses or damages that result from: (a) your or your agents&rsquo; misrepresentation, act or omission or alleged misrepresentation, act or omission, (b) The Bit Back &lsquo;s following your or your agent&rsquo;s directions or failing to follow your or their unlawful or unreasonable directions, (c) any of your actions or the actions of your previous advisers or Custodian, (d) the failure by any person not controlled by The Bit Back to perform any obligations to you, and (e) your failure to provide accurate information on your Bit Back Subscription Application or to update that information as required.<br />
+</p><h2>Waiver, Modifications and Amendments</h2><p><br/>
+You agree that The Bit Back may change the terms of this Agreement by giving you notice of the new terms. You agree that your use of The Bit Back Service after notice of change to this Agreement, or if you do not close your Bit Back Subscription within fifteen (15) calendar days of such notice, means that you accept the changes. Changes required by law, however, will be effective immediately.<br />
+Except as specifically permitted in this Agreement, no provision of this Agreement will be deemed waived, altered, modified or amended unless agreed to in writing by The Bit Back.<br />
+The Bit Back&rsquo;s failure to insist on strict compliance with this Agreement or any other course of conduct on our party will not be deemed a waiver of Bit Back&rsquo;s rights under this Agreement.<br />
+</p><h2>Headings</h2><p><br/>
+The heading of each Section hereof is for descriptive purposes only and shall not be (a) deemed to modify or qualify any of the rights or obligations set forth herein or (b) used to construe or interpret any of the provisions hereunder.<br />
+</p><h2>Counterparts</h2><p><br/>
+This Agreement may be executed in any number of counterparts by you, each of which will constitute an original and all of which, when taken together, will constitute one and the same instrument.<br />
+</p><h2>Appendix</h2><p><br/>
+All content provided by Bit Back.com is copy written and any use is a violation of applicable copyright and/or trademark laws unless prior written consent is provided by Bit Back.com. Company names, logos, icons, graphics and designs referred to on by Bit Back.com may be the property of third party respective owners and our displaying them is intended for the owner&rsquo;s benefit. We do not intend to infringe these third party proprietary rights<br />
+I, as a subscriber of The Bit Back Subscription, have read and understand these Terms of Use. Furthermore, my continued subscription shall constitute my consent to these Terms of Use.<br />
+</p>
+      </div>
+    </div>
+    <div class="overlay" id="company" style="display:none">
+      <div class="exit">
+        <img src="img/exit.png" width="30px" height="30px" id="hide">
+      </div>
+      <div class="overlay-box overflow">
+        <h2>COMPANY</h2>
+        <p>Bit Back is a User Friendly software developed by ASOLUTIONS Software Organisation (ASO). Originally, Software was developed back in 2008 in Germany by Eastern European experts of Digital Forensic and Data Recovery, by working title RODE 1.0, software initially launched as non-commercial product, in order to assist in fight against Cyber Crime.<br /></p>
+
+<p>Initial purpose and development of software was Data protection, however, with revers approach Information Technology Engineers and Software Developers build engines that were and are able to recover deleted files and data from NTFS partitions. In 2009 tester version of Software was released for Commercial Usage and after 3 years of constant improvement &lsquo;&rsquo;Get my Files back&rsquo;&rsquo; Project was shaped and adjusted in User Friendly Software Bit Back</p>
+      </div>
+    </div>
+    <div class="overlay" id="info" style="display:none">
+      <div class="exit">
+        <img src="img/exit.png" width="30px" height="30px" id="hide">
+      </div>
+      <div class="overlay-box">
+        <h2>Bit Back is one of the simplest, safest and fastest portable file recovery tool on the market today!</h2><br /><p>
+If you've accidentally deleted your pictures, video clips, documents or any other file on your computer, Bit Back will get them BACK for you. Bit Back will find the files you've deleted, undelete them and put them where ever you want them. It only takes a couple of clicks and THREE easy steps!</p>
+
+<p>Bit Back Can<br />
+&bull; Get your files back within three easy steps.<br />
+&bull; Run from a removable device &ndash; no installation needed!<br />
+&bull; Work on: Windows 8, Windows 7, Windows Vista, Windows XP<br />
+&bull; Work with unlimited file sizes.<br />
+&bull; Work with absolutely all file types.<br />
+&bull; Handle all the technical stuff &ndash; You don&rsquo;t have to be a computer expert to get your files back.<br />
+&bull; Run absolutely safely. Safety was one of the main concerns while making this software.<br />
+&bull; Windows mangles filenames when it deletes them, Bit Back will get the original file names as well.<br />
+&bull; Automatically recognizes Hard Disk Drives or Removable Storage devices that it can use and only allow work with them.<br />
+&bull; Run Multithreaded &ndash; Bit Back will utilize your CPU in the most optimum way <br />
+Simplicity was one of the main concerns while making this software</p>
+
+<p>It takes only couple of clicks and THREE EASY STEPS!</p>
+
+<p>Choose the source drive.<br />
+So &ndash; some files got deleted &ndash; Select the Hard Disk Drive or a Removable Storage Device where the files were located before they got deleted. If they were on the Desktop &ndash; just choose the Desktop icon. Simply select and click &ldquo;Next&rdquo;.</p>
+
+<p>Choose the destination.<br />
+Once Bit Back gets the files back &ndash; where should it put them? If you have a special place in mind, put it there, if not &ndash; just click &ldquo;Next&rdquo;. Bit Back will select a most convenient location for you.</p>
+
+<p>Select the files.<br />
+Bit Back shows you a list of all files that were deleted from the Hard Disk Drive or a Removable Storage Device you told it to look on. Just pick the files you want to get back and click &ldquo;Next&rdquo;</p>
+
+<p>How does it work?<br />
+When a file is deleted, it is not completely deleted from the Hard drive. Windows only marks the place where the file used to be as &ldquo;free to write&rdquo; and uses the space later, when it needs it. Until you write something into that place it is possible for Bit Back to get the files back for you.<br />
+</p>
+      </div>
+    </div>
+
+
+
+
+
+    <div class="navbar navbar-fadein" id ="scroll-menu">
+
+        <div class="container-fluid fadein-container">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle gumb" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar gumb-line"></span>
+              <span class="icon-bar gumb-line"></span>
+              <span class="icon-bar gumb-line"></span>
+            </button>
+
+            <a href="#home"><img class="navbar-brand"  src="img/bitback_blue.png" alt="bitback" height="20"></a>
+          </div>
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li><a class="navigate" href="#product">Start</a></li>
+        <li><a class="navigate" href="#Section1">Recovery</a></li>
+        <li><a class="navigate" href="#Section2">How</a></li>
+        <li><a class="navigate" href="#features">Features</a></li>
+        <li><a class="navigate" href="#Section5">Buy</a></li>
+        
+      </ul>
+    </div><!-- /.navbar-collapse -->
+
+      
+      </div><!-- /.container-fluid -->
+    </div>
+
+    <div class="home" id="home">
+
+
+
+      <div class="navbar navbar-custom" role="navigation">
+
+        <div class="container-fluid pomak">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            <img class="navbar-brand" href="#" src="img/bitback.png" alt="bitback" height="20">
+          </div>
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#product">Start</a></li>
+        <li><a href="#Section1">Recovery</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#Section5">Buy</a></li>
+        
+      </ul>
+    </div><!-- /.navbar-collapse -->
+
+      
+      </div><!-- /.container-fluid -->
+    </div>
+
+    
+
+        <div class="parallax-viewport spices" id="parallax">
+
+          
+              <img class="particle spice spice1 parallax-layer" src="img/particles2.png" alt="part" style="opacity: 0.5">
+            
+              <img class="particle2 spice spice2  parallax-layer" src="img/particles1.png" alt="part" style="opacity: 0.7">
+
+              <div class=" spice3 spice" >
+              <h1 class="wow fadeInLeft">GET YOUR FILES BACK!</h1>
+              <p class="wow fadeInRight" data-wow-delay="0.25s">Recover your pictures, documents and files in three simple steps.</p>
+              <h2 class="wow fadeInLeft" data-wow-delay="0.5s">It's Working!</h2>
+          
+            
+              </div>
+          
+          <div class=" spice4 spice " >
+              <img class="hdd wow fadeInUpBig" src="img/hdd.png" alt="hdd"  width="200" data-wow-delay="0.5s">
+          </div>
+        
+        </div>
+
+
+
+    </div>
+    <div class="compatible">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-2 col-lg-2  col-sm-2 col-md-offset-2 col-lg-offset-2 hidden-sm hidden-xs">
+            <img class="windows"src="img/windows81.png" alt="hdd"  >
+          </div>
+          <div class="col-md-2 col-lg-2  col-sm-2 hidden-sm hidden-xs">
+            <img class="windows"src="img/windows8.png" alt="hdd" >
+          </div>
+          <div class="col-md-2 col-lg-2  col-sm-2 hidden-sm hidden-xs">
+            <img class="windows"src="img/windows7.png" alt="hdd"  >
+          </div>
+          <div class="col-md-2 col-lg-2  col-sm-2 hidden-sm hidden-xs">
+            <img class="windows"src="img/windowsxp.png" alt="hdd"  >
+          </div>
+        </div>
+      </div>
+
+        </div>
+
+    <section class="product white" id="product">
+
+      <div class="whitespace"></div>
+
+      <div class="product-content">
+        <div class="wow fadeInDown">
+          <h2>Great <span style="color:#3d97c6;">data recovery</span> in a simple application</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus.</p>
+          <div class="video">
+            <iframe src="//player.vimeo.com/video/79916736?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff" width="600" height="337" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section1 dark" id="Section1">
+      <div class="container">
+        <div class="row">
+
+
+          <div class="square col-lg-5 col-md-5 col-sm-8 col-xs-8 col-lg-offset-1 col-md-offset-1 col-xs-offset-2">
+            <div class="square-inner wow fadeInLeftBig">
+              <h2>RECOVER <span style="color:#fff;">YOUR</span> DATA</h2>
+              <p>BitBack is a user friendly application that will recover your deleted files in three simple steps.</p>
+            </div>
+          </div>
+          <div class="krug col-md-4 col-lg-4 col-sm-6 col-xs-8 col-lg-offset-1 col-md-offset-1 col-sm-offset-3 col-xs-offset-2">
+            <div class="circle wow fadeInRightBig" data-wow-delay="0.75s">
+             <div class="circle-inner"></div>
+             </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <section class="section2 dark" id="Section2">
+      <div class="container">
+        <div class="row">
+
+
+          
+          <div class="wow fadeInLeftBig text-box col-lg-4 col-md-4 col-sm-8 col-xs-8 col-lg-offset-1 col-md-offset-1 col-sm-offset-2 col-xs-offset-2" data-wow-delay="0.75s">
+            <h1 >GET YOUR FILES</h1>
+            <p>- more info about bitback</p>
+            <p>- more info about bitback</p>
+            <p>- more info about bitback</p>
+            <p>- more info about bitback</p>
+            
+
+          </div>
+
+          <div class="wow fadeInRightBig laptop col-lg-6 col-md-6 col-sm-10 col-sm-offset-1 col-lg-offset-0 col-md-offset-0 ">
+            <img src="img/laptop_01.png" alt="laptop" height="300" id="laptop">
+          </div>
+        </div>
+      </div>
+  </section>
+
+    <section class="section3 white" id="features">
+      <div class="container">
+      <div class="row">
+        <div class="wow bounceInLeft col-md-4 col-lg-4 text-center col-centered">
+          <h2>BitBack Features</h2>
+        </div>
+        </div>
+        <div class="row">
+
+            <div class="feature-wrap col-md-2 col-lg-2  col-sm-4 col-md-offset-2 col-lg-offset-2 col-sm-offset-2 col-xs-6 col-xs-offset-3">
+              <div class="wow fadeInDown feature">
+                <h2>Get your Photos back</h2>
+                <img src="img/document.png" alt="wallet" height="104" width="74" style="margin-left:35px;">
+                <h3>You accidently deleted your vacation photos? BitBack recovers images within seconds.</h3>
+              </div>
+            </div>
+          
+            <div class="feature-wrap col-md-2 col-lg-2 col-sm-4 col-xs-6 col-xs-offset-3 col-lg-offset-0 col-md-offset-0 col-sm-offset-0" >
+              <div class="wow fadeInDown feature" data-wow-delay="0.75s">
+                <h2>Recover any filetype</h2>
+                <img src="img/wallet.png" alt="wallet" height="104" width="142">
+                <h3>All multimedia Filetypes are supported</h3>
+              </div>
+            </div>
+          
+            <div class="feature-wrap col-md-2 col-lg-2 col-sm-4 col-xs-6 col-xs-offset-3 col-lg-offset-0 col-md-offset-0 col-sm-offset-2">
+              <div class="wow fadeInDown feature" data-wow-delay="1.5s">
+                <h2>It's not too late!</h2>
+                <img src="img/document.png" alt="wallet" height="104" width="74" style="margin-left:35px;">
+                <h3>Recover data after up to 30 rewrites</h3>
+              </div>
+            </div>
+          
+            <div class="feature-wrap col-md-2 col-lg-2 col-sm-4 col-xs-6 col-xs-offset-3 col-lg-offset-0 col-md-offset-0 col-sm-offset-0">
+              <div class="wow fadeInDown feature" data-wow-delay="2.25s">
+                <h2>Affordable and easy</h2>
+                <img src="img/wallet.png" alt="wallet" height="104" width="142">
+                <h3>Pay 99$ once!<br>No setup fees, no contract and a free tutorial video</h3>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+    </section>
+
+
+<section class="section5 white" id="Section5">
+  <div class="section4">
+      <div class="container">
+        <div class="row">
+                <div class="slider">
+                <div class="slider__wrapper">
+                  <div class="slider__item">
+                    
+                          <div class="review review-text col-md-6 col-lg-6 col-sm-6 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus."</p>
+                          </div>
+                          <div class="review review-author col-md-3 col-lg-3 col-sm-3 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <h2>Martin L. King</h2>`
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <p>Review on reviewweb.com</p>
+                          </div>
+
+
+                    
+                  </div>
+                  <div class="slider__item">
+                     <div class="review review-text col-md-6 col-lg-6 col-sm-6 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus."</p>
+                          </div>
+                          <div class="review review-author col-md-3 col-lg-3 col-sm-3 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <h2>Mahatma Ghandi</h2>
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <p>Review on reviewweb.com</p>
+                          </div>
+
+                  </div>
+                  <div class="slider__item">
+                      <div class="review review-text col-md-6 col-lg-6 col-sm-6 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus."</p>
+                          </div>
+                          <div class="review review-author col-md-3 col-lg-3 col-sm-3 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+                            <h2>Clarc Kent</h2>
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <img class="star" src="img/star-2-icon-24.png" alt="star" height="15px;">
+                            <p>Review on reviewweb.com</p>
+                          </div>
+
+
+                  </div>
+
+                </div>
+
+            </div>
+      </div>      
+      </div>
+  </div>
+
+  
+      <div class="container">
+        <div class="row">
+
+          <div class=" package col-lg-4 col-md-4 col-sm-7 col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
+            <img src="img/package.png" alt="package" height="400" >
+          </div>
+
+          <div class="price col-lg-4 col-md-4 col-sm-3 col-sm-offset-0 col-md-offset-2 col-lg-offset-2">
+            <h1 >39,99€</h1>
+            <a href="#">BUY BITBACK NOW</a>
+
+          </div>
+        </div>
+      </div>
+  </section>
+
+
+   <div class="footer">
+      <div class="container">
+        <div class="row">
+             <div class="col-md-1 col-lg-2  col-sm-2 col-md-offset-3 col-lg-offset-2 col-sm-offset-1">
+            <a id="info-click">INFO</a>
+          </div>
+          <div class="col-md-2 col-lg-2  col-sm-2">
+            <a id="company-click">COMPANY</a>
+          </div>
+          <div class="col-md-2 col-lg-2  col-sm-4">
+            <a id="terms-click">TERMS AND CONDITIONS</a>
+          </div>
+          <div class="col-md-1 col-lg-2  col-sm-2">
+            <a id="Contact">CONTACT</a>
+          </div>
+
+
+        </div>
+      </div>
+  </div>
+
+<script type="text/javascript" src="js/jquery-1.7.2.js"></script>
+
+
+    <script src="dist/wow.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script>
+      wow = new WOW(
+        {
+          animateClass: 'animated',
+          offset:       100
+        }
+      );
+      wow.init();
+    </script>
+    <script src="js/jquery.event.frame.js"></script>
+  <script src="js/jquery.parallax.js"></script>
+  <script>
+$(function() {
+  $('a[href*=#]:not([href=#])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+      var target = $(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        $('html,body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
+});
+  </script>
+
+  <script type="text/javascript">
+
+
+  $('#Contact').click(function() {
+      $('#contacting').fadeIn(900);
+    });
+
+        $('.exit').click(function() {
+      $('#contacting').fadeOut(900);
+    });
+        $('#terms-click').click(function() {
+      $('#terms').fadeIn(900);
+    });
+
+        $('.exit').click(function() {
+      $('#terms').fadeOut(900);
+    });
+
+            $('#company-click').click(function() {
+      $('#company').fadeIn(900);
+    });
+
+        $('.exit').click(function() {
+      $('#company').fadeOut(900);
+    });
+
+                $('#info-click').click(function() {
+      $('#info').fadeIn(900);
+    });
+
+        $('.exit').click(function() {
+      $('#info').fadeOut(900);
+    });
+ 
+(function($) {
+    $(document).ready(function(){
+ 
+        $(window).scroll(function(){
+            if ($(this).scrollTop() > 500) {
+                $('#scroll-menu').fadeIn(500);
+            } else {
+                $('#scroll-menu').fadeOut(500);
+            }
+        });
+ 
+    });
+})(jQuery);
+ 
+</script>
+
+<!-- JQuery script to define Layer sizes in the parallax header and turns parallax off if Screen width is less than 900px -->
+<!-- For smaller screens the header layout is defined by Media Queries -->
+<script>
+if(window.innerWidth > 900 ){
+$(".spices>.spice1").each(function(i, spice1) {
+ $(spice1).css({
+        width: ($(spice1).parent().width()) + 50
+    });
+}); 
+
+$(".spices>.spice2").each(function(i, spice2) {
+    $(spice2).css({
+        width: ($(spice2).parent().width()) + 100
+    });
+
+});
+$(".spices>.spice3").each(function(i, spice3) {
+    $(spice3).css({
+        width: ($(spice3).parent().width()) + 150
+    });
+
+});
+$(".spices>.spice4").each(function(i, spice4) {
+    $(spice4).css({
+        width: ($(spice4).parent().width()) + 200
+    });
+});
+
+$(".spices>.spice").each(function(i, spice) {
+    $(spice).css({
+        position: "absolute",
+        left: ($(spice).parent().width()/2) - ($(spice).width()/2)
+    });
+
+});
+
+
+  jQuery(document).ready(function(){
+    jQuery('#parallax .parallax-layer')
+    .parallax({
+      mouseport: jQuery('#parallax')
+    });
+  });
+} else {
+
+
+
+
+
+$(".spices>.spice").each(function(i, spice) {
+    $(spice).css({
+        position: "absolute",
+        left: ($(spice).parent().width()/2) - ($(spice).width()/2)
+    });
+
+});
+
+
+}
+
+
+</script>
+<script>
+$(window).scroll(function() {
+    var windscroll = $(window).scrollTop();
+    if (windscroll >= 100) {
+        
+        $('section').each(function(i) {
+            if ($(this).position().top <= windscroll + 5) {
+                $('.navigate.active').removeClass('active');
+                $('.navigate').eq(i).addClass('active');
+            }
+        });
+
+    } else {
+
+        
+        $('.navigate.active').removeClass('active');
+        $('.navigate:first').addClass('active');
+    }
+
+}).scroll();
+</script>
+<script>
+$(window).scroll(function() {
+    var windscroll = $(window).scrollTop();
+    
+        
+        $('section.white').each(function() {
+            if ($(this).position().top <= windscroll + 20) {
+                $('.navbar-fadein').addClass('change-color');
+                
+            }
+        });
+        $('section.dark').each(function() {
+            if ($(this).position().top <= windscroll + 20) {
+                $('.navbar-fadein').removeClass('change-color');
+                
+            }
+        });
+    
+
+}).scroll();
+</script>
+
+
+<script src="js/jquery.glide.js"></script>
+<script>
+    $('.slider').glide();
+</script>
+
+  </body>
+</html>

@@ -19,8 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install ntfs-3g and the exFAT tools
-        # exfat-fuse: in case the runner's kernel has no exfat module
-        run: sudo apt-get update && sudo apt-get install -y ntfs-3g exfatprogs exfat-fuse
+        # the runner's (Azure) kernel has its exfat module in linux-modules-extra - the test needs the kernel driver
+        run: sudo apt-get update && sudo apt-get install -y ntfs-3g exfatprogs "linux-modules-extra-$(uname -r)"
       - name: Make the NTFS test images
         run: sudo sh tests/ntfs-image/make_image.sh
       - uses: actions/upload-artifact@v7

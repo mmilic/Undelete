@@ -1,6 +1,6 @@
 #!/bin/sh
 # Builds out/exfat-test/exfat.img: an exFAT volume, formatted by exfatprogs and written and deleted from by Linux's
-# exfat driver (or exfat-fuse where the kernel has none), holding deleted files - fragmented and contiguous, in a
+# kernel exfat driver, holding deleted files - fragmented and contiguous, in a
 # folder that stays and in deleted folders, a preallocated one, Recycle Bin pairs - and exfat.expected.tsv, what
 # the engine must report for each deleted test file:
 #   name, SHA-256 of the data, recoverability, folder, content check ("-": not checked), name it is saved under,
@@ -16,9 +16,17 @@ MNT=/tmp/undelete-exfat-test
 mkdir -p "$D" "$MNT"
 rm -f "$IMG" "$TSV"
 
+# The kernel's exfat driver only. exfat-fuse deletes differently: it clears a deleted file's FAT chain and shrinks
+# a folder before deleting it, so the expectations below (what Windows and the kernel driver leave) wouldn't hold.
+if ! modprobe exfat; then
+  echo "The kernel has no exfat module - on Ubuntu: apt-get install linux-modules-extra-\$(uname -r)" >&2
+  exit 1
+fi
 mount_image() {
-  if modprobe exfat 2>/dev/null && mount -t exfat -o loop "$IMG" "$MNT" 2>/dev/null; then return 0; fi
-  mount.exfat-fuse "$IMG" "$MNT"
+  mount -t exfat -o loop "$IMG" "$MNT"
+}
+unmount_image() {
+  umount "$MNT"
 }
 
 dd if=/dev/zero of="$IMG" bs=1M count=16 status=none
@@ -31,7 +39,7 @@ while head -c 16384 /dev/urandom > "$MNT/fill_$i.bin" 2>/dev/null; do i=$((i+1))
 rm -f "$MNT/fill_$i.bin"
 # Linux's exfat driver zeroes a deleted file's size and first cluster if the file is deleted while it is still
 # cached from being written - delete only after a fresh mount, as with a file deleted later on
-umount "$MNT"
+unmount_image
 mount_image
 j=0
 while [ $j -lt $i ]; do rm "$MNT/fill_$j.bin"; j=$((j+2)); done
@@ -104,12 +112,12 @@ expect "$RB/\$RA1B2C3.jpg" Good '\Users\test\Pictures' Damaged "Летовање
 expect "$RB/\$RX9Y8Z7.docx" Good '\Users\test\Documents' Damaged "Izveštaj.docx"
 expect "$RB/\$RQ1W2E3" Good '\Users\test\Desktop' - README
 
-umount "$MNT"
+unmount_image
 mount_image
 cd "$MNT"
 rm fragmented.bin contiguous.bin empty.txt "Čačak ćevapi.txt" "фотографија.jpg" "Grüße.txt" preview.png letter.pdf \
   "$LONG" preallocated.bin "Photos/2014/holiday.png" "Names/aux.txt" "$RB"/*
 rm -r "Old Stuff" "Big Folder"
 cd /
-umount "$MNT"
+unmount_image
 echo "image ready: $IMG ($(wc -l < "$TSV") deleted test files)"

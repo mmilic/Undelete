@@ -1,0 +1,971 @@
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0 0 0 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    -ms-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0 0 0 0;
+    height: 100%;
+    font-family: 'Lato', sans-serif;
+}
+
+section {
+    padding-top: 100px;
+    padding-bottom: 100px;
+    min-height: 100%;
+}
+
+.active{
+
+    background-color: #eeeeee;
+}
+
+
+
+.section4 {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#scroll-menu {
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    z-index: 9;
+    display: none;
+}
+
+.fadein-container {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.navbar-fadein {
+    border: 0px;
+    border-radius: 0px;
+    -webkit-transition: background-color 0.5s; /* For Safari 3.1 to 6.0 */
+    transition: background-color 0.5s;
+    background-color: #fff;
+  
+   
+    
+    }
+
+.container {
+}
+
+.top-menu {
+    height: 20%;
+}
+
+.fadein-container .navbar-right li a {
+    color: #299cbc;
+}
+
+.col-centered {
+    float: none;
+    margin: 0 auto;
+}
+
+.compatible {
+    width: 100%;
+    min-height: 10%;
+    
+    background-color: #9B9B9B;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    display: table;
+
+}
+
+.compatible>.container{
+display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+
+
+
+
+
+
+.compatible > .container > .row >div> img{
+    max-height: 60%;
+    max-width: 100%;
+    
+}
+
+
+
+ul, ol {
+    margin-bottom: 0px;
+}
+
+.home {
+    background: url(../img/preuzmi.png) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 90%;
+    width: 100%;
+}
+
+.home-contentxxx {
+    width: 100%;
+    height: 100%;
+    margin-top: 250px;
+    position: absolute;
+}
+
+.section1 {
+    width: 100%;
+    background: url(../img/preuzmi.png) no-repeat center center fixed;
+}
+
+.section2 {
+    width: 100%;
+    
+    background-color: #3d97c6;
+}
+
+.section4 {
+    width: 100%;
+    background: url(../img/yellow_noise.jpg) no-repeat center center fixed;
+}
+
+.section5 {
+    width: 100%;
+    
+    background-color: #ffffff;
+}
+
+.footer {
+    width: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: #9B9B9B;
+}
+
+
+.footer > .container > .row > div > a {
+
+font-family: 'Lato', sans-serif;
+font-size: 0.8em;
+font-weight: 100;
+color: #fff;
+
+}
+.change-color {
+    -webkit-transition: background-color 1s; /* For Safari 3.1 to 6.0 */
+    transition: background-color 1s;
+    background-color: #333;
+}
+
+.parallax-viewport {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 80%;
+    min-height:80%;
+    margin-left: 0;
+    margin-bottom: 0;
+}
+
+.parallax-layer {
+    position: absolute;
+}
+
+.home h1 {
+    color: #6cd06f;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 2.8em;
+    text-align: center;
+}
+
+.home p {
+    color: #fff;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 1em;
+    line-height: 2em;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    letter-spacing: 0.094em;
+}
+
+.product {
+    background-color: #ffffff;
+    height: 99.8%;
+    min-height: 730px;
+}
+
+.product-content {
+    width: 100%;
+    margin-top: 150px;
+    position: absolute;
+}
+
+.square {
+    
+    
+}
+
+.square-inner p {
+    color: #fff;
+    font-weight: 100;
+    font-size: 2.5em;
+    line-height: 1.5;
+}
+
+.square-inner h2 {
+    font-weight: 400;
+    font-size: 2.8em;
+}
+
+.circle {
+    border-radius: 50%;
+    width: 300px;
+    height: 300px;
+    background-color: #fff;
+    padding-left: 8px;
+    padding-top: 8px;
+}
+
+.circle-inner {
+    background-image: url("../img/screen.png");
+    border-radius: 50%;
+    width: 284px;
+    height: 284px;
+}
+
+.text-box p {
+    line-height: 1.2;
+    font-size: 2em;
+    font-weight: 100;
+    color: #fff;
+}
+
+.review p {
+    line-height: 1.2;
+    font-size: 2em;
+    color: #FFF;
+}
+
+.review-author {
+    text-align: center;
+}
+
+.review-author h2 {
+    font-weight: 100;
+    color: #fff;
+    font-size: 1.8em;
+}
+
+.review-author p {
+    line-height: 1;
+    font-size: 1.5em;
+    color: #808080;
+}
+
+.product-content > div > h2 {
+    color: #353535;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    font-size: 2.8em;
+    text-align: center;
+    text-transform: uppercase;
+       -webkit-font-smoothing: antialiased;
+    -webkit-text-shadow: rgba(0,0,0,.01) 0 0 1px;
+    text-shadow: rgba(0,0,0,.01) 0 0 1px;
+}
+
+.product p {
+    color: #171717;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 1.1em;
+    line-height: 1.5em;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    letter-spacing: 0.094em;
+}
+
+.hdd-img {
+    margin: 0 auto;
+}
+
+.hdd {
+    margin-top: 15%;
+}
+
+.windowsi {
+    margin: 0 auto;
+}
+
+.spice3 h1 {
+    font-weight: 100;
+    color: #fff;
+    font-size: 3.5em;
+}
+
+.spice3 p {
+    font-size: 2.1em;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.spice3 h2 {
+    font-weight: 400;
+    color: #fff;
+}
+
+.spices {
+    text-align: center;
+}
+
+.navbar-brand {
+    padding: 0px;
+    padding-bottom:15px;
+    margin-top: 15px;
+
+}
+
+.particles {
+}
+
+.video {
+    width: 600px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.features {
+    background-color: #fff;
+    height: 99.8%;
+    border-bottom: 1px solid gray;
+    min-height: 700px;
+}
+
+.features-content {
+    width: 100%;
+    margin-top: 150px;
+    position: absolute;
+}
+
+.features h2 {
+    color: #353535;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 2em;
+    text-align: center;
+    -webkit-text-stroke: 0.Xpx;
+    text-shadow: 0 0 1px rgba(61,61,61,0.1);
+}
+
+.features-triple {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+
+
+.feature h2 {
+    color: #353535;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.feature h3 {
+    color: #5f5f5f;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 1.8em;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.navbar-custom {
+    height: 20%;
+    margin-bottom: 0px;
+    position: relative;
+    color: #fff;
+}
+
+
+
+.icon-bar{
+
+    background-color: #fff;
+
+}
+
+.gumb {
+
+border-color: #000;
+
+
+}
+.gimb-line{
+
+    background-color: #000;
+
+}
+
+.price {
+
+padding-top: 200px;
+text-align: center;
+
+
+}
+
+.price a {
+color: #3d97c6;
+
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    font-size: 2.5em;
+
+
+}
+.pomak {
+    position: absolute;
+    bottom: 15px;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    color: #fff;
+}
+
+.navbar-nav > li > a {
+    color: #fff;
+    padding-top: 22px;
+padding-bottom: 23px;
+}
+}
+
+nav {
+    right: 90px;
+    margin-top: 7%;
+    width: 600px;
+    float: right;
+}
+
+nav li {
+    list-style-type: none;
+    display: inline-block;
+    margin: 30px 30px 30px 30px;
+    background-color: transparent;
+    margin-top: 0px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    font-size: 1.1em;
+    outline: none;
+}
+
+nav a:hover {
+    color: #6cd06f;
+}
+
+nav a:focus {
+    outline: none;
+}
+
+#Contact {
+
+
+    cursor: pointer; 
+    cursor: hand;
+}
+
+
+.feature-wrap {
+
+    height: 415px;
+}
+
+/* CSS for Overlay */
+.overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: rgba(999,999,999,1); /*dim the background*/
+  font-family: 'Lato', sans-serif;
+
+ 
+}
+
+.overlay-box {
+
+width: 50%;
+height: 80%;
+margin-top: 10%;
+margin-left: 25%;
+margin-right: 25%;
+overflow-y:scroll;
+
+
+}
+.overflow{
+    overflow-y:initial;
+}
+
+.exit {
+    margin-top: 40px;
+    float: right;
+    margin-right: 40px;
+}
+
+.exit img {
+        cursor: pointer; 
+    cursor: hand;
+}
+
+
+/* Contact form */
+
+.contact-form {
+    width: 500px;
+    height: 500px;
+    line-height: 100px;
+    position: fixed;
+    top: 50%; 
+    left: 50%;
+    margin-top: -200px;
+    margin-left: -250px;
+    background-color: transparent;
+    border-radius: 5px;
+    text-align: center;
+    z-index: 11; /* 1px higher than the overlay layer */
+}
+
+#feedback-page{
+    text-align:center;
+}
+
+#form-main{
+    width:100%;
+    float:left;
+    padding-top:0px;
+}
+
+#form-div {
+    background-color:rgba(72,72,72,0.4);
+    padding-left:35px;
+    padding-right:35px;
+    padding-top:35px;
+    padding-bottom:50px;
+    width: 450px;
+    float: left;
+    left: 50%;
+    position: absolute;
+  margin-top:30px;
+    margin-left: -260px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+}
+
+.feedback-input {
+    color:#3c3c3c;
+    font-family: Helvetica, Arial, sans-serif;
+  font-weight:500;
+    font-size: 18px;
+    border-radius: 0;
+    line-height: 22px;
+    background-color:rgba(255,255,255,0.6);
+    padding: 13px 13px 13px 54px;
+    width:100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+  border: 3px solid rgba(0,0,0,0);
+}
+
+.feedback-input:focus{
+    background: #fff;
+    box-shadow: 0;
+    border: 3px solid #37ae39;
+    color: #3498db;
+    outline: none;
+  padding: 13px 13px 13px 54px;
+}
+
+.focused{
+    color:#5aa65c;
+    border:#5aa65c solid 3px;
+}
+
+/* Icons ---------------------------------- */
+#name{
+    background-image: url(http://rexkirby.com/kirbyandson/images/name.svg);
+    background-size: 30px 30px;
+    background-position: 11px 8px;
+    background-repeat: no-repeat;
+}
+
+#name:focus{
+    background-image: url(http://rexkirby.com/kirbyandson/images/name.svg);
+    background-size: 30px 30px;
+    background-position: 8px 5px;
+  background-position: 11px 8px;
+    background-repeat: no-repeat;
+}
+
+#email{
+    background-image: url(http://rexkirby.com/kirbyandson/images/email.svg);
+    background-size: 30px 30px;
+    background-position: 11px 8px;
+    background-repeat: no-repeat;
+}
+
+#email:focus{
+    background-image: url(http://rexkirby.com/kirbyandson/images/email.svg);
+    background-size: 30px 30px;
+  background-position: 11px 8px;
+    background-repeat: no-repeat;
+}
+
+#comment{
+    background-image: url(http://rexkirby.com/kirbyandson/images/comment.svg);
+    background-size: 30px 30px;
+    background-position: 11px 8px;
+    background-repeat: no-repeat;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    line-height: 150%;
+    resize:vertical;
+}
+
+input:hover, textarea:hover,
+input:focus, textarea:focus {
+    background-color:white;
+}
+
+#button-blue{
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    float:left;
+    width: 100%;
+    height: 100px;
+    border: #fbfbfb solid 4px;
+    cursor:pointer;
+    background-color: #3498db;
+    color:white;
+    font-size:24px;
+    
+    padding-bottom:22px;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+  margin-top:-4px;
+  font-weight:700;
+}
+
+#button-blue:hover{
+    background-color: rgba(0,0,0,0);
+    color: #0493bd;
+}
+    
+.submit:hover {
+    color: #3498db;
+}
+    
+.ease {
+    width: 0px;
+    height: 74px;
+    background-color: #fbfbfb;
+    -webkit-transition: .3s ease;
+    -moz-transition: .3s ease;
+    -o-transition: .3s ease;
+    -ms-transition: .3s ease;
+    transition: .3s ease;
+}
+
+.submit:hover .ease{
+  width:100%;
+  background-color:white;
+}
+
+@media only screen and (max-width: 580px) {
+    #form-div{
+        left: 3%;
+        margin-right: 3%;
+        width: 88%;
+        margin-left: 0;
+        padding-left: 3%;
+        padding-right: 3%;
+    }
+}
+
+
+.feature {
+
+        text-align: center;
+
+    }
+
+/* lg Large desktop */
+@media (min-width: 1200px) { }
+
+/* md */
+@media (min-width: 980px) and (max-width: 1199px){
+
+#laptop{
+
+    height: 260px;
+
+}
+
+.feature {
+
+        text-align: center;
+
+    }
+
+}
+ 
+/* sm Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) { 
+
+    .hdd {
+        width: 250px;
+    }
+
+    .spice4 {
+        bottom: -80px;
+    }
+
+    .spice1 {
+        width: 1200px;
+        bottom: 0px;
+    }
+
+    .spice2 {
+        width: 1200px;
+        bottom: 0px;
+    }
+
+    .circle{
+
+
+        margin-top: 40px;
+    }
+
+    .text-box {
+        text-align: center;
+
+
+    }
+     .laptop {
+        text-align: center;
+         margin-top: 40px;
+
+
+    }
+
+.feature {
+
+        text-align: center;
+
+    }
+
+
+}
+ 
+/* xs Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    .hdd {
+        width: 250px;
+    }
+
+    .spice4 {
+        bottom: -80px;
+    }
+
+    .spice1 {
+        width: 1200px;
+        bottom: 0px;
+    }
+
+    .spice2 {
+        width: 1200px;
+        bottom: 0px;
+    }
+
+    .spice3 h1 {
+        font-size: 2em;
+    }
+
+    .spice3 p {
+        font-size: 1.5em;
+    }
+
+    .spice3 h2 {
+        margin-top: 5px;
+        font-size: 1.5em;
+    }
+        .feature {
+
+        text-align: center;
+
+    }
+
+    .circle {
+        position: relative;
+        left: 50%;
+        margin-left: -150px;
+
+        margin-top: 40px;
+    }
+
+    .krug {
+        text-align: center;
+    }
+
+     .text-box {
+        text-align: center;
+
+
+    }
+    .laptop {
+        text-align: center;
+         margin-top: 40px;
+
+
+    }
+   
+}
+ 
+/* xs Landscape phones and down */
+@media (max-width: 480px) { 
+
+    .hdd {
+        width: 150px;
+    }
+
+    .spice4 {
+        bottom: -80px;
+    }
+
+    .spice1 {
+        width: 600px;
+        bottom: 0px;
+    }
+
+    .spice2 {
+        width: 600px;
+        bottom: 0px;
+    }
+
+    .spice3 h1 {
+        font-size: 2em;
+    }
+
+    .spice3 p {
+        font-size: 1.5em;
+    }
+
+    .spice3 h2 {
+        margin-top: 5px;
+        font-size: 1.5em;
+    }
+
+    .compatible > .container > .row >div> img{
+    max-height: 10%;
+    max-width: 40%;
+    
+}
+
+.navbar-brand{
+
+height: 30px;
+
+}
+
+.feature {
+
+        text-align: center;
+
+    }
+
+    .laptop {
+        text-align: center;
+         margin-top: 40px;
+       
+    }
+
+#laptop {
+       
+         left: 50%;
+         margin-left: -150px;
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* iPhone 4 ----------- */
+@media
+only screen and (-webkit-min-device-pixel-ratio : 1.5),
+only screen and (min-device-pixel-ratio : 1.5) {
+
+    .hdd {
+        width: 200px;
+    }
+
+    .spice4 {
+        bottom: -80px;
+    }
+
+    .spice1 {
+        width: 1200px;
+        bottom: 0px;
+    }
+
+    .spice2 {
+        width: 1200px;
+        bottom: 0px;
+    }
+}

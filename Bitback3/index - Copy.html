@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    
+    <title>bit-back.</title>
+
+    <link rel="stylesheet" href="css/libs/animate.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800">
+
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/scroll-nav.js"></script>
+
+    <style>
+      .wow:first-child {
+        visibility: hidden;
+      }
+    </style>
+
+    <!--[if IE]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body id="scroll">
+
+    <div class="home" id="home">
+
+      <nav>
+          <ul id="nav" class="clearfix">
+            <li><a href="#product" class="animated fadeInDown">Product</a></li>
+            <li><a href="#features" class="animated fadeInDown">Features</a></li>
+            <li><a href="#purchase" class="animated fadeInDown">Purchase</a></li>
+            <li><a href="#contact" class="animated fadeInDown">Contact</a></li>
+          </ul>
+      </nav>
+
+      <div class="logo">
+        <a href="#home" class="animated fadeInDown">bit-back.</a>
+      </div>
+
+        <div class="home-content">
+          <div class="wow fadeInDown">
+            <h1 >Lost your shit and try to get it back?</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus.</p>
+          
+            <div class="hdd">
+              <img class="hdd-img"src="img/hdd.png" alt="hdd"  width="300">
+
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="product" id="product">
+
+      <div class="whitespace"></div>
+
+      <div class="product-content">
+        <div class="wow fadeInDown">
+          <h2>Great data recovery in a simple application</h2>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus lorem lorem, tristique vehicula eros egestas id. Vestibulum ante ipsum primis in faucibus orci luctus.</p>
+          <div class="video">
+            <iframe src="//player.vimeo.com/video/79916736?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff" width="600" height="337" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="features" id="features">
+      <div class="features-content">
+        <div class="wow bounceInLeft">
+          <h2>bit-back has featttures that intrest you!</h2>
+        </div>
+
+        <div class="features-triple">
+
+            <div class="feature">
+              <div class="wow fadeInDown">
+                <h2>Retrive your documents</h2>
+                <img src="img/document.png" alt="wallet" height="104" width="74" style="margin-left:35px;">
+                <h3>Lost your shit?<br>No fuck-up is big enough for this shit, hahahaha.</h3>
+              </div>
+            </div>
+          
+            <div class="feature">
+              <div class="wow fadeInDown" data-wow-delay="0.75s">
+                <h2>Affordable and easy</h2>
+                <img src="img/wallet.png" alt="wallet" height="104" width="142">
+                <h3>Pay 99$ once!<br>No setup fees, no contract and a free training video</h3>
+              </div>
+            </div>
+          
+            <div class="feature">
+              <div class="wow fadeInDown" data-wow-delay="1.5s">
+                <h2>Retrive your documents</h2>
+                <img src="img/document.png" alt="wallet" height="104" width="74" style="margin-left:35px;">
+                <h3>Lost your shit?<br>No fuck-up is big enough for this shit, hahahaha.</h3>
+              </div>
+            </div>
+          
+            <div class="feature">
+              <div class="wow fadeInDown" data-wow-delay="2.25s">
+                <h2>Affordable and easy</h2>
+                <img src="img/wallet.png" alt="wallet" height="104" width="142">
+                <h3>Pay 99$ once!<br>No setup fees, no contract and a free training video</h3>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="purchase" id="purchase">
+      <div class="purchase-content">
+        <h2>Buy this shit</h2>
+      </div>
+    </div>
+
+    <div class="contact" id="contact">
+        <div class="contact-content">
+
+          <h1> Have an issue or just want to share a quote? </h1>
+
+          <form>
+
+            <div>
+
+              <label>
+                <input id="name" type="text" name="name" />
+              </label>
+
+              <label>
+                <input id="email" type="text" name="email" />
+              </label>
+
+              <label>
+                <input id="subject" type="text" name="subject" />
+              </label>
+
+              <label>
+                <textarea id="feedback" name="feedback"></textarea>
+                <input type="button" value="Submit Form" />
+              </label>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+    <script src="dist/wow.js"></script>
+    <script>
+      wow = new WOW(
+        {
+          animateClass: 'animated',
+          offset:       100
+        }
+      );
+      wow.init();
+    </script>
+
+  </body>
+</html>

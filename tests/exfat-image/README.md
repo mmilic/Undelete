@@ -6,8 +6,9 @@ End-to-end check of the exFAT recovery engine (`CExFATDrive`) without admin righ
 powershell -ExecutionPolicy Bypass -File tests\exfat-image\run.ps1
 ```
 
-Needs WSL with `exfatprogs` (`sudo apt-get install exfatprogs`) and `python3`. WSL's kernel mounts exFAT itself;
-elsewhere `exfat-fuse` is used if the kernel has no exfat module. Everything it produces goes to `out\exfat-test\`.
+Needs WSL with `exfatprogs` (`sudo apt-get install exfatprogs`) and `python3`, and the kernel's exfat driver -
+WSL's kernel has it; on Ubuntu elsewhere it is in `linux-modules-extra-$(uname -r)`. Not `exfat-fuse`: it deletes
+differently (see Limits). Everything it produces goes to `out\exfat-test\`.
 With `-UseExistingImage` it skips making the image - the GitHub Actions build makes it on Linux and runs the
 check on Windows.
 
@@ -38,6 +39,11 @@ check on Windows.
    the one Linux wrote, and the recovered file's date. Its log is `out\exfat-test\run-exfat.log`.
 
 ## Limits
+
+Not every exFAT implementation deletes the same way. `exfat-fuse` clears a deleted file's FAT chain and shrinks a
+folder to one cluster before deleting it - then a fragmented file can only be guessed ("Partly overwritten") and
+the files in a deleted folder's later clusters are lost. The test uses the kernel driver, which, like the exFAT
+specification, leaves both alone.
 
 The image is written by Linux, not by Windows. `tests\windows-image` (CI) also makes an exFAT volume with
 Windows itself and checks the recovery from it.
