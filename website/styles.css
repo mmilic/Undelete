@@ -1,0 +1,165 @@
+/* BitBack product page - plain CSS, no framework. Brand colour from the logo (#299CBC); text and buttons use a
+   darker shade of it, the logo colour itself is too light for text on white. */
+
+@font-face {
+    font-family: "Lato";
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+    src: url("fonts/Lato-Light.woff") format("woff"), url("fonts/Lato-Light.ttf") format("truetype");
+}
+
+:root {
+    --brand: #299cbc;
+    --brand-dark: #1b7493;
+    --brand-darker: #135a73;
+    --brand-tint: #e9f5f9;
+    --ink: #1b1f23;
+    --ink-soft: #4a5560;
+    --line: #dde3e8;
+    --paper: #ffffff;
+    --paper-alt: #f4f7f9;
+    --good: #18794e;
+    --warn: #8a5300;
+    --radius: 10px;
+    --display: "Lato", "Segoe UI", system-ui, sans-serif;
+    --text: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+img { max-width: 100%; height: auto; }
+
+a { color: var(--brand-dark); }
+a:hover { color: var(--brand-darker); }
+
+.wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+
+h1, h2, h3 { line-height: 1.2; margin: 0 0 0.5em; }
+h1, h2 { font-family: var(--display); font-weight: 300; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); }
+h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0 0 1em; }
+.lead { font-size: 1.2rem; color: var(--ink-soft); }
+.section-intro { max-width: 42rem; color: var(--ink-soft); }
+
+/* buttons */
+.button {
+    display: inline-block;
+    padding: 13px 26px;
+    min-height: 48px;
+    border-radius: 999px;
+    background: var(--brand-dark);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--brand-dark);
+}
+.button:hover { background: var(--brand-darker); border-color: var(--brand-darker); color: #fff; }
+.button.secondary { background: transparent; color: var(--brand-dark); }
+.button.secondary:hover { background: var(--brand-tint); color: var(--brand-darker); }
+.button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+
+/* header */
+.site-header { border-bottom: 1px solid var(--line); background: var(--paper); position: sticky; top: 0; z-index: 10; }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 12px 0; }
+.site-header img { display: block; width: 150px; height: auto; }
+.site-header nav ul { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; list-style: none; margin: 0; padding: 0; }
+.site-header nav a:not(.button) { color: var(--ink); text-decoration: none; font-weight: 500; }
+.site-header nav a:not(.button):hover { color: var(--brand-dark); }
+.site-header .button { padding: 8px 20px; min-height: 40px; }
+
+/* hero */
+.hero { padding: 72px 0 56px; background: linear-gradient(var(--brand-tint), var(--paper)); }
+.hero .wrap { display: grid; gap: 40px; }
+.hero-text { max-width: 44rem; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 18px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 0; padding: 0; color: var(--ink-soft); font-size: 0.95rem; }
+.facts li::before { content: "✓ "; color: var(--good); font-weight: 700; }
+.screenshot { margin: 0; }
+.screenshot img { display: block; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(19, 90, 115, 0.18); }
+.screenshot figcaption { margin-top: 10px; font-size: 0.9rem; color: var(--ink-soft); text-align: center; }
+
+/* the "stop using the drive" band */
+.urgent { background: var(--brand-darker); color: #fff; padding: 26px 0; }
+.urgent .wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; }
+.urgent strong { font-size: 1.2rem; }
+.urgent p { margin: 0; color: #d9eef5; }
+
+/* sections */
+section { padding: 80px 0; }
+section.alt { background: var(--paper-alt); }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; list-style: none; margin: 36px 0 0; padding: 0; counter-reset: step; }
+.steps li { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; counter-increment: step; }
+.steps li::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 40px; height: 40px; margin-bottom: 14px;
+    border-radius: 50%; background: var(--brand-dark); color: #fff; font-weight: 700;
+}
+.steps p { margin: 0; color: var(--ink-soft); }
+
+.how-why { margin-top: 48px; display: grid; gap: 8px 48px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.how-why h3 { margin-top: 0; }
+
+.ratings { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.ratings li { display: flex; gap: 10px; align-items: baseline; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; translate: 0 -1px; }
+.dot.good { background: #13a10e; }
+.dot.partly { background: #e0a100; }
+.dot.over { background: #a0a7ad; }
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 32px; margin-top: 40px; }
+.feature img { width: 88px; height: 88px; margin-bottom: 14px; }
+.feature p { color: var(--ink-soft); margin: 0; }
+
+.more { margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px 40px; list-style: none; padding: 0; }
+.more li { padding-left: 28px; position: relative; }
+.more li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 700; }
+
+.limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 32px; }
+.limit { border-left: 3px solid var(--warn); padding: 4px 0 4px 18px; }
+.limit p { margin: 0; color: var(--ink-soft); }
+
+/* buy */
+.buy .wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 48px; align-items: center; }
+.buy .box { justify-self: center; width: min(320px, 100%); }
+.price { font-family: var(--display); font-weight: 300; font-size: 3rem; color: var(--brand-darker); margin: 8px 0 4px; }
+.price-note { color: var(--ink-soft); margin-bottom: 24px; }
+.buy ul { padding-left: 1.2em; margin: 0 0 28px; }
+.todo { display: block; margin-top: 12px; font-size: 0.9rem; color: var(--warn); }
+
+/* FAQ */
+.faq { max-width: 50rem; margin-top: 32px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 4px 0; }
+.faq summary { cursor: pointer; padding: 14px 0; font-weight: 600; list-style-position: outside; }
+.faq details p { color: var(--ink-soft); margin: 0 0 16px; }
+
+/* footer */
+.site-footer { background: #10232b; color: #c7d6dc; padding: 48px 0 32px; font-size: 0.95rem; }
+.site-footer .wrap { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.site-footer a { color: #e6f1f5; }
+.site-footer a:hover { color: #fff; }
+.site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.site-footer .social { display: flex; gap: 12px; }
+.site-footer .social img { width: 32px; height: 32px; opacity: 0.8; filter: invert(1); } /* the 2014 icons are dark grey */
+.site-footer .social a:hover img { opacity: 1; }
+.site-footer .legal { grid-column: 1 / -1; border-top: 1px solid #27414b; padding-top: 20px; color: #8fa6ae; }
+
+@media (min-width: 960px) {
+    .hero .wrap { grid-template-columns: 5fr 6fr; align-items: center; }
+}
