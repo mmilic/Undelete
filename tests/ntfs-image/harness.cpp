@@ -90,11 +90,11 @@ int main(int argc, char **argv) {
             iRecovered++;
         }
         // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result, folder, contents,
-        // the name it was saved under, its modification time (FILETIME)
-        printf("FILE\t%d\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%lld\n", pInfo->iRecordId, (const char *) name.utf8_str(),
+        // the name it was saved under, its modification time (FILETIME), the recovery's error code (0 = ok)
+        printf("FILE\t%d\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%lld\t%d\n", pInfo->iRecordId, (const char *) name.utf8_str(),
                 RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok",
                 (const char *) wxString(pInfo->sFolder.c_str()).utf8_str(), ContentLabel(pInfo->iContent),
-                (const char *) saved.utf8_str(), (long long) pInfo->n64Modify);
+                (const char *) saved.utf8_str(), (long long) pInfo->n64Modify, nRet);
     }
     // each file can leave up to 1 KB uncounted (the counter is in whole KB)
     printf("PROGRESS\t%ld\t%ld\t%d\n", (long) lKBWritten, (long) (llBytesRecovered / 1024), iRecovered);

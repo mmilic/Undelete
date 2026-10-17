@@ -39,15 +39,19 @@ its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg 
 - The tag `last-gcc462-x86` is the last commit built with the old vendored 32-bit MinGW GCC 4.6.2 +
   wxWidgets 3.0.1 toolchain (`tools/`, removed after it).
 
-The recovery engine has two automated end-to-end tests (see their READMEs), which run the engine against disk
+The recovery engine has three automated end-to-end tests (see their READMEs), which run the engine against disk
 images and check the recovered files byte-for-byte, plus what the engine reports about them:
 - `tests\ntfs-image\run.ps1` - needs WSL with `ntfs-3g`. NTFS images with deleted fragmented, sparse and
   resident files: the usual format, 4096-byte sectors and 256 KB clusters. Run it after touching `NTFSDrive.*`,
   `MFTRecord.*` or `RecoveryDrive.*`.
 - `tests\fat-image\run.ps1` - needs Python 3 on Windows (installs pyfatfs into `out\fat-test\venv`). FAT12,
   FAT16 and FAT32 images. Run it after touching `FATDrive.*` or `RecoveryDrive.*`.
+- `tests\windows-image\run.ps1` - needs admin rights, so in practice it runs in CI. An NTFS volume formatted and
+  written by Windows itself (a VHD), with compressed and EFS-encrypted files (must be refused) and the real
+  Recycle Bin. FAT32 isn't in it yet: Windows clears the high word of a deleted file's first cluster on FAT32,
+  which the FAT engine doesn't handle yet.
 
-Both use one harness (`tests\ntfs-image\harness.cpp`), which picks the engine by the image's boot sector.
+All three use one harness (`tests\ntfs-image\harness.cpp`), which picks the engine by the image's boot sector.
 The GUI and Windows-specific behaviour are still tested by hand: run the app against a real/virtual drive
 and check the recovered files. Without admin rights the GUI can still be tried on a disk image:
 `set __COMPAT_LAYER=RunAsInvoker` and `GetMyFilesBack.exe out\fat-test\fat32.img` (the image shows up in the

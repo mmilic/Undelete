@@ -122,8 +122,8 @@ out\GetMyFilesBack.exe out\fat-test\fat32.img
 
 ## 4. Tests
 
-Two end-to-end tests build disk images with deleted files, run the recovery engine against them and check
-every recovered file byte-for-byte. The GitHub build runs both on every push.
+Three end-to-end tests build disk images with deleted files, run the recovery engine against them and check
+every recovered file byte-for-byte. The GitHub build runs all three on every push.
 
 **FAT test** (FAT12, FAT16, FAT32) - needs Python 3 on Windows. It installs `pyfatfs` into a venv under
 `out\fat-test` on its own; no WSL. See `tests\fat-image\README.md`.
@@ -154,6 +154,14 @@ wsl -d Ubuntu -u root -e sh -c "apt-get update && apt-get install -y ntfs-3g pyt
 
 ```cmd
 powershell -ExecutionPolicy Bypass -File tests\ntfs-image\run.ps1
+```
+
+**Windows-written image test** - an NTFS volume that Windows itself formats and writes, on a virtual disk,
+with compressed and encrypted files and the real Recycle Bin. It needs a Command Prompt opened with "Run as
+administrator". See `tests\windows-image\README.md`.
+
+```cmd
+powershell -ExecutionPolicy Bypass -File tests\windows-image\run.ps1
 ```
 
 ## More about the build
@@ -207,7 +215,7 @@ rebuild that version.
   multi-language UI). See `CLAUDE.md` for the internal architecture.
 - `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept for reference only.
   **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT support" below.
-- `tests/ntfs-image/`, `tests/fat-image/` — the end-to-end tests of the recovery engine.
+- `tests/ntfs-image/`, `tests/fat-image/`, `tests/windows-image/` — the end-to-end tests of the recovery engine.
 
 ## FAT support
 

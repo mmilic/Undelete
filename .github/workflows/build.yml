@@ -1,4 +1,4 @@
-# Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS and FAT image tests.
+# Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS, FAT and Windows-written image tests.
 # The exe is attached to each run as the "GetMyFilesBack" artifact (Actions tab -> the run -> Artifacts).
 # Pushing a tag v<version> (the version in CMakeLists.txt, e.g. v2.6) also makes a GitHub release with the exe,
 # once the tests have passed.
@@ -85,6 +85,12 @@ jobs:
         if: always()
         run: .\tests\fat-image\run.ps1
 
+      # a volume formatted and written by Windows itself (a virtual disk - the runner has admin rights)
+      - name: Windows-written image test
+        if: always()
+        timeout-minutes: 15
+        run: .\tests\windows-image\run.ps1
+
       - uses: actions/upload-artifact@v7
         with:
           name: GetMyFilesBack
@@ -107,4 +113,6 @@ jobs:
           path: |
             out/ntfs-test/run-*.log
             out/fat-test/run-*.log
+            out/windows-test/run-*.log
+            out/windows-test/*.expected.tsv
           if-no-files-found: ignore
