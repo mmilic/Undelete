@@ -30,6 +30,8 @@ its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg 
 - No `using namespace std;` in headers: with C++17, `std::byte` clashes with the Windows SDK's `byte`.
 - `undelete.rc` embeds `undelete.exe.manifest` (requireAdministrator, Common Controls 6) - the linker's own
   manifest is switched off (`/MANIFEST:NO`).
+- **The version** is only in `CMakeLists.txt` (`project(GetMyFilesBack VERSION ...)`). CMake writes it into
+  `version.h` (from `src/UndeleteWizzard/version.h.in`), which the window title and `undelete.rc`'s VERSIONINFO use.
 - `.github/workflows/build.yml` builds and tests every push on GitHub (Linux job makes the NTFS test image with
   ntfs-3g, Windows job builds, runs the NTFS test with `-UseExistingImage` and the FAT test) and attaches the
   exe as an artifact.

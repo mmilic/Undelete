@@ -1,7 +1,9 @@
 # GetMyFilesBack (UndeleteWizzard) - 64-bit MSVC build, wxWidgets from vcpkg (static, see vcpkg.json).
 # Use build.ps1, or: cmake --preset x64 && cmake --build --preset release
 cmake_minimum_required(VERSION 3.21)
-project(GetMyFilesBack C CXX RC)
+# The app's version - the only place it is written. The window title and the exe's version info take it from
+# here (version.h.in), and a release is made by pushing the tag v<version> (.github/workflows/build.yml).
+project(GetMyFilesBack VERSION 2.6 LANGUAGES C CXX RC)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -59,9 +61,11 @@ if(UNDELETE_BUILD_APP)
         "${SRC}/languages/Translate.cpp"
         "${SRC}/undelete.rc")
     target_link_libraries(GetMyFilesBack PRIVATE undelete_engine wx::core wx::base)
+    configure_file("${SRC}/version.h.in" "${CMAKE_BINARY_DIR}/generated/version.h" @ONLY)
+    target_include_directories(GetMyFilesBack PRIVATE "${CMAKE_BINARY_DIR}/generated")
     # the resource script embeds these - rebuild it when they change
     set_source_files_properties("${SRC}/undelete.rc" PROPERTIES OBJECT_DEPENDS
-        "${SRC}/undelete.exe.manifest;${SRC}/resources/poslednja.ico")
+        "${SRC}/undelete.exe.manifest;${SRC}/resources/poslednja.ico;${CMAKE_BINARY_DIR}/generated/version.h")
     if(MSVC)
         # undelete.rc embeds undelete.exe.manifest (requireAdministrator) - don't let the linker add a second one
         target_link_options(GetMyFilesBack PRIVATE /MANIFEST:NO)

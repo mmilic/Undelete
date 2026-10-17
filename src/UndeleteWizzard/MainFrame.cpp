@@ -14,11 +14,12 @@
 #include "MyThreadClass.h"
 #include "Theme.h"
 #include "languages/Translate.h"
+#include "version.h"
 
 #ifdef DEMO_BUILD
 #define APP_VERSION "DEMO"
 #else
-#define APP_VERSION "v2.06"
+#define APP_VERSION "v" APP_VERSION_STR
 #endif
 
 enum {
