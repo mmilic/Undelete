@@ -24,9 +24,12 @@
 #define COPY_CHUNK_SIZE (1024 * 1024)
 #define MAX_DELETED_DIRECTORY_SEARCH (64 * 1024 * 1024) // how far past its first cluster a deleted folder's next ones are looked for
 
-// how far the cluster guess may go past clusters in use before it gives up: as many as the file has, at least
-// this many - a file fragmented around a big file that still exists is out of reach anyway
+// how far the cluster guess may go past clusters in use before it gives up: SKIP_FACTOR times as many as the file
+// has, at least MIN_CLUSTERS_TO_SKIP - a file fragmented around a big file that still exists is out of reach anyway.
+// Windows fills the holes between files that still exist, so a file can be spread over several times its size
+// (seen: 24,116 clusters over 65,000).
 #define MIN_CLUSTERS_TO_SKIP 4096
+#define SKIP_FACTOR 4
 
 CFATDrive::CFATDrive() {
     m_bInitialized = false;
@@ -109,6 +112,8 @@ int CFATDrive::Initialize() {
     m_iFATType = FAT_TYPE_NONE;
     std::vector<ST_FATFILE>().swap(m_vFiles);
     std::vector<BYTE>().swap(m_vInUse);
+    m_mapNeverWritten.clear();
+    m_setDeletedFolderClusters.clear();
 
     // 4 KB: a whole number of sectors for every sector size
     std::vector<BYTE> vBoot(4096);
@@ -189,6 +194,8 @@ int CFATDrive::Initialize() {
 int CFATDrive::LoadFAT() {
     std::vector<DWORD>().swap(m_vFAT);
     std::vector<BYTE>().swap(m_vInUse);
+    m_mapNeverWritten.clear();
+    m_setDeletedFolderClusters.clear();
 
     std::vector<BYTE> vRaw;
     try {
@@ -256,7 +263,19 @@ static void AddCluster(std::vector<CFATDrive::FAT_RUN> &vRuns, DWORD dwCluster) 
     }
 }
 
-bool CFATDrive::GuessClusters(DWORD dwFirstCluster, DWORD dwSize, std::vector<FAT_RUN> &vRuns, t_FileInfo *pFileInfo) const {
+bool CFATDrive::IsNeverWritten(DWORD dwCluster) {
+    std::map<DWORD, bool>::const_iterator it = m_mapNeverWritten.find(dwCluster);
+    if (it != m_mapNeverWritten.end())
+        return it->second;
+    std::vector<BYTE> vData(m_dwBytesPerCluster);
+    bool bZero = !ReadClusters(dwCluster, 1, &vData[0]);
+    for (DWORD i = 0; i < m_dwBytesPerCluster && bZero; i++)
+        bZero = !vData[i];
+    m_mapNeverWritten[dwCluster] = bZero;
+    return bZero;
+}
+
+bool CFATDrive::GuessClusters(DWORD dwFirstCluster, DWORD dwSize, std::vector<FAT_RUN> &vRuns, t_FileInfo *pFileInfo) {
     vRuns.clear();
     if (pFileInfo) {
         pFileInfo->iRecoverability = RECOVERABILITY_UNKNOWN;
@@ -275,35 +294,56 @@ bool CFATDrive::GuessClusters(DWORD dwFirstCluster, DWORD dwSize, std::vector<FA
         return false;
 
     DWORD dwNeeded = (DWORD) (((ULONGLONG) dwSize + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster);
-    DWORD dwMaxSkipped = (dwNeeded > MIN_CLUSTERS_TO_SKIP) ? dwNeeded : MIN_CLUSTERS_TO_SKIP;
-    DWORD dwTaken = 0, dwSkipped = 0;
+    DWORD dwMaxSkipped = (DWORD) wxMin((ULONGLONG) dwNeeded * SKIP_FACTOR, (ULONGLONG) 0xFFFFFFFF);
+    if (dwMaxSkipped < MIN_CLUSTERS_TO_SKIP)
+        dwMaxSkipped = MIN_CLUSTERS_TO_SKIP;
+    DWORD dwTaken = 0, dwSkipped = 0, dwSkippedEmpty = 0;
     // the first cluster is the only one known for sure. Once another file has it, the clusters after it
     // were most likely taken the same way - skipping to free ones further on would only collect other data.
     bool bStartReused = IsClusterInUse(dwFirstCluster);
 
-    // take the free clusters from the first one on, skipping the ones in use
-    for (DWORD c = dwFirstCluster; !bStartReused && dwTaken < dwNeeded && c <= m_dwMaxCluster && dwSkipped <= dwMaxSkipped;) {
+    // Take the free clusters from the first one on, skipping the ones in use. And the free runs that were never
+    // written (their first cluster is all zeros): a deleted file's clusters still hold its data. At the end of the
+    // volume, go on from the start of the first cluster's block of 65536 clusters - Windows' FAT driver hands out
+    // free space in such blocks, and wraps around in them (seen on a volume Windows wrote).
+    bool bWrapped = false, bInFreeRun = false;
+    for (DWORD c = dwFirstCluster; !bStartReused && dwTaken < dwNeeded && dwSkipped <= dwMaxSkipped && !(bWrapped && c >= dwFirstCluster);) {
+        if (c > m_dwMaxCluster) {
+            if (bWrapped)
+                break;
+            bWrapped = true;
+            bInFreeRun = false;
+            c = wxMax((DWORD) 2, dwFirstCluster & ~(DWORD) 0xFFFF);
+            continue;
+        }
         if (!(c & 7) && m_vInUse[c >> 3] == 0xFF && c + 7 <= m_dwMaxCluster) { // 8 clusters in use at once
             dwSkipped += 8;
             c += 8;
-        } else if (IsClusterInUse(c)) {
+            bInFreeRun = false;
+        } else if (IsClusterInUse(c) || (c != dwFirstCluster && m_setDeletedFolderClusters.count(c))) {
             dwSkipped++;
             c++;
+            bInFreeRun = false;
+        } else if (!bInFreeRun && c != dwFirstCluster && IsNeverWritten(c)) {
+            for (; c <= m_dwMaxCluster && !IsClusterInUse(c); c++) // the whole free run
+                dwSkippedEmpty++;
         } else {
             AddCluster(vRuns, c);
             dwTaken++;
             c++;
+            bInFreeRun = true;
         }
     }
 
     if (dwTaken == dwNeeded) {
         if (pFileInfo) {
-            if (!dwSkipped) {
+            if (!dwSkipped && !dwSkippedEmpty) {
                 pFileInfo->iRecoverability = RECOVERABILITY_GOOD;
                 pFileInfo->iPercentIntact = 100;
             } else {
                 // clusters in use between them: either the file was fragmented around another file (then it is
                 // intact), or another file has taken part of it (then a part is gone) - there is no telling which
+                // (free space that was never written isn't counted - it says nothing about overwriting)
                 int iPercent = (int) ((ULONGLONG) dwNeeded * 100 / ((ULONGLONG) dwNeeded + dwSkipped));
                 pFileInfo->iRecoverability = RECOVERABILITY_PARTIAL;
                 pFileInfo->iPercentIntact = (iPercent < 1) ? 1 : (iPercent > 99 ? 99 : iPercent);
@@ -603,6 +643,7 @@ int CFATDrive::ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &
             if (!puchCluster[0] || IsDotEntry(*(const FAT_DIR_ENTRY *) puchCluster) || !LooksLikeDirectory(puchCluster, m_dwBytesPerCluster))
                 continue;
             setClaimed.insert(c + i);
+            m_setDeletedFolderClusters.insert(c + i);
             vData.insert(vData.end(), puchCluster, puchCluster + m_dwBytesPerCluster);
             if (HasEndOfDirectory(puchCluster, m_dwBytesPerCluster) || ++dwRead >= dwMaxClusters)
                 return ERROR_SUCCESS;
@@ -785,15 +826,22 @@ DWORD CFATDrive::ResolveClearedHighWordExactly(WORD wLow, bool bDirectory, DWORD
     return dwFound;
 }
 
-DWORD CFATDrive::ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected) const {
-    // the place nearest to where the file is expected - in use or not: a file whose place is in use now was
-    // overwritten, and a free place further away must not be taken for it just because it is free
+DWORD CFATDrive::ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected) {
+    // The place nearest to where the file is expected - in use or not: a file whose place is in use now was
+    // overwritten, and a free place further away must not be taken for it just because it is free. But not a free
+    // place that was never written (all zeros) while another one holds data: the file's data is still there.
     DWORD dwBest = 0, dBest = 0xFFFFFFFF;
+    bool bBestEmpty = true;
+    int iRead = 0;
     for (DWORD c = wLow; c <= m_dwMaxCluster; c += 0x10000) {
+        if (c < 2)
+            continue;
         DWORD d = c > dwExpected ? c - dwExpected : dwExpected - c;
-        if (c >= 2 && d < dBest) {
+        bool bEmpty = !IsClusterInUse(c) && iRead++ < MAX_CANDIDATES_READ && IsNeverWritten(c);
+        if (!dwBest || (bBestEmpty && !bEmpty) || (bBestEmpty == bEmpty && d < dBest)) {
             dBest = d;
             dwBest = c;
+            bBestEmpty = bEmpty;
         }
     }
     return dwBest;
@@ -862,8 +910,11 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
         if (m_iFATType == FAT_TYPE_32 && bEntryDeleted && !e.wFirstClusterHigh && m_dwMaxCluster > 0xFFFF && entry.dwCluster) {
             // Windows cleared the high word when it deleted the entry - only the low word is left
             DWORD dwExact = ResolveClearedHighWordExactly(e.wFirstClusterLow, (e.uchAttributes & ATTR_DIRECTORY) != 0, e.dwFileSize, sName);
-            if (dwExact)
+            if (dwExact) {
                 entry.dwCluster = dwExact;
+                if (e.uchAttributes & ATTR_DIRECTORY)
+                    m_setDeletedFolderClusters.insert(dwExact);
+            }
             else if (e.uchAttributes & ATTR_DIRECTORY)
                 entry.dwCluster = 0; // no free cluster holds it any more
             else
@@ -872,10 +923,11 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
         vEntries.push_back(entry);
     }
 
-    // The others: files written one after another lie one after another, so a file starts about where the files
-    // between it and its next known neighbour, counted back from that neighbour's start, begin - this also holds
-    // where the volume was full and the allocation went on from its beginning. Without a known next neighbour,
-    // counted on from where the previous known one ends. Off by less than 32768 clusters, the nearest place is right.
+    // The others: files written one after another lie one after another - in the free clusters of the time, skipping
+    // the ones in use. So a file starts where the files between it and its next known neighbour begin, counted back
+    // from that neighbour's start in free clusters - this also holds where the volume was full and the allocation
+    // went on from its beginning. Without a known next neighbour, counted on from where the previous known one ends.
+    // Off by less than 32768 clusters, the nearest place is right.
     std::vector<DWORD> vClusters(vEntries.size()); // the clusters each entry takes
     for (size_t k = 0; k < vEntries.size(); k++) {
         const FAT_DIR_ENTRY &e = pEntries[vEntries[k].iEntry];
@@ -888,8 +940,13 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
         ULONGLONG ullBetween = 0;
         for (size_t n = k; n < vEntries.size(); n++) {
             if (vEntries[n].bKnown && vEntries[n].dwCluster >= 2 && vEntries[n].dwCluster <= m_dwMaxCluster) {
-                if (ullBetween < vEntries[n].dwCluster)
-                    dwExpected = (DWORD) (vEntries[n].dwCluster - ullBetween);
+                // back from it, counting only free clusters: the files in between were deleted, so their clusters
+                // are free - and the ones they were fragmented around are in use, so they don't count
+                DWORD c = vEntries[n].dwCluster;
+                for (ULONGLONG ullLeft = ullBetween; ullLeft && c > 2;)
+                    if (!IsClusterInUse(--c))
+                        ullLeft--;
+                dwExpected = c;
                 break;
             }
             if (!vEntries[n].bKnown)
@@ -906,7 +963,14 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
                 if (!vEntries[p].bKnown)
                     ullBetween += vClusters[p];
             }
-            dwExpected = (DWORD) wxMin((ULONGLONG) dwPrevEnd + ullBetween, (ULONGLONG) m_dwMaxCluster);
+            // on from it, counting only free clusters likewise, to the next free one
+            DWORD c = dwPrevEnd;
+            for (ULONGLONG ullLeft = ullBetween; ullLeft && c < m_dwMaxCluster; c++)
+                if (!IsClusterInUse(c))
+                    ullLeft--;
+            while (c < m_dwMaxCluster && IsClusterInUse(c))
+                c++;
+            dwExpected = c;
         }
         vEntries[k].dwCluster = ResolveClearedHighWordNear(pEntries[vEntries[k].iEntry].wFirstClusterLow, dwExpected);
         // a guess - the log says which place was taken (for a support case)
@@ -924,6 +988,8 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
             if (dwCluster >= 2 && dwCluster <= m_dwMaxCluster && !setSeen.count(dwCluster)
                     && (!entry.bDeleted || !IsClusterInUse(dwCluster))) {
                 setSeen.insert(dwCluster);
+                if (entry.bDeleted)
+                    m_setDeletedFolderClusters.insert(dwCluster);
                 ST_DIR_TO_SCAN sub = {dwCluster, entry.bDeleted, ChildPath(dir.sPath, entry.sName)};
                 vToScan.push_back(sub);
             }

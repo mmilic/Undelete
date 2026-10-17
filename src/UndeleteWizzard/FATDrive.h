@@ -21,6 +21,7 @@
 #ifndef FATDRIVE_H
 #define	FATDRIVE_H
 
+#include <map>
 #include <set>
 #include "RecoveryDrive.h"
 
@@ -146,7 +147,13 @@ private:
 
     // the clusters a deleted file most likely had, see the top of FATDrive.h. Also judges its recoverability
     // when pFileInfo is given. False if the first cluster can't be right.
-    bool GuessClusters(DWORD dwFirstCluster, DWORD dwSize, std::vector<FAT_RUN> &vRuns, t_FileInfo *pFileInfo) const;
+    bool GuessClusters(DWORD dwFirstCluster, DWORD dwSize, std::vector<FAT_RUN> &vRuns, t_FileInfo *pFileInfo);
+
+    // a free cluster that holds only zeros was never written - no deleted file's data is there. Cached per scan.
+    std::map<DWORD, bool> m_mapNeverWritten;
+    bool IsNeverWritten(DWORD dwCluster);
+    // the clusters of the deleted folders the scan found: free, but a folder's - not a deleted file's data
+    std::set<DWORD> m_setDeletedFolderClusters;
 
     // read whole clusters, cluster dwCluster on
     int ReadClusters(DWORD dwCluster, DWORD dwCount, BYTE *puchOut);
@@ -164,7 +171,7 @@ private:
     // number, a file by the content check of its start (0: none). The others go where they are expected from
     // their nearest neighbours in the folder that are known for sure - the place nearest to dwExpected.
     DWORD ResolveClearedHighWordExactly(WORD wLow, bool bDirectory, DWORD dwSize, const std::wstring &sName);
-    DWORD ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected) const;
+    DWORD ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected);
 
     struct ST_DIR_TO_SCAN {
         DWORD dwCluster; // 0: the fixed root directory of FAT12/16

@@ -104,15 +104,19 @@ drive strip).
   their first cluster is free; a deleted folder's later clusters are searched for further on
   (`ReadDirectory`, strict `LooksLikeDirectory` so file data never passes). Long names come back whole, and the lost first byte of the 8.3 name is restored
   through the long-name checksum. The data's clusters are guessed (`GuessClusters`): from the first cluster on,
-  skipping clusters in use. Clusters had to be skipped → never "Good". First cluster in use → judged as
+  skipping clusters in use, deleted folders' clusters (`m_setDeletedFolderClusters`) and free runs that were never
+  written (`IsNeverWritten`: first cluster all zeros, cached per scan); at the end of the volume it wraps to the
+  start of the first cluster's 65536-cluster block, as Windows' FAT driver does. All of that was worked out on a
+  volume Windows wrote (`tests\windows-image`). Clusters had to be skipped → never "Good". First cluster in use → judged as
   contiguous. The FAT is read once per scan; only the in-use bitmap is kept for recovery, so recovery uses the
   same guess the recoverability was judged by. Limits are in README.md's "FAT and exFAT support".
   FAT32: Windows clears the high word of a deleted entry's first cluster, so past cluster 65535 only the low word
   is left. `ScanDirectory` settles that in two passes per folder: first what can be told for sure
   (`ResolveClearedHighWordExactly`: a folder by its "." entry, a file by the content check - only if exactly one
   candidate passes), then the rest from those known neighbours (`ResolveClearedHighWordNear`: counted back from
-  the next known file's start, else on from the previous one's end). Guesses never feed other guesses, and a
-  candidate in use is not skipped for a free one further away - the file was most likely overwritten.
+  the next known file's start in free clusters, else on from the previous one's end; a never-written candidate
+  loses to one with data). Guesses never feed other guesses, and a candidate in use is not skipped for a free one
+  further away - the file was most likely overwritten. Each guess is logged ("first cluster guessed as").
 - `ExFATDrive.{h,cpp}` — `CExFATDrive`, the exFAT engine. Deleting only clears the "in use" bit (0x80) of a
   file's entry set and its bits in the allocation bitmap: name, size, first cluster, the NoFatChain flag and a
   fragmented file's FAT chain all stay. So the clusters are known (`DeletedClusters`: contiguous, or the chain)

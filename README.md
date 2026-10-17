@@ -271,14 +271,19 @@ What FAT leaves of a deleted file decides what can be recovered:
     looks like that type
   - every other file by its neighbours in the folder: files written one after another lie one after
     another, so it goes to the place nearest to where it is expected - counted back from the next known
-    file's start (which also holds where a full volume's allocation went on from its beginning). That is
+    file's start in free clusters (which also holds where a full volume's allocation went on from its
+    beginning). A place that was never written (all zeros) isn't taken while another one holds data. That is
     right while the estimate is off by less than 32,768 clusters - but a guess, so it can be wrong.
 - **The name**: a long file name comes back in full, and so does the first character of the short (8.3)
   name, via the checksum the long name entries keep. A file with only an 8.3 name loses its first
   character - it is listed as `_EADME.TXT`. In the Recycle Bin the lost character is always `$`, so
   `$R`/`$I` pairs still get their original names back.
 - **The data**: the chain of clusters is gone, only the first cluster is known. The engine takes as many
-  clusters as the size needs from the first one on, skipping clusters in use now (what DOS UNDELETE did).
+  clusters as the size needs from the first one on, skipping clusters in use now (what DOS UNDELETE did) - and
+  skipping what can't be the file's either: the clusters of deleted folders it found, and free stretches that
+  were never written (all zeros - a deleted file's data is still there). At the end of the volume it goes on
+  from the start of the first cluster's block of 65,536 clusters: Windows hands out free space in such blocks
+  and wraps around in them (seen on a volume Windows wrote).
   - A contiguous file comes back whole, flagged Good.
   - A file fragmented around files that still exist comes back whole too, but is flagged "Partly
     overwritten": a file that was really partly overwritten looks the same.
