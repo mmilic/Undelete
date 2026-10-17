@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 **GetMyFilesBack** (internal name "UndeleteWizzard") — a Windows GUI file-undelete/recovery utility written in
-C++ with wxWidgets. It scans an NTFS or FAT12/16/32 drive for deleted-but-recoverable files, shows them in its window as they are found,
+C++ with wxWidgets. It scans an NTFS, FAT12/16/32 or exFAT drive for deleted-but-recoverable files, shows them in its window as they are found,
 and copies recovered files to a destination chosen by the user. It was built/sold as a small commercial
 product; its expiry check in `main.cpp` has since been removed (see below).
 
@@ -32,23 +32,26 @@ its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg 
   manifest is switched off (`/MANIFEST:NO`).
 - **The version** is only in `CMakeLists.txt` (`project(GetMyFilesBack VERSION ...)`). CMake writes it into
   `version.h` (from `src/UndeleteWizzard/version.h.in`), which the window title and `undelete.rc`'s VERSIONINFO use.
-- `.github/workflows/build.yml` builds and tests every push on GitHub (Linux job makes the NTFS test image with
-  ntfs-3g, Windows job builds, runs the NTFS test with `-UseExistingImage` and the FAT test) and attaches the
+- `.github/workflows/build.yml` builds and tests every push on GitHub (Linux job makes the NTFS and exFAT test
+  images, Windows job builds, runs those tests with `-UseExistingImage`, the FAT and the Windows-written test) and attaches the
   exe as an artifact. A pushed tag `v<version>` (it must match the CMake version) also makes a GitHub release
   with the exe, after the tests pass.
 - The tag `last-gcc462-x86` is the last commit built with the old vendored 32-bit MinGW GCC 4.6.2 +
   wxWidgets 3.0.1 toolchain (`tools/`, removed after it).
 
-The recovery engine has three automated end-to-end tests (see their READMEs), which run the engine against disk
+The recovery engine has four automated end-to-end tests (see their READMEs), which run the engine against disk
 images and check the recovered files byte-for-byte, plus what the engine reports about them:
 - `tests\ntfs-image\run.ps1` - needs WSL with `ntfs-3g`. NTFS images with deleted fragmented, sparse and
   resident files: the usual format, 4096-byte sectors and 256 KB clusters. Run it after touching `NTFSDrive.*`,
   `MFTRecord.*` or `RecoveryDrive.*`.
 - `tests\fat-image\run.ps1` - needs Python 3 on Windows (installs pyfatfs into `out\fat-test\venv`). FAT12,
   FAT16 and FAT32 images. Run it after touching `FATDrive.*` or `RecoveryDrive.*`.
-- `tests\windows-image\run.ps1` - needs admin rights, so in practice it runs in CI. An NTFS volume formatted and
-  written by Windows itself (a VHD), with compressed and EFS-encrypted files (must be refused) and the real
-  Recycle Bin. FAT32 isn't in it yet: Windows clears the high word of a deleted file's first cluster on FAT32,
+- `tests\exfat-image\run.ps1` - needs WSL with `exfatprogs`. An exFAT image written and deleted from by Linux's
+  exfat driver: a fragmented file (chain kept in the FAT), deleted folders, ValidDataLength, Recycle Bin pairs.
+  Run it after touching `ExFATDrive.*` or `RecoveryDrive.*`.
+- `tests\windows-image\run.ps1` - needs admin rights, so in practice it runs in CI. An NTFS and an exFAT volume
+  formatted and written by Windows itself (VHDs); on NTFS compressed and EFS-encrypted files (must be refused)
+  and the real Recycle Bin. FAT32 isn't in it yet: Windows clears the high word of a deleted file's first cluster on FAT32,
   which the FAT engine doesn't handle yet.
 
 All three use one harness (`tests\ntfs-image\harness.cpp`), which picks the engine by the image's boot sector.
@@ -70,7 +73,7 @@ drive strip).
   shared state: the source, the scan's `FileInfoHash`, the drive's engine. Recover stops a running scan first.
 - `RecoverDialog.{h,cpp}` — `CRecoverDialog`: the destination (suggestions, same-drive warning), then the copy
   (it runs the copy thread), then the result. The log file is opened in the destination when copying starts.
-- The engine is chosen in the scan thread by the boot sector (`OpenRecoveryDrive`: NTFS, else FAT).
+- The engine is chosen in the scan thread by the boot sector (`OpenRecoveryDrive`: NTFS, else FAT, else exFAT).
 - `Theme.{h,cpp}`, `Widgets.{h,cpp}` — the look: colours, fonts, the design's stroke icons as SVG (nanosvg,
   sharp at any DPI - the manifest declares PerMonitorV2), and hand-drawn controls Windows doesn't have
   (`CFlatButton`, `CBanner`, `CDriveCard`, `CThinBar`). Sizes in DIPs (`FromDIP`). The design they follow is
@@ -102,7 +105,15 @@ drive strip).
   through the long-name checksum. The data's clusters are guessed (`GuessClusters`): from the first cluster on,
   skipping clusters in use. Clusters had to be skipped → never "Good". First cluster in use → judged as
   contiguous. The FAT is read once per scan; only the in-use bitmap is kept for recovery, so recovery uses the
-  same guess the recoverability was judged by. Limits are in README.md's "FAT support".
+  same guess the recoverability was judged by. Limits are in README.md's "FAT and exFAT support".
+- `ExFATDrive.{h,cpp}` — `CExFATDrive`, the exFAT engine. Deleting only clears the "in use" bit (0x80) of a
+  file's entry set and its bits in the allocation bitmap: name, size, first cluster, the NoFatChain flag and a
+  fragmented file's FAT chain all stay. So the clusters are known (`DeletedClusters`: contiguous, or the chain)
+  and judged by the bitmap like NTFS; only a broken chain falls back to FAT's skip-guess (then never "Good").
+  An entry set is taken only if its checksum (computed with the in-use bits set again) matches and none of its
+  secondary entries is in use - a partly reused set is skipped. Deleted folders: only their still-free clusters
+  are read. The FAT and the bitmap are read once per scan and kept for recovery. Data past ValidDataLength is
+  written as zeros.
 - `MyThreadClass.{h,cpp}` — `CScanThread`, `CCopyThread`: scanning and copying so the window stays responsive.
   They never touch a control: the window polls their progress (volatile counters) and the scan's new files
   (`TakeNewFiles`) with a timer, and each posts one `wxEVT_THREAD` (`THREAD_SCAN_DONE` / `THREAD_COPY_DONE`)

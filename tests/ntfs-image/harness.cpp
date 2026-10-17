@@ -1,6 +1,6 @@
 // Test harness: runs the real recovery engine (CNTFSDrive / CMFTRecord, or CFATDrive) against a disk image
 // file instead of a live volume, and recovers every deleted file it finds into an output directory.
-// The engine is chosen by the image's boot sector: NTFS if it is NTFS, FAT if it is FAT.
+// The engine is chosen by the image's boot sector: NTFS, FAT or exFAT.
 //   harness.exe <image> <output dir>
 #include <windows.h>
 #include <wx/wx.h>
@@ -14,6 +14,10 @@
 #if __has_include("FATDrive.h") // not in older engines (build_harness.ps1 -WithOld)
 #define HAVE_FAT_ENGINE
 #include "FATDrive.h"
+#endif
+#if __has_include("ExFATDrive.h")
+#define HAVE_EXFAT_ENGINE
+#include "ExFATDrive.h"
 #endif
 
 // like the app's log file: UTF-8, so non-ANSI file names show up (wxLogStderr drops those lines)
@@ -51,7 +55,19 @@ int main(int argc, char **argv) {
         if (!nRet)
             printf("FAT type: %d\n", fat.GetFATType());
     }
-    CRecoveryDrive &drive = fat.GetFATType() ? (CRecoveryDrive &) fat : (CRecoveryDrive &) ntfs;
+    CRecoveryDrive *pDrive = fat.GetFATType() ? (CRecoveryDrive *) &fat : (CRecoveryDrive *) &ntfs;
+#ifdef HAVE_EXFAT_ENGINE
+    CExFATDrive exfat;
+    if (nRet == ERROR_INVALID_DRIVE) { // neither NTFS nor FAT
+        exfat.SetDriveHandle(hImage);
+        nRet = exfat.Initialize();
+        if (!nRet) {
+            printf("File system: exFAT\n");
+            pDrive = &exfat;
+        }
+    }
+#endif
+    CRecoveryDrive &drive = *pDrive;
 #else
     CNTFSDrive &drive = ntfs;
 #endif

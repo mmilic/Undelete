@@ -4,6 +4,7 @@
 
 #include "NTFSDrive.h"
 #include "FATDrive.h"
+#include "ExFATDrive.h"
 #include "MyThreadClass.h"
 #include "languages/Translate.h"
 
@@ -21,6 +22,14 @@ CRecoveryDrive *OpenRecoveryDrive(const wxString &sSource, int &nError) {
     if (!nError)
         return pFAT;
     delete pFAT;
+    if (nError != ERROR_INVALID_DRIVE)
+        return NULL;
+
+    CExFATDrive *pExFAT = new CExFATDrive;
+    nError = pExFAT->ReadVolume(sSource);
+    if (!nError)
+        return pExFAT;
+    delete pExFAT;
     return NULL;
 }
 

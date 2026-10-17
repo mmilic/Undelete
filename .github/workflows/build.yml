@@ -1,4 +1,4 @@
-# Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS, FAT and Windows-written image tests.
+# Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS, FAT, exFAT and Windows-written image tests.
 # The exe is attached to each run as the "GetMyFilesBack" artifact (Actions tab -> the run -> Artifacts).
 # Pushing a tag v<version> (the version in CMakeLists.txt, e.g. v2.6) also makes a GitHub release with the exe,
 # once the tests have passed.
@@ -12,14 +12,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  # the test images are made with ntfs-3g on Linux (the Windows runners have no WSL);
-  # an NTFS image is the same bytes wherever it was made
+  # the NTFS and exFAT test images are made with ntfs-3g and Linux's exfat driver (the Windows runners have no
+  # WSL); an image is the same bytes wherever it was made
   test-image:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - name: Install ntfs-3g
-        run: sudo apt-get update && sudo apt-get install -y ntfs-3g
+      - name: Install ntfs-3g and the exFAT tools
+        # exfat-fuse: in case the runner's kernel has no exfat module
+        run: sudo apt-get update && sudo apt-get install -y ntfs-3g exfatprogs exfat-fuse
       - name: Make the NTFS test images
         run: sudo sh tests/ntfs-image/make_image.sh
       - uses: actions/upload-artifact@v7
@@ -28,6 +29,15 @@ jobs:
           path: |
             out/ntfs-test/*.img
             out/ntfs-test/*.sha256
+          retention-days: 3
+      - name: Make the exFAT test image
+        run: sudo sh tests/exfat-image/make_image.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: exfat-test-image
+          path: |
+            out/exfat-test/exfat.img
+            out/exfat-test/exfat.expected.tsv
           retention-days: 3
 
   build:
@@ -80,6 +90,15 @@ jobs:
       - name: NTFS image test
         run: .\tests\ntfs-image\run.ps1 -UseExistingImage
 
+      - uses: actions/download-artifact@v8
+        with:
+          name: exfat-test-image
+          path: out/exfat-test
+
+      - name: exFAT image test
+        if: always()
+        run: .\tests\exfat-image\run.ps1 -UseExistingImage
+
       # the FAT images are made right here, with the runner's Python and pyfatfs - no Linux needed
       - name: FAT image test
         if: always()
@@ -96,7 +115,7 @@ jobs:
           name: GetMyFilesBack
           path: out/GetMyFilesBack.exe
 
-      # only reached when the build and both tests passed
+      # only reached when the build and all the tests passed
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
@@ -113,6 +132,7 @@ jobs:
           path: |
             out/ntfs-test/run-*.log
             out/fat-test/run-*.log
+            out/exfat-test/run-*.log
             out/windows-test/run-*.log
             out/windows-test/*.expected.tsv
           if-no-files-found: ignore

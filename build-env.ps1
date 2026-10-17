@@ -3,8 +3,14 @@
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) { throw "Visual Studio 2022 (or Build Tools) is not installed - see README.md." }
-$VsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+# Visual Studio 2022 - the one CMakePresets.json's generator ("Visual Studio 17 2022") compiles with. Any other
+# installation only if there is no 2022 (then the preset's generator has to be changed - see README.md).
+$VsPath = & $vswhere -latest -products * -version "[17.0,18.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (-not $VsPath) { $VsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath }
 if (-not $VsPath) { throw "No Visual Studio installation with the C++ x64 compiler ('Desktop development with C++') - see README.md." }
+# vcpkg must build wxWidgets with that same compiler. On its own it takes the newest Visual Studio - with VS 2026
+# beside 2022 that is 2026, whose libraries 2022's linker can't link (unresolved __std_find_..._trivial_pos_2).
+$env:VCPKG_VISUAL_STUDIO_PATH = $VsPath
 
 $Cmake = Join-Path $VsPath "Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
 if (-not (Test-Path $Cmake)) { $Cmake = (Get-Command cmake -ErrorAction SilentlyContinue).Source }

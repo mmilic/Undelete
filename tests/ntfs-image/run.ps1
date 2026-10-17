@@ -31,7 +31,8 @@ $failed = 0
 foreach ($img in $Images) {
     Write-Host "${img}:"
     $RecDir = Join-Path $OutDir "recovered-$img"
-    if (Test-Path $RecDir) { Remove-Item -Recurse -Force $RecDir }
+    # rd with \\?\ - Remove-Item of Windows PowerShell 5.1 can't delete the long-named file inside
+    if (Test-Path $RecDir) { cmd /c "rd /s /q `"\\?\$RecDir`"" }
     New-Item -ItemType Directory -Force -Path $RecDir | Out-Null
 
     $Log = Join-Path $OutDir "run-$img.log"
@@ -90,7 +91,8 @@ foreach ($img in $Images) {
     }
     foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "$img.sha256")) {
         $hash, $name = $line -split '\s+', 2
-        $file = Join-Path $RecDir $name
+        # \\?\ - the 199-character name makes a path over 260 characters when the clone isn't near the drive's root
+        $file = "\\?\" + (Join-Path $RecDir $name)
         $shortName = if ($name.Length -gt 40) { $name.Substring(0, 40) + "..." } else { $name }
         if (-not (Test-Path -LiteralPath $file)) {
             Write-Host "  MISSING  $shortName"; $failed++; continue

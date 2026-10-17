@@ -12,7 +12,6 @@ static const std::unordered_map<std::wstring, const wchar_t *> &GermanTable() {
         {L"Local Disk", L"Lokaler Datenträger"},
         {L"Disk image", L"Datenträgerabbild"},
         {L"The drive can't be read", L"Das Laufwerk kann nicht gelesen werden"},
-        {L"exFAT drives can't be scanned yet", L"exFAT-Laufwerke können noch nicht durchsucht werden"},
         {L"%s drives can't be scanned", L"%s-Laufwerke können nicht durchsucht werden"},
         {L"Search name or folder", L"Name oder Ordner suchen"},
 
@@ -79,8 +78,8 @@ static const std::unordered_map<std::wstring, const wchar_t *> &GermanTable() {
         {L"Can't create thread for reading the drive.", L"Der Thread zum Lesen des Laufwerks kann nicht erstellt werden."},
         {L"Access to the drive was denied. Please run the program as administrator.",
             L"Der Zugriff auf das Laufwerk wurde verweigert. Bitte starten Sie das Programm als Administrator."},
-        {L"This drive holds neither an NTFS nor a FAT file system - files can't be recovered from it.",
-            L"Dieses Laufwerk hat weder ein NTFS- noch ein FAT-Dateisystem - davon können keine Dateien gerettet werden."},
+        {L"This drive holds no NTFS, FAT or exFAT file system - files can't be recovered from it.",
+            L"Dieses Laufwerk hat weder ein NTFS-, FAT- noch exFAT-Dateisystem - davon können keine Dateien gerettet werden."},
         {L"The drive could not be read (error %d).", L"Das Laufwerk konnte nicht gelesen werden (Fehler %d)."},
 
         // the content check

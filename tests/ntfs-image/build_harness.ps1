@@ -25,14 +25,15 @@ try {
         $files = @{"NTFSDrive.cpp" = "src/UndeleteWizzard"; "NTFSDrive.h" = "src/UndeleteWizzard"; "MFTRecord.cpp" = "src/UndeleteWizzard";
             "MFTRecord.h" = "src/UndeleteWizzard"; "FileContents.cpp" = "src/UndeleteWizzard"; "FileContents.h" = "src/UndeleteWizzard";
             "RecoveryDrive.cpp" = "src/UndeleteWizzard"; "RecoveryDrive.h" = "src/UndeleteWizzard";
-            "FATDrive.cpp" = "src/UndeleteWizzard"; "FATDrive.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
+            "FATDrive.cpp" = "src/UndeleteWizzard"; "FATDrive.h" = "src/UndeleteWizzard";
+            "ExFATDrive.cpp" = "src/UndeleteWizzard"; "ExFATDrive.h" = "src/UndeleteWizzard"; "harness.cpp" = "tests/ntfs-image"}
         foreach ($f in $files.Keys) {
             # cmd redirection keeps the bytes as they are (a PowerShell 5.1 pipe would re-encode them)
             cmd /c "git -C `"$Root`" show HEAD:$($files[$f])/$f > `"$(Join-Path $Old $f)`" 2>nul"
             if ($LASTEXITCODE -ne 0) {
                 Remove-Item -Force (Join-Path $Old $f)
                 # files that older engines don't have
-                if ($f -notlike "FileContents.*" -and $f -notlike "RecoveryDrive.*" -and $f -notlike "FATDrive.*") {
+                if ($f -notlike "FileContents.*" -and $f -notlike "RecoveryDrive.*" -and $f -notlike "FATDrive.*" -and $f -notlike "ExFATDrive.*") {
                     throw "git show HEAD:$($files[$f])/$f failed"
                 }
             }

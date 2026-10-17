@@ -261,14 +261,13 @@ wxString FormatDriveSize(ULONGLONG ullBytes) {
 }
 
 static bool IsSupportedFileSystem(const wxString &sFileSystem) {
-    return sFileSystem == "NTFS" || sFileSystem == "FAT" || sFileSystem == "FAT32" || sFileSystem == "FAT12" || sFileSystem == "FAT16";
+    return sFileSystem == "NTFS" || sFileSystem == "FAT" || sFileSystem == "FAT32" || sFileSystem == "FAT12" || sFileSystem == "FAT16"
+            || sFileSystem.CmpNoCase("exFAT") == 0;
 }
 
 static wxString UnsupportedNote(const wxString &sFileSystem) {
     if (sFileSystem.IsEmpty())
         return Tr(L"The drive can't be read");
-    if (sFileSystem.CmpNoCase("exFAT") == 0)
-        return Tr(L"exFAT drives can't be scanned yet");
     return wxString::Format(Tr(L"%s drives can't be scanned"), sFileSystem);
 }
 
@@ -346,10 +345,6 @@ ST_DRIVE DiskImageDrive(const wxString &sPath) {
         drive.sFileSystem = Tr(L"Disk image");
         drive.bSupported = false;
         drive.sNote = Tr(L"The drive can't be read");
-    }
-    if (drive.sFileSystem == "exFAT") {
-        drive.bSupported = false;
-        drive.sNote = UnsupportedNote(drive.sFileSystem);
     }
     return drive;
 }

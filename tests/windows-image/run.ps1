@@ -1,5 +1,5 @@
 ﻿# End-to-end check of the recovery engines on volumes that Windows itself formatted and wrote - the NTFS and FAT
-# tests make theirs with ntfs-3g and pyfatfs. NTFS for now (see $Images for FAT32). Needs administrator rights (it attaches virtual disks); the
+# tests make theirs with ntfs-3g and pyfatfs. NTFS and exFAT for now (see $Images for FAT32). Needs administrator rights (it attaches virtual disks); the
 # GitHub Actions build runs it on every push.
 #   1. for each image: creates a virtual disk (VHD), formats it with Windows, writes the test files - fragmented,
 #      in folders, through the Recycle Bin, and on NTFS compressed and EFS-encrypted ones - deletes them, then
@@ -16,7 +16,7 @@ $OutDir = Join-Path $Root "out\windows-test"
 # name, file system, cluster size, MB - add @("fat32", "FAT32", 512, 64) once the FAT engine can recover it: on
 # FAT32 Windows clears the high word of a deleted file's first cluster, so the files past cluster 65535 point to
 # the wrong clusters (the FAT test doesn't see it - its images are small, and pyfatfs keeps the high word)
-$Images = @(, @("ntfs", "NTFS", 4096, 64))
+$Images = @(@("ntfs", "NTFS", 4096, 64), @("exfat", "exFAT", 4096, 64))
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 $Rng = New-Object System.Random 20141017
@@ -125,11 +125,12 @@ function New-TestImage($name, $fs, $cluster, $mb) {
         Write-VolumeCache -DriveLetter $part.DriveLetter
         Write-Host "Test files written"
 
-        $fragRecov = if ($fs -eq "NTFS") { "Good" } else { "Partly overwritten" }
+        # exFAT: Good if Windows leaves the deleted chain in the FAT, as Linux does - not checked (the log shows it)
+        $fragRecov = if ($fs -eq "NTFS") { "Good" } elseif ($fs -eq "exFAT") { "-" } else { "Partly overwritten" }
         foreach ($f in $files.Keys) {
             $leaf = Split-Path -Leaf $f
             $folder = "\" + (Split-Path -Parent $f)
-            $saved = if ($fs -ne "NTFS" -and (Fits83 $leaf)) { "_" + $leaf.Substring(1) } else { $leaf }
+            $saved = if ($fs -like "FAT*" -and (Fits83 $leaf)) { "_" + $leaf.Substring(1) } else { $leaf }
             $recov = if ($leaf -eq "fragmented.bin") { $fragRecov } else { "Good" }
             Expect $saved $files[$f] $recov $folder 0 $saved
         }
@@ -235,6 +236,7 @@ foreach ($i in $Images) {
         $short = if ($name.Length -gt 40) { $name.Substring(0, 40) + "..." } else { $name }
         if (-not $file) { Write-Host "  MISSING from the list: $short"; $failed++; continue }
         if ($recov -ne "-") { Check "$short - recoverability" $file.Recov $recov }
+        else { Write-Host "  $short - recoverability (not checked): $($file.Recov)" }
         Check "$short - folder" $file.Folder $folder
         Check "$short - error code" $file.Error $err
         if ($hash -ne "-") {
@@ -249,7 +251,7 @@ foreach ($i in $Images) {
 
     $infoFiles = @($found.Keys | Where-Object { $_ -like '$I*' })
     Check "Recycle Bin info files listed" ($infoFiles -join ", ") ""
-    $png = if ($img -eq "ntfs") { "preview.png" } else { "_review.png" }
+    $png = if ($img -like "fat*") { "_review.png" } else { "preview.png" }
     Check "preview of $png" $preview[$png] "120x80"
     Check "contents of $png" $found[$png].Content "Looks valid"
     $fillers = @($found.Keys | Where-Object { $_ -like "fill_*" })

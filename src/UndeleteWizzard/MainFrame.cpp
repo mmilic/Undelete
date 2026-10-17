@@ -375,7 +375,7 @@ void CMainFrame::StopScan() {
         if (iResult == ERROR_ACCESS_DENIED)
             sReason = Tr(L"Access to the drive was denied. Please run the program as administrator.");
         else if (iResult == ERROR_INVALID_DRIVE || iResult == ERROR_BAD_DEVICE)
-            sReason = Tr(L"This drive holds neither an NTFS nor a FAT file system - files can't be recovered from it.");
+            sReason = Tr(L"This drive holds no NTFS, FAT or exFAT file system - files can't be recovered from it.");
         else
             sReason.Printf(Tr(L"The drive could not be read (error %d)."), iResult);
         wxMessageBox(sReason, Tr(L"Error"), wxOK | wxICON_ERROR, this);

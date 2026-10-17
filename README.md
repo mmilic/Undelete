@@ -1,6 +1,6 @@
 # GetMyFilesBack (UndeleteWizzard)
 
-A Windows GUI file-undelete/recovery tool (wxWidgets) that scans an NTFS or FAT (FAT12/16/32)
+A Windows GUI file-undelete/recovery tool (wxWidgets) that scans an NTFS, FAT (FAT12/16/32) or exFAT
 drive for deleted-but-recoverable files and copies them to a destination you choose.
 
 It builds as one 64-bit exe with everything linked in statically - no DLLs, no installer. That is
@@ -10,7 +10,7 @@ deleted files you want back.
 Contents: [Just use it](#just-use-it) · [1. Install the tools](#1-install-the-tools) ·
 [2. Get the source and build](#2-get-the-source-and-build) · [3. Deploy and run](#3-deploy-and-run) ·
 [4. Tests](#4-tests) · [More about the build](#more-about-the-build) · [Repo layout](#repo-layout) ·
-[FAT support](#fat-support)
+[FAT and exFAT support](#fat-and-exfat-support)
 
 ## Just use it
 
@@ -58,7 +58,7 @@ while (several GB). Already have Visual Studio 2022 with "Desktop development wi
 Things to know:
 - **Visual Studio 2022 specifically.** `CMakePresets.json` uses the "Visual Studio 17 2022" generator; a machine
   with only a newer Visual Studio needs that line changed.
-- **The tests need more** - Python, and WSL for the NTFS test. Building the app doesn't. See [4. Tests](#4-tests).
+- **The tests need more** - Python, and WSL for the NTFS and exFAT tests. Building the app doesn't. See [4. Tests](#4-tests).
 
 ## 2. Get the source and build
 
@@ -122,8 +122,8 @@ out\GetMyFilesBack.exe out\fat-test\fat32.img
 
 ## 4. Tests
 
-Three end-to-end tests build disk images with deleted files, run the recovery engine against them and check
-every recovered file byte-for-byte. The GitHub build runs all three on every push.
+Four end-to-end tests build disk images with deleted files, run the recovery engine against them and check
+every recovered file byte-for-byte. The GitHub build runs all four on every push.
 
 **FAT test** (FAT12, FAT16, FAT32) - needs Python 3 on Windows. It installs `pyfatfs` into a venv under
 `out\fat-test` on its own; no WSL. See `tests\fat-image\README.md`.
@@ -146,18 +146,25 @@ user name and password):
 wsl --install -d Ubuntu
 ```
 
-Then `ntfs-3g` and Python inside it:
+Then `ntfs-3g`, the exFAT tools (for the exFAT test below) and Python inside it:
 
 ```cmd
-wsl -d Ubuntu -u root -e sh -c "apt-get update && apt-get install -y ntfs-3g python3"
+wsl -d Ubuntu -u root -e sh -c "apt-get update && apt-get install -y ntfs-3g exfatprogs python3"
 ```
 
 ```cmd
 powershell -ExecutionPolicy Bypass -File tests\ntfs-image\run.ps1
 ```
 
-**Windows-written image test** - an NTFS volume that Windows itself formats and writes, on a virtual disk,
-with compressed and encrypted files and the real Recycle Bin. It needs a Command Prompt opened with "Run as
+**exFAT test** - the image is made and deleted from by Linux's exfat driver in the same WSL (`exfatprogs`,
+installed above). See `tests\exfat-image\README.md`.
+
+```cmd
+powershell -ExecutionPolicy Bypass -File tests\exfat-image\run.ps1
+```
+
+**Windows-written image test** - an NTFS and an exFAT volume that Windows itself formats and writes, on
+virtual disks, with compressed and encrypted files and the real Recycle Bin on NTFS. It needs a Command Prompt opened with "Run as
 administrator". See `tests\windows-image\README.md`.
 
 ```cmd
@@ -211,17 +218,42 @@ rebuild that version.
 
 - `CMakeLists.txt`, `CMakePresets.json`, `vcpkg.json` - the build; `build.ps1` / `build-env.ps1` run it.
 - `.github/workflows/build.yml` - the GitHub Actions build and test.
-- `src/UndeleteWizzard/` — the application source (the window, NTFS and FAT scan/recovery,
+- `src/UndeleteWizzard/` — the application source (the window, NTFS, FAT and exFAT scan/recovery,
   multi-language UI). See `CLAUDE.md` for the internal architecture.
 - `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept for reference only.
-  **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT support" below.
-- `tests/ntfs-image/`, `tests/fat-image/`, `tests/windows-image/` — the end-to-end tests of the recovery engine.
+  **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT and exFAT support" below.
+- `tests/ntfs-image/`, `tests/fat-image/`, `tests/exfat-image/`, `tests/windows-image/` — the end-to-end tests
+  of the recovery engine.
 
-## FAT support
+## FAT and exFAT support
 
-FAT12, FAT16 and FAT32 drives (USB sticks, memory cards) are scanned by `FATDrive.cpp`, the app's own
-engine; the app picks it by the drive's boot sector. **exFAT is not supported yet** - an exFAT drive
-is shown greyed out, with a note.
+FAT12, FAT16 and FAT32 drives (old USB sticks, memory cards up to 32 GB) are scanned by `FATDrive.cpp`,
+exFAT drives (nearly every SD card and USB stick over 32 GB) by `ExFATDrive.cpp` - the app's own engines. The
+app picks the engine by the drive's boot sector.
+
+### exFAT
+
+exFAT keeps much more of a deleted file than FAT does:
+- Deleting only clears the "in use" bit of the file's directory entries and frees its clusters in the
+  allocation bitmap. **The whole name** stays (exFAT has no 8.3 names), and so do the size, the dates and the
+  first cluster.
+- **The data**: a contiguous file is marked as such ("NoFatChain") - its first cluster and size describe it
+  exactly. A fragmented file keeps its cluster chain in the FAT, which deleting doesn't touch. So both come
+  back whole and are judged by the allocation bitmap, like on NTFS: Good while none of their clusters is in
+  use again.
+- A chain that another file has broken since (it took one of the clusters and changed its FAT entry) is
+  guessed like on FAT - from the first cluster on, skipping clusters in use - and such a file is never called
+  Good.
+- A set of directory entries carries a checksum, so a deleted entry set that newer entries have partly
+  overwritten is recognised and skipped instead of listed with a garbled name or size.
+- **Folders**: deleted folders are walked while their first cluster is free; only their clusters that are
+  still free are read. A deleted folder knows its size and its chain too, so it doesn't have to be searched for.
+- What lies past a file's ValidDataLength (preallocated, never written) comes back as zeros, as Windows reads it.
+
+This is what Linux's exfat driver leaves behind (`tests/exfat-image`). Windows is expected to do the same -
+the CI's Windows-written test makes an exFAT volume with Windows itself to check it.
+
+### FAT
 
 What FAT leaves of a deleted file decides what can be recovered:
 - Windows marks the file's directory entry as deleted (its first byte becomes `0xE5`) and frees its

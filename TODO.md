@@ -19,14 +19,12 @@ clusters. The FAT test can't show it: its images are small, and pyfatfs keeps th
 
 ## Recovering more files
 
-1. **exFAT support**: the format of nearly every SD card and USB stick over 32 GB. These are shown
-   greyed out today.
-2. **"Save a disk image first"**: copy a failing card or the system drive to an image file, then scan the
+1. **"Save a disk image first"**: copy a failing card or the system drive to an image file, then scan the
    image. The app can already read images.
-3. **Heavily fragmented NTFS files**: an attribute list, with the data runs in a second MFT record, isn't
+2. **Heavily fragmented NTFS files**: an attribute list, with the data runs in a second MFT record, isn't
    followed yet.
-4. **NTFS-compressed files**: LZNT1 decompression. Today they are refused.
-5. **Recreate the folder structure** as an option when recovering. Today all files land in one folder.
+3. **NTFS-compressed files**: LZNT1 decompression. Today they are refused.
+4. **Recreate the folder structure** as an option when recovering. Today all files land in one folder.
 
 ## Release
 
@@ -35,7 +33,7 @@ clusters. The FAT test can't show it: its images are small, and pyfatfs keeps th
 
 ## Testing
 
-- **Real hardware**: an elevated scan of a real NTFS drive, a USB stick and an SD card. Also check the 4K-sector
+- **Real hardware**: an elevated scan of a real NTFS drive, a FAT32 USB stick and an exFAT SD card (written and deleted from by Windows, a camera and a phone). Also check the 4K-sector
   and big-cluster fixes on real disks, and the free-space warning.
 - **A short manual checklist per release** (`TESTING.md`): the GUI from a USB stick, the same-drive and
   free-space warnings, 100% and 150% display scaling, German.

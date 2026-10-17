@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.21)
 # The app's version - the only place it is written. The window title and the exe's version info take it from
 # here (version.h.in), and a release is made by pushing the tag v<version> (.github/workflows/build.yml).
-project(GetMyFilesBack VERSION 2.6 LANGUAGES C CXX RC)
+project(GetMyFilesBack VERSION 2.7 LANGUAGES C CXX RC)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -28,10 +28,10 @@ if(MSVC)
     add_compile_options(/W3 /utf-8 /MP)
 endif()
 
-# the recovery engine: NTFS and FAT parsing, recoverability, content check - no GUI
+# the recovery engine: NTFS, FAT and exFAT parsing, recoverability, content check - no GUI
 set(ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/NTFSDrive.cpp" "${UNDELETE_ENGINE_DIR}/MFTRecord.cpp")
 # older engines (git HEAD for -WithOld) may not have these
-foreach(ENGINE_FILE FileContents.cpp RecoveryDrive.cpp FATDrive.cpp IsValidFileName.cpp)
+foreach(ENGINE_FILE FileContents.cpp RecoveryDrive.cpp FATDrive.cpp ExFATDrive.cpp IsValidFileName.cpp)
     if(EXISTS "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
         list(APPEND ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
     endif()
@@ -43,7 +43,7 @@ target_link_libraries(undelete_engine PUBLIC wx::base)
 if(UNDELETE_BUILD_APP)
     # An explicit list, not a glob: the source tree may hold stray merge leftovers
     # (e.g. Page_SelectFilesPage.cpp.BACKUP.*.cpp) that must never be compiled. FAT/ (TestDisk) isn't
-    # linked either - FAT drives are read by the engine's own FATDrive.cpp (README.md, "FAT support").
+    # linked either - FAT drives are read by the engine's own FATDrive.cpp (README.md, "FAT and exFAT support").
     add_executable(GetMyFilesBack WIN32
         "${SRC}/main.cpp"
         "${SRC}/MainFrame.cpp"
