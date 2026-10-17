@@ -909,6 +909,9 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
             dwExpected = (DWORD) wxMin((ULONGLONG) dwPrevEnd + ullBetween, (ULONGLONG) m_dwMaxCluster);
         }
         vEntries[k].dwCluster = ResolveClearedHighWordNear(pEntries[vEntries[k].iEntry].wFirstClusterLow, dwExpected);
+        // a guess - the log says which place was taken (for a support case)
+        wxLogMessage("%s: first cluster guessed as %u (expected near %u).", wxString(vEntries[k].sName.c_str()),
+                (unsigned) vEntries[k].dwCluster, (unsigned) dwExpected);
     }
 
     for (size_t k = 0; k < vEntries.size(); k++) {

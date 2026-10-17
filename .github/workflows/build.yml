@@ -124,6 +124,19 @@ jobs:
           gh release create "$env:GITHUB_REF_NAME" out/GetMyFilesBack.exe --repo "$env:GITHUB_REPOSITORY" --title "GetMyFilesBack $env:GITHUB_REF_NAME" --generate-notes
           if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
 
+      # the volumes Windows wrote, to look into a failure of that test locally (tests\windows-image\run.ps1
+      # -UseExistingImages) - they can't be made without admin rights
+      - name: Windows-written images
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-test-images
+          path: |
+            out/windows-test/*.img
+            out/windows-test/*.expected.tsv
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Test log
         if: always()
         uses: actions/upload-artifact@v7

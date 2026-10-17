@@ -130,7 +130,9 @@ function New-TestImage($name, $fs, $cluster, $mb) {
         foreach ($f in $files.Keys) {
             $leaf = Split-Path -Leaf $f
             $folder = "\" + (Split-Path -Parent $f)
-            $saved = if ($fs -like "FAT*" -and (Fits83 $leaf)) { "_" + $leaf.Substring(1) } else { $leaf }
+            # a deleted 8.3 entry loses its first letter - not the files of a folder deleted as a whole (Old Stuff):
+            # Windows leaves their entries as they are
+            $saved = if ($fs -like "FAT*" -and (Fits83 $leaf) -and $f -notlike "Old Stuff\*") { "_" + $leaf.Substring(1) } else { $leaf }
             $recov = if ($leaf -eq "fragmented.bin") { $fragRecov } else { "Good" }
             Expect $saved $files[$f] $recov $folder 0 $saved
         }
