@@ -3,8 +3,7 @@
 #include <wx/intl.h>
 #include "../Theme.h"
 
-// the languages offered, by their LanguageFactory name. Srpski is there (Srpski, Srpski_Cyr) but has no
-// translations of the current UI's texts - it would show mostly English.
+// the languages offered, by their LanguageFactory name
 static const char *const s_aLanguages[] = {"English", "Deutsch"};
 
 LanguageDialog::LanguageDialog()

@@ -55,7 +55,6 @@ if(UNDELETE_BUILD_APP)
         "${SRC}/AppLog.cpp"
         "${SRC}/languages/LanguageDialog.cpp"
         "${SRC}/languages/LanguageFactory.cpp"
-        "${SRC}/languages/LanguagesImpl.cpp"
         "${SRC}/languages/GermanTexts.cpp"
         "${SRC}/languages/Translate.cpp"
         "${SRC}/undelete.rc")

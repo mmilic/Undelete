@@ -7,8 +7,6 @@ LanguageFactory::LanguageFactory() {
     // Register(“Horse”, &Horse::Create);
     // Register(“Cat”, &Cat::Create);
     Register("English", &English::Create);
-    Register("Srpski", &Srpski::Create);
-    Register("Srpski_Cyr", &Srpski_Cyr::Create);
     Register("Deutsch", &Deutsch::Create);
 }
 

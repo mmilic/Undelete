@@ -191,8 +191,6 @@ rebuild that version.
   multi-language UI). See `CLAUDE.md` for the internal architecture.
 - `src/UndeleteWizzard/FAT/` — vendored TestDisk/PhotoRec source, kept for reference only.
   **Not linked into the build** — FAT drives are read by `FATDrive.cpp`, see "FAT support" below.
-- `src/UndeleteWizzard/Makefile`, `nbproject/`, `*.conf` — the original NetBeans/MinGW build files of the
-  commercial version. They point at paths on the original developer's machine and aren't used.
 - `tests/ntfs-image/`, `tests/fat-image/` — the end-to-end tests of the recovery engine.
 
 ## FAT support

@@ -3,7 +3,7 @@
  *
  * The text of the UI in the chosen language. The English text is the key: Tr(L"Back") is "Zurück" in German,
  * and a language that has no translation for a text shows the English one - a missing entry never shows an
- * empty button. The language packs (LanguagesImpl.cpp) hold the tables.
+ * empty button. A language pack holds its table (German: GermanTexts.cpp).
  */
 
 #ifndef TRANSLATE_H

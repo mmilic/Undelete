@@ -124,8 +124,8 @@ drive strip).
 - `languages/` — i18n. The UI's text goes through `Tr(L"English text")` (`Translate.h`): the English text is
   the key, a language pack's `translate()` returns its translation, a missing one falls back to English.
   German is in `GermanTexts.cpp` - add every new `Tr()` text there. `LanguageDialog` offers English and Deutsch
-  (preselected on German Windows). The older enum-keyed `getWXText(page, text)` tables in `LanguagesImpl.cpp`
-  (also Srpski, Srpski_Cyr) are no longer used by the UI.
+  (preselected on German Windows); another language is a class in `ILanguage.h` with its own `translate()`
+  table, registered in `LanguageFactory.cpp`.
 - `FAT/` — vendored TestDisk/PhotoRec source (~357 files), kept for reference only and **not linked into the
   build** (GCC-only code, its own ncurses UI, GPL). FAT drives are read by `FATDrive.cpp`.
 - Comments/identifiers mix English and Serbian (Latin and occasionally Cyrillic) — normal for this codebase.
