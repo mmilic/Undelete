@@ -4,9 +4,11 @@
 #include <wx/wx.h>
 #include <wx/hashmap.h>
 #include <new>
+#include <algorithm>
 #include <set>
 #include <string>
 #include "FATDrive.h"
+#include "FileContents.h"
 
 #define ATTR_READ_ONLY 0x01
 #define ATTR_HIDDEN 0x02
@@ -740,6 +742,63 @@ static std::wstring ChildPath(const std::wstring &sParent, const std::wstring &s
     return (sParent == L"\\") ? sParent + sName : sParent + L"\\" + sName;
 }
 
+// how many candidate clusters are read for the exact check - on a 2 TB FAT32 volume there can be 1000 of them
+#define MAX_CANDIDATES_READ 16
+
+DWORD CFATDrive::ResolveClearedHighWordExactly(WORD wLow, bool bDirectory, DWORD dwSize, const std::wstring &sName) {
+    // only a place that is still free can be read for it - in use, it holds another file's data by now
+    std::vector<DWORD> vCandidates;
+    for (DWORD c = wLow; c <= m_dwMaxCluster && vCandidates.size() < MAX_CANDIDATES_READ; c += 0x10000)
+        if (c >= 2 && !IsClusterInUse(c))
+            vCandidates.push_back(c);
+
+    if (bDirectory) {
+        // a folder's first cluster starts with its "." entry, which holds the folder's own cluster number
+        std::vector<BYTE> vData(m_dwBytesPerCluster);
+        for (size_t i = 0; i < vCandidates.size(); i++) {
+            if (ReadClusters(vCandidates[i], 1, &vData[0]))
+                continue;
+            const FAT_DIR_ENTRY &dot = *(const FAT_DIR_ENTRY *) &vData[0];
+            if (!memcmp(dot.uchName, ".          ", 11)
+                    && ((DWORD) dot.wFirstClusterHigh << 16 | dot.wFirstClusterLow) == vCandidates[i])
+                return vCandidates[i];
+        }
+        return 0;
+    }
+
+    // a file whose start shows its type: the place where it passes the content check - if only one does
+    if (!dwSize || !CanCheckFileContents(sName.c_str()))
+        return 0;
+    DWORD dwStart = wxMin(dwSize, (DWORD) CONTENT_CHECK_BYTES);
+    std::vector<BYTE> vStart(dwStart);
+    DWORD dwFound = 0;
+    for (size_t i = 0; i < vCandidates.size(); i++) {
+        std::vector<FAT_RUN> vRuns;
+        if (!GuessClusters(vCandidates[i], dwSize, vRuns, NULL) || ReadRuns(vRuns, dwStart, &vStart[0], NULL))
+            continue;
+        if (ClassifyFileContents(sName.c_str(), &vStart[0], dwStart) == CONTENT_OK) {
+            if (dwFound)
+                return 0; // two places look like it (two copies of a photo?) - leave it to the neighbours
+            dwFound = vCandidates[i];
+        }
+    }
+    return dwFound;
+}
+
+DWORD CFATDrive::ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected) const {
+    // the place nearest to where the file is expected - in use or not: a file whose place is in use now was
+    // overwritten, and a free place further away must not be taken for it just because it is free
+    DWORD dwBest = 0, dBest = 0xFFFFFFFF;
+    for (DWORD c = wLow; c <= m_dwMaxCluster; c += 0x10000) {
+        DWORD d = c > dwExpected ? c - dwExpected : dwExpected - c;
+        if (c >= 2 && d < dBest) {
+            dBest = d;
+            dwBest = c;
+        }
+    }
+    return dwBest;
+}
+
 void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_SCAN> &vToScan, std::set<DWORD> &setSeen,
         FileInfoHash *finfohash) {
     std::vector<BYTE> vData;
@@ -757,6 +816,17 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
     CharUpperBuffW(&sUpperPath[0], (DWORD) sUpperPath.length());
     bool bInRecycleBin = sUpperPath.find(L"\\$RECYCLE.BIN") != std::wstring::npos;
 
+    // the folder's entries, in their order - their clusters are settled before any is used (see
+    // ResolveClearedHighWordExactly in FATDrive.h)
+    struct ST_ENTRY {
+        int iEntry;
+        std::wstring sName;
+        DWORD dwCluster;
+        bool bDeleted;
+        bool bKnown; // the cluster is known for sure - the others lie between their nearest known neighbours
+    };
+    std::vector<ST_ENTRY> vEntries;
+
     for (int i = 0; i < iEntries; i++) {
         const FAT_DIR_ENTRY &e = pEntries[i];
         if (!e.uchName[0])
@@ -766,7 +836,6 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
 
         // in a deleted folder, everything is deleted - whether its entries were marked or not
         bool bEntryDeleted = e.uchName[0] == DELETED_ENTRY;
-        bool bDeleted = bEntryDeleted || dir.bDeleted;
         if ((e.uchAttributes & 0xC0) || (!bEntryDeleted && e.uchName[0] != 0x05 && !IsShortNameChar(e.uchName[0])))
             continue; // not a valid entry
         bool bValid = true;
@@ -787,26 +856,82 @@ void CFATDrive::ScanDirectory(const ST_DIR_TO_SCAN &dir, std::vector<ST_DIR_TO_S
         if (sName.empty())
             continue;
 
-        DWORD dwCluster = e.wFirstClusterLow;
+        ST_ENTRY entry = {i, sName, e.wFirstClusterLow, bEntryDeleted || dir.bDeleted, true};
         if (m_iFATType == FAT_TYPE_32)
-            dwCluster |= (DWORD) e.wFirstClusterHigh << 16;
+            entry.dwCluster |= (DWORD) e.wFirstClusterHigh << 16;
+        if (m_iFATType == FAT_TYPE_32 && bEntryDeleted && !e.wFirstClusterHigh && m_dwMaxCluster > 0xFFFF && entry.dwCluster) {
+            // Windows cleared the high word when it deleted the entry - only the low word is left
+            DWORD dwExact = ResolveClearedHighWordExactly(e.wFirstClusterLow, (e.uchAttributes & ATTR_DIRECTORY) != 0, e.dwFileSize, sName);
+            if (dwExact)
+                entry.dwCluster = dwExact;
+            else if (e.uchAttributes & ATTR_DIRECTORY)
+                entry.dwCluster = 0; // no free cluster holds it any more
+            else
+                entry.bKnown = false;
+        }
+        vEntries.push_back(entry);
+    }
+
+    // The others: files written one after another lie one after another, so a file starts about where the files
+    // between it and its next known neighbour, counted back from that neighbour's start, begin - this also holds
+    // where the volume was full and the allocation went on from its beginning. Without a known next neighbour,
+    // counted on from where the previous known one ends. Off by less than 32768 clusters, the nearest place is right.
+    std::vector<DWORD> vClusters(vEntries.size()); // the clusters each entry takes
+    for (size_t k = 0; k < vEntries.size(); k++) {
+        const FAT_DIR_ENTRY &e = pEntries[vEntries[k].iEntry];
+        vClusters[k] = (e.uchAttributes & ATTR_DIRECTORY) ? 1 : (DWORD) (((ULONGLONG) e.dwFileSize + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster);
+    }
+    for (size_t k = 0; k < vEntries.size(); k++) {
+        if (vEntries[k].bKnown)
+            continue;
+        DWORD dwExpected = 0;
+        ULONGLONG ullBetween = 0;
+        for (size_t n = k; n < vEntries.size(); n++) {
+            if (vEntries[n].bKnown && vEntries[n].dwCluster >= 2 && vEntries[n].dwCluster <= m_dwMaxCluster) {
+                if (ullBetween < vEntries[n].dwCluster)
+                    dwExpected = (DWORD) (vEntries[n].dwCluster - ullBetween);
+                break;
+            }
+            if (!vEntries[n].bKnown)
+                ullBetween += vClusters[n];
+        }
+        if (!dwExpected) {
+            ullBetween = 0;
+            DWORD dwPrevEnd = dir.dwCluster ? dir.dwCluster + 1 : 2; // nothing before it is known: right after the folder
+            for (size_t p = k; p-- > 0;) {
+                if (vEntries[p].bKnown && vEntries[p].dwCluster >= 2 && vEntries[p].dwCluster <= m_dwMaxCluster) {
+                    dwPrevEnd = vEntries[p].dwCluster + vClusters[p];
+                    break;
+                }
+                if (!vEntries[p].bKnown)
+                    ullBetween += vClusters[p];
+            }
+            dwExpected = (DWORD) wxMin((ULONGLONG) dwPrevEnd + ullBetween, (ULONGLONG) m_dwMaxCluster);
+        }
+        vEntries[k].dwCluster = ResolveClearedHighWordNear(pEntries[vEntries[k].iEntry].wFirstClusterLow, dwExpected);
+    }
+
+    for (size_t k = 0; k < vEntries.size(); k++) {
+        const ST_ENTRY &entry = vEntries[k];
+        const FAT_DIR_ENTRY &e = pEntries[entry.iEntry];
+        DWORD dwCluster = entry.dwCluster;
 
         if (e.uchAttributes & ATTR_DIRECTORY) {
             // a deleted folder can only be read while its first cluster is still free
             if (dwCluster >= 2 && dwCluster <= m_dwMaxCluster && !setSeen.count(dwCluster)
-                    && (!bDeleted || !IsClusterInUse(dwCluster))) {
+                    && (!entry.bDeleted || !IsClusterInUse(dwCluster))) {
                 setSeen.insert(dwCluster);
-                ST_DIR_TO_SCAN sub = {dwCluster, bDeleted, ChildPath(dir.sPath, sName)};
+                ST_DIR_TO_SCAN sub = {dwCluster, entry.bDeleted, ChildPath(dir.sPath, entry.sName)};
                 vToScan.push_back(sub);
             }
             continue;
         }
 
-        if (!bDeleted || (e.uchAttributes & (ATTR_SYSTEM | ATTR_HIDDEN)))
+        if (!entry.bDeleted || (e.uchAttributes & (ATTR_SYSTEM | ATTR_HIDDEN)))
             continue; // like on NTFS: no system or hidden files
 
         t_FileInfo *pFileInfo = new t_FileInfo;
-        pFileInfo->sFilename = sName;
+        pFileInfo->sFilename = entry.sName;
         pFileInfo->sFolder = dir.sPath;
         pFileInfo->bDeleted = true;
         pFileInfo->dwAttributes = e.uchAttributes & (ATTR_READ_ONLY | FILE_ATTRIBUTE_ARCHIVE);

@@ -17,8 +17,8 @@ Needs Python 3 on Windows. The first run makes a venv in `out\fat-test\venv` and
    implementation independent of the engine's.
    pyfatfs removes a file by rewriting its whole folder, which leaves no deleted entry behind. So the test
    files are deleted by `make_image.py` itself, the way Windows deletes: the first byte of the 8.3 entry and of
-   its long name entries becomes `0xE5`, the cluster chain is zeroed in every FAT, and a folder's files go
-   before the folder. pyfatfs is still used for its own clean-up of the filler files, which leave no trace.
+   its long name entries becomes `0xE5`, the cluster chain is zeroed in every FAT, on FAT32 the high 16 bits of
+   the first cluster are cleared, and a folder's files go before the folder. pyfatfs is still used for its own clean-up of the filler files, which leave no trace.
    - Filler files are written, then every other one is removed. `frag_live_gaps.bin` fills the holes, fragmented
      around the fillers that stay. The engine must recover it byte-for-byte and flag it "Partly overwritten".
      A partly overwritten file would look the same, so it can't be called Good.
@@ -41,7 +41,10 @@ Needs Python 3 on Windows. The first run makes a venv in `out\fat-test\venv` and
    - Three Recycle Bin pairs in `$RECYCLE.BIN\S-1-5-21-1`, written by the NTFS test's
      `make_recycle_info.py`. Each `$R` file must come back under its original name and folder, and the `$I`
      files must not be listed. `$RQ1W2E3` has no long name: its lost first character can only be `$`.
-   - FAT32 only: `far.bin` starts past cluster 65535, so its first cluster needs the high 16 bits of the entry.
+   - FAT32 only, past cluster 65535, where the cleared high 16 bits matter: `BIGFILL.BIN` (zeros, deleted too)
+     fills the space before them, so each one's "low 16 bits only" place is free as well - the engine has to pick
+     the right one. `far.bin` (no checkable type) by its neighbours in the folder, `far.png` by the content check
+     (its other place holds zeros), and the deleted `Far Folder` by its "." entry - its `inside.txt` must be found.
 
    Each image gets `<image>.expected.tsv`: the name, the SHA-256, the recoverability, the folder and the content
    check result each deleted test file must get.
@@ -56,9 +59,9 @@ Needs Python 3 on Windows. The first run makes a venv in `out\fat-test\venv` and
 
 - Windows-specific behaviour still needs a manual test on a USB stick or memory card formatted and used by
   Windows:
-  - what Windows really leaves in a deleted entry;
-  - whether it clears the high 16 bits of the first cluster on FAT32 (the test assumes it doesn't);
-  - real `$I`/`$R` files.
-- A file fragmented around space that is free now comes back wrong, and is flagged Good - see "FAT support"
-  in the main README. Nothing on the volume shows it, so there is no test for it.
-- exFAT is not supported yet.
+  - real `$I`/`$R` files;
+  - a well-used card, where files of many sizes were written and deleted in any order - the neighbours the
+    FAT32 high-word guess relies on are less orderly there. `tests\windows-image` (CI) has a FAT32 volume that
+    Windows wrote, but a freshly filled one.
+- A file fragmented around space that is free now comes back wrong, and is flagged Good - see "FAT and exFAT
+  support" in the main README. Nothing on the volume shows it, so there is no test for it.

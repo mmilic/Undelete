@@ -134,6 +134,10 @@ class RawFat:
                     self.delete(path.rstrip("/") + "/" + child[0])
         for o in [off] + lfn:
             self.d[o] = 0xE5
+        if self.type == 32:
+            # Windows also clears the high word of the first cluster - past cluster 65535 that is all the engine
+            # has to find the file by (the low word stays)
+            struct.pack_into("<H", self.d, off + 20, 0)
         for c in list(self.chain(cluster)):
             self.set(c, 0)
 
@@ -249,16 +253,25 @@ def build(out_dir, name, fat_type, size):
                content="Damaged" if original_name.endswith((".jpg", ".docx")) else "-")
 
     if fat_type == PyFat.FAT_TYPE_FAT32:
-        # past cluster 65535: the first cluster needs the high 16 bits of the entry
+        # Past cluster 65535, where Windows' cleared high word matters. BIGFILL (zeros, deleted later too) fills the
+        # space before them, so the "low word only" places of these files are free as well - the engine has to tell
+        # which of the places is the file's: by where the file before it ended (far.bin), by the content check
+        # (far.png - its low-word place holds zeros) and by the "." entry (a deleted folder).
         fs.writebytes("/BIGFILL.BIN", bytes((65600 - max(used_clusters(fs))) * bpc))
         write(fs, "/far.bin", rnd.randbytes(3 * bpc + 5))
         expect("/far.bin")
+        write(fs, "/far.png", helper_output("make_png.py", 32, 24))
+        expect("/far.png", content="Looks valid")
+        fs.makedir("/Far Folder")
+        write(fs, "/Far Folder/inside.txt", b"in a deleted folder past cluster 65535\r\n")
+        expect("/Far Folder/inside.txt", folder="\\Far Folder", content="Looks valid")
     fs.close()
 
     # delete overwritten.bin and let a new file take its clusters
     raw = RawFat(img)
     if fat_type == PyFat.FAT_TYPE_FAT32:
-        assert raw.find("/far.bin")[3] > 0xFFFF, "far.bin should start past cluster 65535"
+        for far in ("/far.bin", "/far.png", "/Far Folder", "/Far Folder/inside.txt"):
+            assert raw.find(far)[3] > 0xFFFF, far + " should start past cluster 65535"
     raw.delete("/overwritten.bin")
     raw.save()
     fs = PyFatFS(img)
@@ -267,10 +280,13 @@ def build(out_dir, name, fat_type, size):
 
     raw = RawFat(img)
     for path in files:
-        if path != "/overwritten.bin" and not path.startswith(("/Old Stuff/", "/Big Folder/")):
+        if path != "/overwritten.bin" and not path.startswith(("/Old Stuff/", "/Big Folder/", "/Far Folder/")):
             raw.delete(path)
     raw.delete("/Old Stuff")
     raw.delete("/Big Folder")
+    if fat_type == PyFat.FAT_TYPE_FAT32:
+        raw.delete("/Far Folder")
+        raw.delete("/BIGFILL.BIN")
     raw.save()
 
     with open(os.path.join(out_dir, name + ".expected.tsv"), "w", encoding="utf-8", newline="\n") as f:

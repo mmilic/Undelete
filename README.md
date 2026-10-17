@@ -261,7 +261,18 @@ overwritten"), and files in a deleted folder's later clusters are lost.
 
 What FAT leaves of a deleted file decides what can be recovered:
 - Windows marks the file's directory entry as deleted (its first byte becomes `0xE5`) and frees its
-  clusters in the FAT. The size, the dates and the first cluster stay.
+  clusters in the FAT. The size, the dates and the first cluster stay - on FAT32 only the lower half of the
+  first cluster's number (see below).
+- **FAT32's first cluster**: Windows also clears the high 16 bits of a deleted entry's first cluster. On a
+  volume of more than 65,535 clusters - every USB stick and memory card - a file past cluster 65,535 then
+  seems to start at one of `low`, `low + 65536`, `low + 2 × 65536`… The engine settles that per folder:
+  - a deleted folder exactly, by its "." entry, which holds the folder's own full cluster number
+  - a file whose type it knows (photos, documents…) by the content check: the one place whose start
+    looks like that type
+  - every other file by its neighbours in the folder: files written one after another lie one after
+    another, so it goes to the place nearest to where it is expected - counted back from the next known
+    file's start (which also holds where a full volume's allocation went on from its beginning). That is
+    right while the estimate is off by less than 32,768 clusters - but a guess, so it can be wrong.
 - **The name**: a long file name comes back in full, and so does the first character of the short (8.3)
   name, via the checksum the long name entries keep. A file with only an 8.3 name loses its first
   character - it is listed as `_EADME.TXT`. In the Recycle Bin the lost character is always `$`, so

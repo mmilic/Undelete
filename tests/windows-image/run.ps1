@@ -1,5 +1,5 @@
 ﻿# End-to-end check of the recovery engines on volumes that Windows itself formatted and wrote - the NTFS and FAT
-# tests make theirs with ntfs-3g and pyfatfs. NTFS and exFAT for now (see $Images for FAT32). Needs administrator rights (it attaches virtual disks); the
+# tests make theirs with ntfs-3g and pyfatfs. NTFS, exFAT and FAT32. Needs administrator rights (it attaches virtual disks); the
 # GitHub Actions build runs it on every push.
 #   1. for each image: creates a virtual disk (VHD), formats it with Windows, writes the test files - fragmented,
 #      in folders, through the Recycle Bin, and on NTFS compressed and EFS-encrypted ones - deletes them, then
@@ -13,10 +13,9 @@ $ErrorActionPreference = "Stop"
 $Here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = Resolve-Path (Join-Path $Here "..\..")
 $OutDir = Join-Path $Root "out\windows-test"
-# name, file system, cluster size, MB - add @("fat32", "FAT32", 512, 64) once the FAT engine can recover it: on
-# FAT32 Windows clears the high word of a deleted file's first cluster, so the files past cluster 65535 point to
-# the wrong clusters (the FAT test doesn't see it - its images are small, and pyfatfs keeps the high word)
-$Images = @(@("ntfs", "NTFS", 4096, 64), @("exfat", "exFAT", 4096, 64))
+# name, file system, cluster size, MB. FAT32 with 512-byte clusters: 64 MB is about 130,000 clusters, so files lie
+# past cluster 65535 - where Windows' cleared high word of a deleted file's first cluster matters
+$Images = @(@("ntfs", "NTFS", 4096, 64), @("exfat", "exFAT", 4096, 64), @("fat32", "FAT32", 512, 64))
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 $Rng = New-Object System.Random 20141017

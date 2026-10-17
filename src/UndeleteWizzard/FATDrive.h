@@ -158,6 +158,14 @@ private:
     // never one in setClaimed (another deleted folder's), and the ones it takes go there
     int ReadDirectory(DWORD dwCluster, bool bDeleted, std::vector<BYTE> &vData, std::set<DWORD> &setClaimed);
 
+    // FAT32: Windows clears the high word of a deleted entry's first cluster, so past cluster 65535 only the low
+    // word is left - the cluster is one of low, low + 65536, low + 2 * 65536... (ScanDirectory, in two passes):
+    // First the ones that can be told for sure - a folder by its "." entry, which holds its own full cluster
+    // number, a file by the content check of its start (0: none). The others go where they are expected from
+    // their nearest neighbours in the folder that are known for sure - the place nearest to dwExpected.
+    DWORD ResolveClearedHighWordExactly(WORD wLow, bool bDirectory, DWORD dwSize, const std::wstring &sName);
+    DWORD ResolveClearedHighWordNear(WORD wLow, DWORD dwExpected) const;
+
     struct ST_DIR_TO_SCAN {
         DWORD dwCluster; // 0: the fixed root directory of FAT12/16
         bool bDeleted;
