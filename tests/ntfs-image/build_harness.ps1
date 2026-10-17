@@ -13,9 +13,9 @@ Push-Location $Root
 try {
     & $Cmake --preset x64
     if ($LASTEXITCODE -ne 0) { throw "CMake configure failed" }
-    & $Cmake --build --preset release --target ntfs_harness
+    & $Cmake --build --preset release --target engine_harness
     if ($LASTEXITCODE -ne 0) { throw "build of the harness failed" }
-    Copy-Item "out\build\x64\bin\Release\ntfs_harness.exe" (Join-Path $OutDir "harness-new.exe") -Force
+    Copy-Item "out\build\x64\bin\Release\engine_harness.exe" (Join-Path $OutDir "harness-new.exe") -Force
     Write-Host "Built $(Join-Path $OutDir 'harness-new.exe')"
 
     if ($WithOld) {
@@ -44,9 +44,9 @@ try {
             "-DVCPKG_INSTALLED_DIR=$Root\out\vcpkg_installed" "-DUNDELETE_BUILD_APP=OFF" `
             "-DUNDELETE_ENGINE_DIR=$Old" "-DUNDELETE_HARNESS_SOURCE=$Old\harness.cpp"
         if ($LASTEXITCODE -ne 0) { throw "CMake configure of the old engine failed" }
-        & $Cmake --build $OldBuild --config Release --target ntfs_harness
+        & $Cmake --build $OldBuild --config Release --target engine_harness
         if ($LASTEXITCODE -ne 0) { throw "build of the old harness failed" }
-        Copy-Item (Join-Path $OldBuild "bin\Release\ntfs_harness.exe") (Join-Path $OutDir "harness-old.exe") -Force
+        Copy-Item (Join-Path $OldBuild "bin\Release\engine_harness.exe") (Join-Path $OutDir "harness-old.exe") -Force
         Write-Host "Built $(Join-Path $OutDir 'harness-old.exe')"
     }
 } finally {

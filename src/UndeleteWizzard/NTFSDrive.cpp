@@ -598,8 +598,8 @@ int CNTFSDrive::ScanFiles(FileInfoHash *m_FileInfoHash) {
     if (LoadVolumeBitmap())
         wxLogMessage("Volume bitmap not available - recoverability of the files will be unknown.");
 
-    //    for (i = 0; ((unsigned) i < 0xFFFFFFFF); i++) {
-    for (i = 30; ((unsigned) i < 0xFFFFFFFF); i++) { //stavio da i krece od +30 da bi izbegao sistemske MFT recorde
+    // records 0-23 are the system files ($MFT, $Bitmap, ...) and reserved ones - the first user file is 24
+    for (i = 24; ((unsigned) i < 0xFFFFFFFF); i++) {
 
         if (!(i & 0xFFF)) {
             if (IsCancelled()) {

@@ -1,37 +1,11 @@
-/* 
- * File:   NTFSDrive.h
- * Author: MilicM
- *
- * Created on September 28, 2012, 12:05 PM
- */
+// NTFSDrive.h: interface for the CNTFSDrive class - the NTFS recovery engine.
 
-#ifndef NTFSDRIVE_H
-#define	NTFSDRIVE_H
+#pragma once
 
-
-
-#endif	/* NTFSDRIVE_H */
-
-// NTFSDrive.h: interface for the CNTFSDrive class.
-//
-//////////////////////////////////////////////////////////////////////
-
-//#include <windows.h>
-//#include <wx/wx.h>
 #include <string>
 #include <vector>
 #include "MFTRecord.h"
 #include "RecoveryDrive.h"
-//#include <wx/hashmap.h>
-
-#if !defined(AFX_NTFSDRIVE_H__078B2392_2978_4C23_97FD_166C4B234BF3__INCLUDED_)
-#define AFX_NTFSDRIVE_H__078B2392_2978_4C23_97FD_166C4B234BF3__INCLUDED_
-
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
 
 #pragma pack(push, curAlignment)
 
@@ -83,8 +57,8 @@ protected:
     int LoadMFT(LONGLONG nStartCluster);
 
     /////////////////// the MFT info /////////////////
-    // The MFT is not loaded into memory as a whole - on a big volume it is gigabytes, more than this
-    // 32-bit process can hold. Only its location is kept, and records are read through a small cache.
+    // The MFT is not loaded into memory as a whole - on a big volume it is gigabytes - too much to
+    // hold in memory. Only its location is kept, and records are read through a small cache.
     std::vector<NTFS_DATA_RUN> m_vMFTRuns; // where the MFT is on the volume
     LONGLONG m_llMFTSize; // bytes of the MFT that can be read (multiple of the record size)
     std::vector<BYTE> m_vMFTCache; // a window of the MFT
@@ -138,6 +112,3 @@ public:
     virtual ~CNTFSDrive();
 
 };
-
-#endif // !defined(AFX_NTFSDRIVE_H__078B2392_2978_4C23_97FD_166C4B234BF3__INCLUDED_)
-

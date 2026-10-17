@@ -70,6 +70,6 @@ endif()
 
 if(UNDELETE_BUILD_TESTS)
     # runs the engine against a disk image - see tests/ntfs-image/README.md and tests/fat-image/README.md
-    add_executable(ntfs_harness "${UNDELETE_HARNESS_SOURCE}")
-    target_link_libraries(ntfs_harness PRIVATE undelete_engine wx::core wx::base)
+    add_executable(engine_harness "${UNDELETE_HARNESS_SOURCE}")
+    target_link_libraries(engine_harness PRIVATE undelete_engine wx::core wx::base)
 endif()
