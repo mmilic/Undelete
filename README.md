@@ -14,13 +14,14 @@ Contents: [Just use it](#just-use-it) · [1. Install the tools](#1-install-the-t
 
 ## Just use it
 
-No need to build anything: every push to `master` is built and tested on GitHub's own Windows machines
-(`.github/workflows/build.yml`).
+No need to build anything: download **`GetMyFilesBack.exe`** from the latest release on the repo's
+**Releases** page (https://github.com/mmilic/Undelete/releases), then continue with
+[3. Deploy and run](#3-deploy-and-run).
 
-1. Open the repo on GitHub, go to the **Actions** tab and pick the latest successful **Build** run.
-2. Under **Artifacts**, download **GetMyFilesBack** (you need to be signed in to GitHub). It is a zip with
-   the exe, built from that commit after the image tests passed.
-3. Continue with [3. Deploy and run](#3-deploy-and-run).
+Every release and every push to `master` is built and tested on GitHub's own Windows machines
+(`.github/workflows/build.yml`). For a build newer than the latest release: open the **Actions** tab, pick the
+latest successful **Build** run and download **GetMyFilesBack** under **Artifacts** - a zip with the exe
+(you need to be signed in to GitHub).
 
 ## 1. Install the tools
 
@@ -178,6 +179,21 @@ cmake --build --preset release
 
 `build.ps1` does the same after finding Visual Studio's CMake and vcpkg (`build-env.ps1`). To use your own
 vcpkg checkout instead of the one that comes with Visual Studio, set `VCPKG_ROOT`.
+
+**Making a release:** the version is written in one place, `project(GetMyFilesBack VERSION ...)` in
+`CMakeLists.txt` - the window title and the exe's file properties show it. Raise it, commit and push, then tag
+that commit with `v` and the version and push the tag, e.g. for version 2.7:
+
+```cmd
+git tag v2.7
+```
+
+```cmd
+git push origin v2.7
+```
+
+The GitHub build then builds and tests the tagged commit and, if the tests pass, makes the release with the
+exe. A tag that doesn't match the version in `CMakeLists.txt` fails the build before anything is released.
 
 **Older build:** until October 2026 the repo carried its own 32-bit toolchain in `tools/` (MinGW GCC 4.6.2 and
 static wxWidgets 3.0.1). The tag **`last-gcc462-x86`** marks the last commit built that way - check it out to

@@ -1,10 +1,13 @@
 # Builds GetMyFilesBack.exe on a clean Windows machine and runs the NTFS and FAT image tests.
 # The exe is attached to each run as the "GetMyFilesBack" artifact (Actions tab -> the run -> Artifacts).
+# Pushing a tag v<version> (the version in CMakeLists.txt, e.g. v2.6) also makes a GitHub release with the exe,
+# once the tests have passed.
 name: Build
 
 on:
   push:
     branches: [master]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -31,11 +34,24 @@ jobs:
     needs: test-image
     # pinned: CMakePresets.json uses the "Visual Studio 17 2022" generator
     runs-on: windows-2022
+    permissions:
+      contents: write # the release, for a tag
     defaults:
       run:
         shell: powershell
     steps:
       - uses: actions/checkout@v7
+
+      # before the long build: a release tag must name the version the exe is built with
+      - name: Check the tag against the version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          $m = Select-String -Path CMakeLists.txt -Pattern 'project\(GetMyFilesBack VERSION ([0-9.]+)'
+          if (-not $m) { throw "No project(GetMyFilesBack VERSION ...) in CMakeLists.txt" }
+          $version = $m.Matches[0].Groups[1].Value
+          if ("$env:GITHUB_REF_NAME" -ne "v$version") {
+              throw "The tag $env:GITHUB_REF_NAME doesn't match the version $version in CMakeLists.txt - expected v$version"
+          }
 
       # a full vcpkg checkout - vcpkg.json's builtin-baseline commit has to be in its history
       - name: Get vcpkg
@@ -73,6 +89,15 @@ jobs:
         with:
           name: GetMyFilesBack
           path: out/GetMyFilesBack.exe
+
+      # only reached when the build and both tests passed
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$env:GITHUB_REF_NAME" out/GetMyFilesBack.exe --repo "$env:GITHUB_REPOSITORY" --title "GetMyFilesBack $env:GITHUB_REF_NAME" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
 
       - name: Test log
         if: always()

@@ -34,7 +34,8 @@ its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg 
   `version.h` (from `src/UndeleteWizzard/version.h.in`), which the window title and `undelete.rc`'s VERSIONINFO use.
 - `.github/workflows/build.yml` builds and tests every push on GitHub (Linux job makes the NTFS test image with
   ntfs-3g, Windows job builds, runs the NTFS test with `-UseExistingImage` and the FAT test) and attaches the
-  exe as an artifact.
+  exe as an artifact. A pushed tag `v<version>` (it must match the CMake version) also makes a GitHub release
+  with the exe, after the tests pass.
 - The tag `last-gcc462-x86` is the last commit built with the old vendored 32-bit MinGW GCC 4.6.2 +
   wxWidgets 3.0.1 toolchain (`tools/`, removed after it).
 
