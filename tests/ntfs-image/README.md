@@ -10,10 +10,18 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
 
 ## What it does
 
-1. `make_image.sh` (runs as root in WSL) creates an 8 MB NTFS image. It mounts the image with `ntfs-3g`, which
-   can mount a plain image file directly, fills the volume, and frees every other 64 KB file in disk order to
-   leave holes. It then writes the test files, records their SHA-256 checksums, deletes them and unmounts.
-   - `fragmented.bin`: 18 fragments
+1. `make_image.sh` (runs as root in WSL) creates three NTFS images with the same test files, formatted
+   differently:
+   - `test.img`: 8 MB, 512-byte sectors and 4 KB clusters - the usual NTFS
+   - `4k-sectors.img`: 4096-byte sectors, as on "4Kn" disks. The MFT records are 4 KB too, and the boot sector
+     can't be read as 512 bytes.
+   - `256k-clusters.img`: 256 KB clusters. Above 64 KB the boot sector stores the sectors per cluster as a
+     power of two (`0xF7` = 2^9), not as a count.
+
+   For each, it mounts the image with `ntfs-3g`, which can mount a plain image file directly, fills the
+   volume, and frees every other filler file (64 KB, or two clusters) in disk order to leave holes. It then
+   writes the test files, records their SHA-256 checksums in `<image>.sha256`, deletes them and unmounts.
+   - `fragmented.bin`: 18 fragments on `test.img`
    - a file with a 199-character name, 11 fragments. The long name pushes the attributes past byte 510 of
      the MFT record, so the fixups have to be applied correctly.
    - `sparse.bin`: has a hole that isn't stored on disk
@@ -35,9 +43,10 @@ Needs WSL with `ntfs-3g` installed (`sudo apt-get install ntfs-3g`). Everything 
    `src\`, same toolchain as `build.ps1`). With `-WithOld` it also builds the engine and the harness from git
    `HEAD` in a second build tree, so you can compare before and after a change. The FAT test
    (`tests\fat-image`) uses the same harness - it picks the engine by the image's boot sector.
-3. The harness opens `test.img` as if it were a raw volume (`\\.\X:`), scans the MFT and recovers every deleted
+3. The harness opens each image as if it were a raw volume (`\\.\X:`), scans the MFT and recovers every deleted
    file. `run.ps1` then checks the test files against their original checksums and checks the recoverability
-   each file was given.
+   each file was given. Its log for each image is `out
+tfs-testun-<image>.log`.
 
 ## Limits
 

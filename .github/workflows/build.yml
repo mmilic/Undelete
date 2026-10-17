@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # the test image is made with ntfs-3g on Linux (the Windows runners have no WSL);
+  # the test images are made with ntfs-3g on Linux (the Windows runners have no WSL);
   # an NTFS image is the same bytes wherever it was made
   test-image:
     runs-on: ubuntu-24.04
@@ -20,14 +20,14 @@ jobs:
       - uses: actions/checkout@v7
       - name: Install ntfs-3g
         run: sudo apt-get update && sudo apt-get install -y ntfs-3g
-      - name: Make the NTFS test image
+      - name: Make the NTFS test images
         run: sudo sh tests/ntfs-image/make_image.sh
       - uses: actions/upload-artifact@v7
         with:
           name: ntfs-test-image
           path: |
-            out/ntfs-test/test.img
-            out/ntfs-test/expected.sha256
+            out/ntfs-test/*.img
+            out/ntfs-test/*.sha256
           retention-days: 3
 
   build:
@@ -105,6 +105,6 @@ jobs:
         with:
           name: test-logs
           path: |
-            out/ntfs-test/run.log
+            out/ntfs-test/run-*.log
             out/fat-test/run-*.log
           if-no-files-found: ignore

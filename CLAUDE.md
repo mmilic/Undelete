@@ -41,8 +41,9 @@ its CMake and vcpkg. Produces `out\GetMyFilesBack.exe`; all build output, vcpkg 
 
 The recovery engine has two automated end-to-end tests (see their READMEs), which run the engine against disk
 images and check the recovered files byte-for-byte, plus what the engine reports about them:
-- `tests\ntfs-image\run.ps1` - needs WSL with `ntfs-3g`. An NTFS image with deleted fragmented, sparse and
-  resident files. Run it after touching `NTFSDrive.*`, `MFTRecord.*` or `RecoveryDrive.*`.
+- `tests\ntfs-image\run.ps1` - needs WSL with `ntfs-3g`. NTFS images with deleted fragmented, sparse and
+  resident files: the usual format, 4096-byte sectors and 256 KB clusters. Run it after touching `NTFSDrive.*`,
+  `MFTRecord.*` or `RecoveryDrive.*`.
 - `tests\fat-image\run.ps1` - needs Python 3 on Windows (installs pyfatfs into `out\fat-test\venv`). FAT12,
   FAT16 and FAT32 images. Run it after touching `FATDrive.*` or `RecoveryDrive.*`.
 
