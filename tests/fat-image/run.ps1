@@ -44,8 +44,11 @@ function Check($what, $got, $want) {
 
 foreach ($img in $Images) {
     Write-Host "$img`:"
-    $RecDir = Join-Path $OutDir "recovered-$img"
-    if (Test-Path $RecDir) { Remove-Item -Recurse -Force $RecDir }
+    # a long folder: with the test's 120-character file name the path is over 260 characters - only the \\?\
+    # form reaches it (the folder itself stays under the 248 characters a plain folder path may have)
+    $RecDir = Join-Path $OutDir ("recovered-$img-" + ("long folder " * 9).Trim().Replace(" ", "-"))
+    # rd with \\?\ - Remove-Item of Windows PowerShell 5.1 can't delete the long path inside
+    if (Test-Path $RecDir) { cmd /c "rd /s /q `"\\?\$RecDir`"" }
     New-Item -ItemType Directory -Force -Path $RecDir | Out-Null
 
     $Log = Join-Path $OutDir "run-$img.log"
@@ -59,7 +62,7 @@ foreach ($img in $Images) {
     $fatType = $null
     foreach ($line in Get-Content -Encoding UTF8 $Log) {
         $f = $line -split "`t"
-        if ($f[0] -eq "FILE") { $found[$f[2]] = @{ Recov = $f[3]; Result = $f[5]; Folder = $f[6]; Content = $f[7] } }
+        if ($f[0] -eq "FILE") { $found[$f[2]] = @{ Recov = $f[3]; Result = $f[5]; Folder = $f[6]; Content = $f[7]; Saved = $f[8]; Modified = [long]$f[9] } }
         if ($f[0] -eq "PROGRESS") { $progress = $f }
         if ($f[0] -eq "PREVIEW") { $preview[$f[1]] = $f[2] }
         if ($line -like "FAT type: *") { $fatType = $line.Substring(10) }
@@ -67,18 +70,24 @@ foreach ($img in $Images) {
     Check "FAT type" "FAT$fatType" $img.ToUpper()
 
     foreach ($line in Get-Content -Encoding UTF8 (Join-Path $OutDir "$img.expected.tsv")) {
-        $name, $hash, $recov, $folder, $content = $line -split "`t"
+        $name, $hash, $recov, $folder, $content, $saved = $line -split "`t"
         $file = $found[$name]
-        if (-not $file) { Write-Host "  MISSING from the list: $name"; $failed++; continue }
-        Check "$name - recoverability" $file.Recov $recov
-        Check "$name - folder" $file.Folder $folder
-        if ($content -ne "-") { Check "$name - contents" $file.Content $content }
+        $short = if ($name.Length -gt 40) { $name.Substring(0, 40) + "..." } else { $name }
+        if (-not $file) { Write-Host "  MISSING from the list: $short"; $failed++; continue }
+        Check "$short - recoverability" $file.Recov $recov
+        Check "$short - folder" $file.Folder $folder
+        if ($content -ne "-") { Check "$short - contents" $file.Content $content }
+        # the name it is saved under: device names get a "_" in front
+        Check "$short - saved as" ($file.Saved -eq $saved) $true
         if ($hash -ne "-") {
-            $path = Join-Path $RecDir $name
+            # \\?\ - the long name makes a path over 260 characters
+            $path = "\\?\" + (Join-Path $RecDir $saved)
             if ($file.Result -ne "ok" -or -not (Test-Path -LiteralPath $path)) {
-                Write-Host "  $name - NOT RECOVERED"; $failed++
+                Write-Host "  $short - NOT RECOVERED"; $failed++
             } else {
-                Check "$name - data" ((Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLower() -eq $hash) $true
+                Check "$short - data" ((Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLower() -eq $hash) $true
+                # the recovered file has the deleted file's date, not today's
+                Check "$short - date" ((Get-Item -LiteralPath $path).LastWriteTimeUtc.ToFileTimeUtc() -eq $file.Modified) $true
             }
         }
     }

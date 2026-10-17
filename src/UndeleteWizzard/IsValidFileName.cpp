@@ -205,12 +205,12 @@ int IsValidFileName(char *pFileName, bool bFixIt) {
         if (pFileName[0] == 'c' || pFileName[0] == 'C') {
             if ((pFileName[1] == 'o' || pFileName[1] == 'O') &&
                     (pFileName[2] == 'm' || pFileName[2] == 'M') &&
-                    (pFileName[3] >= '1' || pFileName[3] <= '9'))
+                    (pFileName[3] >= '1' && pFileName[3] <= '9'))
                 return INVALID_FILENAME_COM1 - (pFileName[3] - '1');
         } else if (pFileName[0] == 'l' || pFileName[0] == 'L') {
             if ((pFileName[1] == 'p' || pFileName[1] == 'P') &&
                     (pFileName[2] == 't' || pFileName[2] == 'T') &&
-                    (pFileName[3] >= '1' || pFileName[3] <= '9'))
+                    (pFileName[3] >= '1' && pFileName[3] <= '9'))
                 return INVALID_FILENAME_LPT1 - (pFileName[3] - '1');
         }
     } else if (len == 6) {
@@ -320,12 +320,12 @@ int IsValidFileName(wchar_t *pFileName, bool bFixIt) {
         if (pFileName[0] == 'c' || pFileName[0] == 'C') {
             if ((pFileName[1] == 'o' || pFileName[1] == 'O') &&
                     (pFileName[2] == 'm' || pFileName[2] == 'M') &&
-                    (pFileName[3] >= '1' || pFileName[3] <= '9'))
+                    (pFileName[3] >= '1' && pFileName[3] <= '9'))
                 return INVALID_FILENAME_COM1 - (pFileName[3] - '1');
         } else if (pFileName[0] == 'l' || pFileName[0] == 'L') {
             if ((pFileName[1] == 'p' || pFileName[1] == 'P') &&
                     (pFileName[2] == 't' || pFileName[2] == 'T') &&
-                    (pFileName[3] >= '1' || pFileName[3] <= '9'))
+                    (pFileName[3] >= '1' && pFileName[3] <= '9'))
                 return INVALID_FILENAME_LPT1 - (pFileName[3] - '1');
         }
     } else if (len == 6) {

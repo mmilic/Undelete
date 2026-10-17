@@ -94,21 +94,31 @@ int CNTFSDrive::Initialize() {
         return dwErrorCode;
     }
 
-    // Read the boot sector for the MFT infomation
-    int nRet = ReadFile(m_hDrive, &ntfsBS, sizeof (NTFS_PART_BOOT_SEC), &dwBytes, NULL);
-    if (!nRet) {
-        DWORD dwErrorCode = GetLastError();
-        wxLogError("Unable to read from drive - check disk access rights!!");
-        wxLogError("ReadRaw returned error code %d .", dwErrorCode); //sranje - ovde treba provera mesta na hardu i neko lepo preskakanje
+    // Read the boot sector for the MFT infomation - 4 KB: a volume handle only reads whole sectors, and on a
+    // drive with 4096-byte sectors a 512-byte read fails
+    std::vector<BYTE> vBoot(4096);
+    int nRet = ReadFile(m_hDrive, &vBoot[0], (DWORD) vBoot.size(), &dwBytes, NULL);
+    if (!nRet || dwBytes < sizeof (NTFS_PART_BOOT_SEC)) {
+        DWORD dwErrorCode = nRet ? ERROR_HANDLE_EOF : GetLastError();
+        wxLogMessage("Unable to read the boot sector (error %u) - check disk access rights.", (unsigned) dwErrorCode);
         return (dwErrorCode);
     }
+    memcpy(&ntfsBS, &vBoot[0], sizeof (NTFS_PART_BOOT_SEC));
 
     if (memcmp(ntfsBS.chOemID, "NTFS", 4)) // check whether it is realy ntfs
         return (ERROR_INVALID_DRIVE);
 
     /// Cluster is the logical entity
-    ///  which is made up of several sectors (a physical entity) 
-    m_dwBytesPerCluster = ntfsBS.bpb.uchSecPerClust * ntfsBS.bpb.wBytesPerSec;
+    ///  which is made up of several sectors (a physical entity). Clusters over 64 KB (Windows 10 1709 on: up to
+    ///  2 MB) don't fit the byte - it holds a negative power of two then: 0xF8 = -8 = 2^8 sectors.
+    DWORD dwSectorsPerCluster = ntfsBS.bpb.uchSecPerClust;
+    if (dwSectorsPerCluster > 0x80)
+        dwSectorsPerCluster = (DWORD) 1 << (256 - dwSectorsPerCluster);
+    m_dwBytesPerCluster = dwSectorsPerCluster * ntfsBS.bpb.wBytesPerSec;
+    if (!ntfsBS.bpb.wBytesPerSec || !m_dwBytesPerCluster || m_dwBytesPerCluster > 2 * 1024 * 1024) {
+        wxLogMessage("Invalid cluster size in the boot sector.");
+        return ERROR_INVALID_DRIVE;
+    }
 
     delete[] m_puchMFTRecord;
     m_puchMFTRecord = 0;
@@ -163,18 +173,22 @@ int CNTFSDrive::LoadMFT(LONGLONG nStartCluster) {
     }
 
     /// reading the first record in the NTFS table.
-    //   the first record in the NTFS is always MFT record
-    nRet = ReadFile(m_hDrive, m_puchMFTRecord, m_llMFTRecordSz, &dwBytes, NULL);
-    if (!nRet) {
-        DWORD dwErrorCode = GetLastError();
-        wxLogError("ReadRaw returned error code %d .", dwErrorCode); //sranje - ovde treba provera mesta na hardu i neko lepo preskakanje
+    //   the first record in the NTFS is always MFT record. Read in whole clusters - a cluster is always a whole
+    //   number of sectors, a 1 KB record isn't on a drive with 4096-byte sectors.
+    DWORD dwFirstRead = (DWORD) (((m_llMFTRecordSz + m_dwBytesPerCluster - 1) / m_dwBytesPerCluster) * m_dwBytesPerCluster);
+    std::vector<BYTE> vFirst(dwFirstRead);
+    nRet = ReadFile(m_hDrive, &vFirst[0], dwFirstRead, &dwBytes, NULL);
+    if (!nRet || dwBytes < m_llMFTRecordSz) {
+        DWORD dwErrorCode = nRet ? ERROR_HANDLE_EOF : GetLastError();
+        wxLogMessage("Unable to read the first MFT record (error %u).", (unsigned) dwErrorCode);
         return (dwErrorCode);
     }
+    memcpy(m_puchMFTRecord, &vFirst[0], (size_t) m_llMFTRecordSz);
 
     // now extract the MFT record just like the other MFT table records - only where its data is, not the data
     cMFTRec.SetDriveHandle(m_hDrive);
     cMFTRec.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
-    nRet = cMFTRec.ExtractFile(m_puchMFTRecord, dwBytes, true);
+    nRet = cMFTRec.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, true);
     if (nRet)
         return nRet;
 
@@ -464,6 +478,8 @@ int CNTFSDrive::ReadFileStart(DWORD nFileSeq, std::vector<BYTE> &vData, DWORD dw
     nRet = cFile.ExtractFile(m_puchMFTRecord, m_llMFTRecordSz, true); // where the data is, not the data
     if (nRet)
         return nRet;
+    if (cFile.IsEncrypted())
+        return ERROR_FILE_ENCRYPTED;
 
     if (cFile.m_bDataResident) {
         // the data is in the record itself - extract it from a fresh copy (the fixups were applied to this one)
@@ -543,7 +559,10 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     // keep the name as UTF-16 - converting it to char loses every character outside the ANSI code page
     stFileInfo.sFilename.assign((const wchar_t*) cFile.m_attrFilename.wFilename);
 
-    stFileInfo.dwAttributes = cFile.m_attrFilename.dwFlags;
+    // FILE_NAME's copy of the attributes is only updated with the name - encryption and compression come from
+    // STANDARD_INFORMATION, which is current
+    stFileInfo.dwAttributes = cFile.m_attrFilename.dwFlags
+            | (cFile.m_attrStandard.dwFATAttributes & (FILE_ATTRIBUTE_ENCRYPTED | FILE_ATTRIBUTE_COMPRESSED));
 
     stFileInfo.n64Create = cFile.m_attrStandard.n64Create;
     stFileInfo.n64Modify = cFile.m_attrStandard.n64Modify;
@@ -560,7 +579,7 @@ int CNTFSDrive::GetFileDetail(DWORD nFileSeq, t_FileInfo &stFileInfo) {
     stFileInfo.bDirectory = cFile.m_bDirectory || (cFile.m_attrFilename.dwFlags & 0x10000000);
 
     stFileInfo.bDeleted = !cFile.m_bInUse;
-    if (stFileInfo.bDeleted && !stFileInfo.bDirectory)
+    if (stFileInfo.bDeleted && !stFileInfo.bDirectory && !cFile.IsEncrypted()) // encrypted: never recoverable here
         CheckRecoverability(cFile, stFileInfo);
 
     return (ERROR_SUCCESS);
@@ -718,7 +737,7 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *w
     cFile.SetDriveHandle(m_hDrive);
     cFile.SetRecordInfo((LONGLONG) m_llStartSector*m_dwBytesPerSector, m_llMFTRecordSz, m_dwBytesPerCluster);
 
-    HANDLE hFile = CreateFileW(wszDestinationFileName, // name of the write
+    HANDLE hFile = CreateFileW(LongPathForWindows(sDestintationFileName).wc_str(), // name of the write
             GENERIC_WRITE | GENERIC_READ, // open for writing and reading
             //            0, // do not share
             FILE_SHARE_READ,
@@ -742,8 +761,9 @@ int CNTFSDrive::RetreiveAndWriteFileToDestination(int nFileSeq, const wchar_t *w
     if (nRet) {
         wxLogMessage("Extracting file \'%s\' FAILED (error %d)!!!", sDestintationFileName, nRet);
         CloseHandle(hFile);
-        if (nRet == ERROR_CANCELLED)
-            DeleteFileW(wszDestinationFileName); // a cut-off file would look like a recovered one
+        // a cut-off file would look like a recovered one; an encrypted or compressed one wasn't written at all
+        if (nRet == ERROR_CANCELLED || nRet == ERROR_FILE_ENCRYPTED || nRet == ERROR_NOT_SUPPORTED)
+            DeleteFileW(LongPathForWindows(sDestintationFileName).wc_str());
         return (nRet);
     }
 

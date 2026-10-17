@@ -8,11 +8,57 @@
 #include <string>
 #include "RecoveryDrive.h"
 #include "FileContents.h"
+#include "IsValidFileName.h"
 
 void DeleteFileInfoHash(FileInfoHash *finfohash) {
     for (FileInfoHash::iterator it = finfohash->begin(); it != finfohash->end(); ++it)
         delete it->second;
     finfohash->clear();
+}
+
+wxString SafeFileName(const std::wstring &sName) {
+    wchar_t wszName[_MAX_PATH];
+    wcsncpy(wszName, sName.c_str(), _MAX_PATH - 1);
+    wszName[_MAX_PATH - 1] = 0;
+    IsValidFileName(wszName, true); // names stay UTF-16 (wchar_t) all the way
+
+    // Windows drops trailing dots and spaces - "notes." would be saved as "notes", maybe over another file
+    wxString sSafe(wszName);
+    while (!sSafe.IsEmpty() && (sSafe.Last() == '.' || sSafe.Last() == ' '))
+        sSafe.RemoveLast();
+    if (sSafe.IsEmpty())
+        return "_";
+
+    wcsncpy(wszName, sSafe.wc_str(), _MAX_PATH - 1);
+    if (IsValidFileName(wszName, false) <= INVALID_FILENAME_CLOCK) // a device name: "con.txt" is no file
+        sSafe = "_" + sSafe;
+    return sSafe;
+}
+
+wxString LongPathForWindows(const wxString &sPath) {
+    if (sPath.length() < MAX_PATH - 12 || sPath.StartsWith("\\\\")) // short enough, or already \\?\ or UNC
+        return sPath;
+    return "\\\\?\\" + sPath; // only for a full path like C:\... - which is what the destination always is
+}
+
+bool PathExists(const wxString &sPath) {
+    return GetFileAttributesW(LongPathForWindows(sPath).wc_str()) != INVALID_FILE_ATTRIBUTES;
+}
+
+void RestoreFileTimes(const wxString &sPath, const t_FileInfo &file) {
+    HANDLE hFile = CreateFileW(LongPathForWindows(sPath).wc_str(), FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    if (hFile == INVALID_HANDLE_VALUE)
+        return;
+    FILETIME ftCreate, ftAccess, ftModify;
+    LONGLONG aTimes[3] = {file.n64Create, file.n64Access, file.n64Modify};
+    FILETIME *apTimes[3] = {&ftCreate, &ftAccess, &ftModify};
+    for (int i = 0; i < 3; i++) {
+        apTimes[i]->dwLowDateTime = (DWORD) aTimes[i];
+        apTimes[i]->dwHighDateTime = (DWORD) ((ULONGLONG) aTimes[i] >> 32);
+    }
+    SetFileTime(hFile, file.n64Create > 0 ? &ftCreate : NULL, file.n64Access > 0 ? &ftAccess : NULL,
+            file.n64Modify > 0 ? &ftModify : NULL);
+    CloseHandle(hFile);
 }
 
 std::string FileStatusText(const t_FileInfo &stFileInfo) {

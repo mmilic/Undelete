@@ -32,6 +32,10 @@ Needs Python 3 on Windows. The first run makes a venv in `out\fat-test\venv` and
      `.docx` files must be "Damaged".
    - `Photos\2014\holiday.png` (the folder stays) and `Old Stuff\notes.txt` (the folder is deleted too) must come
      back with their folders. The deleted folder is read from its first cluster, which is free.
+   - `Names\aux.txt` must be saved as `_aux.txt` (AUX is a device name), `Names\coma.txt` as it is (only looks like
+     COM1-COM9), and a 120-character name ends up in a path over 260 characters - `run.ps1` recovers into a long
+     folder, so only the `\\?\` form reaches it.
+   - every recovered file must have the deleted file's date, not today's.
    - `Big Folder` with 40 long-named files is deleted too. It needs several clusters, with its files' data
      between them, so its chain has to be guessed. All 40 files must be found, in `\Big Folder`.
    - Three Recycle Bin pairs in `$RECYCLE.BIN\S-1-5-21-1`, written by the NTFS test's

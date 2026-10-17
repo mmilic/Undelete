@@ -29,7 +29,7 @@ endif()
 # the recovery engine: NTFS and FAT parsing, recoverability, content check - no GUI
 set(ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/NTFSDrive.cpp" "${UNDELETE_ENGINE_DIR}/MFTRecord.cpp")
 # older engines (git HEAD for -WithOld) may not have these
-foreach(ENGINE_FILE FileContents.cpp RecoveryDrive.cpp FATDrive.cpp)
+foreach(ENGINE_FILE FileContents.cpp RecoveryDrive.cpp FATDrive.cpp IsValidFileName.cpp)
     if(EXISTS "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
         list(APPEND ENGINE_SOURCES "${UNDELETE_ENGINE_DIR}/${ENGINE_FILE}")
     endif()
@@ -53,7 +53,6 @@ if(UNDELETE_BUILD_APP)
         "${SRC}/MyThreadClass.cpp"
         "${SRC}/Volumes.cpp"
         "${SRC}/AppLog.cpp"
-        "${SRC}/IsValidFileName.cpp"
         "${SRC}/languages/LanguageDialog.cpp"
         "${SRC}/languages/LanguageFactory.cpp"
         "${SRC}/languages/LanguagesImpl.cpp"

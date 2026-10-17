@@ -180,6 +180,11 @@ public:
     bool m_bDirectory; // the record is a folder
     WORD m_wSequence; // bumped every time the record is freed - tells a reused record from the one a reference meant
 
+    // EFS-encrypted - by STANDARD_INFORMATION (current) or FILE_NAME (may be stale) - its data can't be recovered
+    bool IsEncrypted() const {
+        return ((m_attrStandard.dwFATAttributes | m_attrFilename.dwFlags) & FILE_ATTRIBUTE_ENCRYPTED) != 0;
+    }
+
 public:
     int SetRecordInfo(LONGLONG n64StartPos, DWORD dwRecSize, DWORD dwBytesPerCluster);
     void SetDriveHandle(HANDLE hDrive);

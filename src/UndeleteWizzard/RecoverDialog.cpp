@@ -223,6 +223,15 @@ void CRecoverDialog::OnStart(wxCommandEvent &WXUNUSED(event)) {
         return;
     }
 
+    // not enough room: the files that don't fit would fail one by one, after a long wait
+    wxDiskspaceSize_t llTotal, llFree;
+    if (wxGetDiskSpace(sDestination, &llTotal, &llFree) && llFree < m_llBytes) {
+        wxString sQuestion = wxString::Format(Tr(L"The ticked files need %s, but only %s is free there - the files that don't fit will fail.\n\nRecover anyway?"),
+                FormatFileSize(m_llBytes), FormatFileSize(llFree.GetValue()));
+        if (wxMessageBox(sQuestion, Tr(L"Not enough space"), wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this) != wxYES)
+            return;
+    }
+
     // overwritten files: other files now use their clusters - warn before spending time on them
     int iOverwritten = 0;
     for (size_t i = 0; i < m_vFiles.size(); i++)

@@ -79,6 +79,12 @@ drive strip).
   changes a file once it is there; `FinishScan` (GUI thread, after the thread is done) completes them - NTFS
   folder paths, Recycle Bin names - and deletes the `$I` files, so the list must let go of them first
   (`CDeletedFilesList::SetFiles` after it). `GetFileList` does both, for the test harness.
+  Saving a recovered file goes through `SafeFileName` (device names get a `_`), `LongPathForWindows` (`\\?\`
+  over 260 characters - the engines use it in their `CreateFileW`) and `RestoreFileTimes` - the copy thread and
+  the harness both use them, so the FAT test checks them. `IsValidFileName.cpp` is part of the engine library.
+- NTFS files that can't be recovered from their clusters are refused, not copied as garbage: compressed
+  (`ERROR_NOT_SUPPORTED`) and EFS-encrypted (`ERROR_FILE_ENCRYPTED`, `CMFTRecord::IsEncrypted` - by
+  STANDARD_INFORMATION, which is current; FILE_NAME's attributes may be stale). The list says why.
 - `NTFSDrive.{h,cpp}` / `MFTRecord.{h,cpp}` — the NTFS recovery engine: parses the MFT (`CNTFSDrive`/
   `CMFTRecord`), builds a `FileInfoHash` of recoverable file records, copies a given MFT record's data to disk.
 - `FATDrive.{h,cpp}` — `CFATDrive`, the FAT12/16/32 engine. Deleted entries have `0xE5` as their first byte, and

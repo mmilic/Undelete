@@ -455,7 +455,7 @@ int CFATDrive::RetreiveAndWriteFileToDestination(int iFileId, const wchar_t *wsz
         return ERROR_FILE_CORRUPT;
     }
 
-    HANDLE hFile = CreateFileW(wszDestinationFileName, GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ, NULL,
+    HANDLE hFile = CreateFileW(LongPathForWindows(sDestinationFileName).wc_str(), GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ, NULL,
             CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
         // one file that can't be created must not stop the others - the copy thread logs it and goes on
@@ -471,7 +471,7 @@ int CFATDrive::RetreiveAndWriteFileToDestination(int iFileId, const wchar_t *wsz
     if (nRet) {
         wxLogMessage("Extracting file \'%s\' FAILED (error %d)!!!", sDestinationFileName, nRet);
         if (nRet == ERROR_CANCELLED)
-            DeleteFileW(wszDestinationFileName); // a cut-off file would look like a recovered one
+            DeleteFileW(LongPathForWindows(sDestinationFileName).wc_str()); // a cut-off file would look like a recovered one
         return nRet;
     }
     wxLogMessage("Extracted a file.");

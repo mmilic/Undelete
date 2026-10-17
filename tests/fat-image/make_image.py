@@ -164,10 +164,10 @@ def build(out_dir, name, fat_type, size):
         fs.writebytes(path, data)
         files[path] = data
 
-    def expect(path, name=None, recov="Good", folder="\\", content="-", check_data=True):
+    def expect(path, name=None, recov="Good", folder="\\", content="-", check_data=True, saved=None):
         name = name or path.rsplit("/", 1)[-1]
         sha = hashlib.sha256(files[path]).hexdigest() if check_data else "-"
-        expected.append((name, sha, recov, folder, content))
+        expected.append((name, sha, recov, folder, content, saved or name))
 
     fs = PyFatFS(img)
     bpc = fs.fs.bytes_per_cluster
@@ -219,6 +219,16 @@ def build(out_dir, name, fat_type, size):
     fs.makedir("/Old Stuff")
     write(fs, "/Old Stuff/notes.txt", b"Shopping list\r\n- milk\r\n- bread\r\nCall Ana about the trip.\r\n")
     expect("/Old Stuff/notes.txt", folder="\\Old Stuff", content="Looks valid")
+    # names that need care when saved: a device name, a name that only looks like one, a path over 260 characters
+    fs.makedir("/Names")
+    write(fs, "/Names/aux.txt", b"not the AUX device\r\n")
+    expect("/Names/aux.txt", folder="\\Names", saved="_aux.txt")
+    write(fs, "/Names/coma.txt", b"a name, not COM1-COM9\r\n")
+    expect("/Names/coma.txt", folder="\\Names")
+    long_name = "long name " + "x" * 106 + ".bin"  # 120 - pyfatfs takes no more (it counts UTF-16 bytes, not chars)
+    write(fs, "/Names/" + long_name, rnd.randbytes(900))
+    expect("/Names/" + long_name, folder="\\Names")
+
     # a deleted folder bigger than one cluster: its later clusters lie after its files' data, its chain is gone
     fs.makedir("/Big Folder")
     for i in range(40):

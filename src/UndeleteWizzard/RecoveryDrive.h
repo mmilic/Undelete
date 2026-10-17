@@ -78,6 +78,16 @@ WX_DECLARE_HASH_MAP(int, t_FileInfo*, wxIntegerHash, wxIntegerEqual, FileInfoHas
 // delete the files of a previous scan and empty the map (clear() alone leaks every t_FileInfo)
 void DeleteFileInfoHash(FileInfoHash *finfohash);
 
+// Saving a recovered file:
+// the name to save it under - characters Windows doesn't allow become spaces, the trailing dots and spaces
+// Windows would drop go, and a device name (CON, NUL, COM1...) gets a "_" in front
+wxString SafeFileName(const std::wstring &sName);
+// the path as CreateFile needs it - with the \\?\ prefix when it is too long for the plain form
+wxString LongPathForWindows(const wxString &sPath);
+bool PathExists(const wxString &sPath);
+// the recovered file gets the dates the deleted one had (0 = unknown, left as it is)
+void RestoreFileTimes(const wxString &sPath, const t_FileInfo &file);
+
 // the files a running scan has found and the window hasn't taken yet - the scan thread adds, the window takes
 class CFoundFiles {
 public:

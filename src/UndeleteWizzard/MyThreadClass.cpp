@@ -5,7 +5,6 @@
 #include "NTFSDrive.h"
 #include "FATDrive.h"
 #include "MyThreadClass.h"
-#include "IsValidFileName.h"
 #include "languages/Translate.h"
 
 CRecoveryDrive *OpenRecoveryDrive(const wxString &sSource, int &nError) {
@@ -90,6 +89,9 @@ static wxString RecoveryErrorText(int iError, const t_FileInfo *pFile) {
         case ERROR_NOT_SUPPORTED:
             sReason = Tr(L"compressed or very fragmented file - not supported");
             break;
+        case ERROR_FILE_ENCRYPTED:
+            sReason = Tr(L"encrypted (EFS) - only Windows with the owner's key can read it");
+            break;
         case ERROR_FILE_CORRUPT:
         case ERROR_FILE_INVALID:
             sReason = Tr(L"its record on the drive is damaged");
@@ -141,18 +143,12 @@ void *CCopyThread::Entry() {
         t_FileInfo *pFile = m_vFiles[iFile];
         wxLogMessage("Recovering %s (%s).", wxString(pFile->sFilename.c_str()), RecoverabilityLabel(pFile->iRecoverability));
 
-        // a name Windows accepts - names stay UTF-16 (wchar_t) all the way
-        wchar_t wszName[_MAX_PATH];
-        wcsncpy(wszName, pFile->sFilename.c_str(), _MAX_PATH - 1);
-        wszName[_MAX_PATH - 1] = 0;
-        IsValidFileName(wszName, true);
-        destination.SetFullName(wxString(wszName));
-
-        // a file of that name is already there (recovered before, or two deleted files with the same name):
-        // number it the way Windows does - "photo (2).jpg", "photo (3).jpg"
-        wxString sOriginalName(wszName);
-        for (int iNumber = 2; destination.FileExists(destination.GetFullPath()); iNumber++)
-            destination.SetFullName(NumberedFileName(sOriginalName, iNumber));
+        // a name Windows accepts - and if that name is taken (recovered before, or two deleted files with the
+        // same name), numbered the way Windows does: "photo (2).jpg", "photo (3).jpg"
+        wxString sName = SafeFileName(pFile->sFilename);
+        destination.SetFullName(sName);
+        for (int iNumber = 2; PathExists(destination.GetFullPath()); iNumber++)
+            destination.SetFullName(NumberedFileName(sName, iNumber));
 
         // only that: the default flags also expand %VARIABLES% in the file name
         destination.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
@@ -165,6 +161,7 @@ void *CCopyThread::Entry() {
             wxLogMessage("Recovering %s FAILED.", sPath);
             m_vFailures.push_back(wxString(pFile->sFilename.c_str()) + " - " + RecoveryErrorText(iRet, pFile));
         } else {
+            RestoreFileTimes(sPath, *pFile);
             m_iCopied++;
             wxLogMessage("Recovered to %s.", sPath);
         }

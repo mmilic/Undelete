@@ -252,6 +252,9 @@ int CMFTRecord::ExtractFile(BYTE *puchMFTBuffer, LONGLONG llLen, bool bExcludeDa
 
                     if (!hFile && bExcludeData)
                         break;
+                    // EFS: the clusters hold ciphertext, readable only by Windows with the owner's key
+                    if (IsEncrypted())
+                        return ERROR_FILE_ENCRYPTED;
 
                     BYTE *puchData = 0;
                     LONGLONG llDataLen = 0;

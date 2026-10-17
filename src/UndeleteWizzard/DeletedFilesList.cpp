@@ -176,6 +176,11 @@ wxString FormatFileTime(LONGLONG llFileTime) {
 }
 
 wxString RecoverabilityText(const t_FileInfo &file) {
+    // NTFS: the data on the drive isn't the file's - recovering would give ciphertext / compressed blocks
+    if (file.dwAttributes & FILE_ATTRIBUTE_ENCRYPTED)
+        return Tr(L"Encrypted - can't be recovered");
+    if (file.dwAttributes & FILE_ATTRIBUTE_COMPRESSED)
+        return Tr(L"Compressed - can't be recovered");
     switch (file.iRecoverability) {
         case RECOVERABILITY_GOOD: return Tr(L"Good");
         case RECOVERABILITY_PARTIAL: return wxString::Format(Tr(L"Partly · %d %% intact"), file.iPercentIntact);

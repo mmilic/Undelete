@@ -74,17 +74,27 @@ int main(int argc, char **argv) {
     for (FileInfoHash::iterator it = hash.begin(); it != hash.end(); ++it) {
         t_FileInfo *pInfo = it->second;
         wxString name(pInfo->sFilename.c_str());
-        wxString dest = outDir + "\\" + name;
+#ifdef HAVE_FAT_ENGINE // the app's way to save a file: a name Windows accepts, long paths, the original dates
+        wxString saved = SafeFileName(pInfo->sFilename);
+#else
+        wxString saved = name;
+#endif
+        wxString dest = outDir + "\\" + saved;
         drive.CheckFileContents(*pInfo); // what the "Check contents" button does
         nRet = drive.RetreiveAndWriteFileToDestination(pInfo->iRecordId, dest.wc_str());
         if (!nRet) {
+#ifdef HAVE_FAT_ENGINE
+            RestoreFileTimes(dest, *pInfo);
+#endif
             llBytesRecovered += pInfo->n64RealSize;
             iRecovered++;
         }
-        // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result, folder, contents
-        printf("FILE\t%d\t%s\t%s\t%d\t%s\t%s\t%s\n", pInfo->iRecordId, (const char *) name.utf8_str(),
+        // tab separated, for run.ps1: record, name, recoverability, % intact, recovery result, folder, contents,
+        // the name it was saved under, its modification time (FILETIME)
+        printf("FILE\t%d\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%lld\n", pInfo->iRecordId, (const char *) name.utf8_str(),
                 RecoverabilityLabel(pInfo->iRecoverability), pInfo->iPercentIntact, nRet ? "FAILED" : "ok",
-                (const char *) wxString(pInfo->sFolder.c_str()).utf8_str(), ContentLabel(pInfo->iContent));
+                (const char *) wxString(pInfo->sFolder.c_str()).utf8_str(), ContentLabel(pInfo->iContent),
+                (const char *) saved.utf8_str(), (long long) pInfo->n64Modify);
     }
     // each file can leave up to 1 KB uncounted (the counter is in whole KB)
     printf("PROGRESS\t%ld\t%ld\t%d\n", (long) lKBWritten, (long) (llBytesRecovered / 1024), iRecovered);
